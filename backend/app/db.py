@@ -24,8 +24,10 @@ CREATE TABLE IF NOT EXISTS shop_categories(shop_id TEXT, category TEXT);
 CREATE TABLE IF NOT EXISTS shop_payments(shop_id TEXT, provider TEXT, channel TEXT);
 CREATE TABLE IF NOT EXISTS products(
   product_id TEXT PRIMARY KEY, title TEXT, title_norm TEXT, brand TEXT, category TEXT, model TEXT,
-  images TEXT, specs TEXT, offer_count INTEGER DEFAULT 0, shop_count INTEGER DEFAULT 0,
+  images TEXT, offer_count INTEGER DEFAULT 0, shop_count INTEGER DEFAULT 0,
   price_min INTEGER, price_median INTEGER, price_max INTEGER);
+-- specs are large and only needed on product detail/compare: keeping them out of `products` keeps the hot set small
+CREATE TABLE IF NOT EXISTS product_specs(product_id TEXT, specs TEXT);
 CREATE TABLE IF NOT EXISTS offers(
   offer_id TEXT PRIMARY KEY, shop_id TEXT, product_id TEXT, seller_title TEXT, description TEXT,
   price INTEGER, changed_at TEXT, warranty TEXT, warranty_months INTEGER, outlier INTEGER DEFAULT 0);
@@ -41,6 +43,7 @@ CREATE INDEX IF NOT EXISTS {p}ix_inq_token ON inquiries(token);
 """
 
 INDEXES = """
+CREATE UNIQUE INDEX IF NOT EXISTS ix_specs_pid ON product_specs(product_id);
 CREATE INDEX IF NOT EXISTS ix_offers_product ON offers(product_id);
 CREATE INDEX IF NOT EXISTS ix_offers_shop ON offers(shop_id);
 CREATE INDEX IF NOT EXISTS ix_shops_geo ON shops(lat, lon);
@@ -74,3 +77,25 @@ def connect(path: Path | str | None = None, state: bool = True) -> sqlite3.Conne
     elif not READONLY:
         con.executescript(STATE_TABLES.format(p=""))
     return con
+
+
+def warm_cache(path: Path | str | None = None) -> float:
+    """Touch the hot tables/indexes so the first real query isn't cold. On small-RAM hosts (0.5 GB) the OS page cache is
+    the only cache; specs are deliberately NOT read here. Returns seconds taken."""
+    import time
+    t = time.time()
+    con = connect(path, state=False)
+    try:
+        for q in ("SELECT COUNT(*), SUM(LENGTH(title_norm)) FROM products",
+                  "SELECT COUNT(*) FROM products_fts WHERE products_fts MATCH 'هندزفری*'",
+                  "SELECT COUNT(*), SUM(price) FROM offers",
+                  "SELECT COUNT(*) FROM offers INDEXED BY ix_offers_product WHERE product_id > ''",
+                  "SELECT COUNT(*) FROM offers INDEXED BY ix_offers_shop WHERE shop_id > ''",
+                  "SELECT COUNT(*), SUM(LENGTH(hours)) FROM shops",
+                  "SELECT COUNT(*) FROM shop_categories INDEXED BY ix_shopcat_cat WHERE category > ''",
+                  "SELECT COUNT(*) FROM shop_payments",
+                  "SELECT COUNT(*) FROM products INDEXED BY ix_prod_cat WHERE category > ''"):
+            con.execute(q).fetchone()
+    finally:
+        con.close()
+    return time.time() - t

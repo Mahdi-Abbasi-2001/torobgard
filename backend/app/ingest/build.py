@@ -42,6 +42,16 @@ def warranty_months(w: dict | None) -> int | None:
     return None
 
 
+def _flush(con, batch, spec_batch):
+    if batch:
+        con.executemany("INSERT INTO products(product_id,title,title_norm,brand,category,model,images) "
+                        "VALUES(?,?,?,?,?,?,?)", batch)
+        batch.clear()
+    if spec_batch:
+        con.executemany("INSERT INTO product_specs(product_id,specs) VALUES(?,?)", spec_batch)
+        spec_batch.clear()
+
+
 def build(data_dir: Path, out: Path):
     t0 = time.time()
     if out.exists():
@@ -90,20 +100,18 @@ def build(data_dir: Path, out: Path):
     print(f"offers {len(rows)}  {time.time()-t0:.0f}s")
 
     # ---- products
-    batch = []
+    batch, spec_batch = [], []
     with open(data_dir / "products.csv", encoding="utf-8", newline="") as f:
         for r in csv.DictReader(f):
             imgs = (_j(r["image_urls"]) or [])[:4]
             title = r["persian_title"]
             batch.append((r["product_id"], title, normalize_fa(title), _n(r["brand_name"]), _n(r["category_name"]),
-                          _n(r["model"]), json.dumps(imgs), _n(r["specs"])))
+                          _n(r["model"]), json.dumps(imgs)))
+            if _n(r["specs"]) not in (None, "[]"):
+                spec_batch.append((r["product_id"], r["specs"]))
             if len(batch) >= 20000:
-                con.executemany("INSERT INTO products(product_id,title,title_norm,brand,category,model,images,specs) "
-                                "VALUES(?,?,?,?,?,?,?,?)", batch)
-                batch.clear()
-    if batch:
-        con.executemany("INSERT INTO products(product_id,title,title_norm,brand,category,model,images,specs) "
-                        "VALUES(?,?,?,?,?,?,?,?)", batch)
+                _flush(con, batch, spec_batch)
+    _flush(con, batch, spec_batch)
     print(f"products  {time.time()-t0:.0f}s")
     con.commit()
     con.executescript(db.INDEXES)

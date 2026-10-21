@@ -153,7 +153,8 @@ def get_product(con, product_id: str) -> dict | None:
     d = _product_row(r)
     d["images"] = json.loads(r["images"]) if r["images"] else []
     d["model"] = r["model"]
-    d["specs"] = _specs(r["specs"])
+    sp = con.execute("SELECT specs FROM product_specs WHERE product_id=?", (product_id,)).fetchone()
+    d["specs"] = _specs(sp[0] if sp else None)
     return d
 
 
