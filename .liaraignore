@@ -3,7 +3,7 @@
 data
 design
 docs
-*.txt
+/competition-*.txt
 starcoach-dataset-v16-cap300-csv.zip
 backend/.venv
 backend/tests
