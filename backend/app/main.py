@@ -1,4 +1,5 @@
 import asyncio
+import os
 import json
 from contextlib import asynccontextmanager
 from typing import Annotated
@@ -16,14 +17,30 @@ from .services.hours import now_tehran
 from .services.text import split_budget
 
 
+WARM_INTERVAL = float(os.environ.get("TOROB_WARM_INTERVAL_S", "240"))
+
+
+async def _warm_loop():
+    """Keep the catalog's hot pages resident: after a long idle the host evicts them and the next user pays 3-5 s."""
+    loop = asyncio.get_running_loop()
+    while True:
+        await asyncio.sleep(WARM_INTERVAL)
+        try:
+            await loop.run_in_executor(None, db.warm_cache)
+        except Exception:
+            pass  # warming is best-effort
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db.connect().close()  # creates state tables (local: in the catalog file; prod: in the attached state DB)
     asyncio.get_running_loop().run_in_executor(None, db.warm_cache)  # background: don't delay startup
     inq.LOOP = asyncio.get_running_loop()
     task = asyncio.create_task(inq.timeout_loop())
+    warm = asyncio.create_task(_warm_loop())
     yield
     task.cancel()
+    warm.cancel()
 
 
 app = FastAPI(title="Torob In-Person Shopping Assistant API", version="0.1.0", lifespan=lifespan)
