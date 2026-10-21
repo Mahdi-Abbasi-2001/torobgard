@@ -18,9 +18,7 @@ from .services.text import split_budget
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    con = db.connect()
-    con.executescript(db.SCHEMA)
-    con.close()
+    db.connect().close()  # creates state tables (local: in the catalog file; prod: in the attached state DB)
     inq.LOOP = asyncio.get_running_loop()
     task = asyncio.create_task(inq.timeout_loop())
     yield

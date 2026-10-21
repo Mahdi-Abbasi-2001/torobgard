@@ -14,7 +14,7 @@ npm run dev                  # http://localhost:3000 (backend must be running)
 Production: `npm run build && npm start`.
 
 ## How it talks to the backend
-- The browser calls `/api/*` on the same origin. `next.config.ts` forwards it to `API_URL` with a **fallback** rewrite.
+- The browser calls `/api/*` on the same origin. `src/app/api/[...path]/route.ts` proxies it to `API_URL` **at runtime** (so Liara can set it without a rebuild).
 - `src/app/api/sessions/[id]/events/route.ts` streams the live-update SSE through untouched. The generic rewrite
   gzips responses, which buffers events until the connection closes; keep this route.
 - The anonymous session id lives in `localStorage` and is mirrored to `PUT /api/sessions/{id}` (location, filters, shortlist).

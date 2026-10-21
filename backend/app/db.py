@@ -1,11 +1,20 @@
+"""SQLite access.
+
+Catalog (shops/products/offers + FTS) is read-mostly and built by app.ingest.build.
+State (sessions, inquiries) is written at runtime. In production they are separate files:
+  TOROB_DB            catalog file (baked into the image; opened immutable when TOROB_CATALOG_READONLY=1)
+  TOROB_STATE_DB      state file on a persistent disk, ATTACHed as `st` (unqualified table names still resolve)
+Locally, with TOROB_STATE_DB unset, state tables simply live in the catalog file.
+"""
 import os
 import sqlite3
 from pathlib import Path
 
 DB_PATH = Path(os.environ.get("TOROB_DB", Path(__file__).resolve().parents[2] / "data" / "torob.db"))
+STATE_DB = os.environ.get("TOROB_STATE_DB")
+READONLY = os.environ.get("TOROB_CATALOG_READONLY") == "1"
 
-SCHEMA = """
-PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;
+CATALOG_SCHEMA = """
 CREATE TABLE IF NOT EXISTS shops(
   shop_id TEXT PRIMARY KEY, name TEXT, is_real_name INTEGER, address TEXT, location_label TEXT,
   lat REAL, lon REAL, mall TEXT, mall_key TEXT, floor INTEGER, floor_label TEXT, unit TEXT, plaque TEXT,
@@ -20,11 +29,17 @@ CREATE TABLE IF NOT EXISTS products(
 CREATE TABLE IF NOT EXISTS offers(
   offer_id TEXT PRIMARY KEY, shop_id TEXT, product_id TEXT, seller_title TEXT, description TEXT,
   price INTEGER, changed_at TEXT, warranty TEXT, warranty_months INTEGER, outlier INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY, state TEXT, created_at TEXT, updated_at TEXT);
-CREATE TABLE IF NOT EXISTS inquiries(
+"""
+
+STATE_TABLES = """
+CREATE TABLE IF NOT EXISTS {p}sessions(id TEXT PRIMARY KEY, state TEXT, created_at TEXT, updated_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}inquiries(
   id TEXT PRIMARY KEY, session_id TEXT, shop_id TEXT, product_id TEXT, questions TEXT, status TEXT,
   token TEXT, answer TEXT, created_at TEXT, delivered_at TEXT, answered_at TEXT, deadline_at TEXT);
+CREATE INDEX IF NOT EXISTS {p}ix_inq_session ON inquiries(session_id);
+CREATE INDEX IF NOT EXISTS {p}ix_inq_token ON inquiries(token);
 """
+
 INDEXES = """
 CREATE INDEX IF NOT EXISTS ix_offers_product ON offers(product_id);
 CREATE INDEX IF NOT EXISTS ix_offers_shop ON offers(shop_id);
@@ -35,12 +50,27 @@ CREATE INDEX IF NOT EXISTS ix_shopcat_shop ON shop_categories(shop_id);
 CREATE INDEX IF NOT EXISTS ix_pay_shop ON shop_payments(shop_id);
 CREATE INDEX IF NOT EXISTS ix_prod_cat ON products(category);
 CREATE INDEX IF NOT EXISTS ix_prod_brand ON products(brand);
-CREATE INDEX IF NOT EXISTS ix_inq_session ON inquiries(session_id);
-CREATE INDEX IF NOT EXISTS ix_inq_token ON inquiries(token);
 """
 
+SCHEMA = CATALOG_SCHEMA  # back-compat name used by the ingest
 
-def connect(path: Path | str | None = None) -> sqlite3.Connection:
-    con = sqlite3.connect(str(path or DB_PATH), check_same_thread=False)
+
+def connect(path: Path | str | None = None, state: bool = True) -> sqlite3.Connection:
+    """Open the catalog and (state=True) make sure runtime state tables are reachable."""
+    target = Path(path or DB_PATH)
+    if READONLY and path is None:
+        con = sqlite3.connect(f"file:{target}?mode=ro&immutable=1", uri=True, check_same_thread=False)
+    else:
+        con = sqlite3.connect(str(target), check_same_thread=False)
     con.row_factory = sqlite3.Row
+    if not state:
+        return con
+    if STATE_DB:
+        Path(STATE_DB).parent.mkdir(parents=True, exist_ok=True)
+        con.execute("ATTACH DATABASE ? AS st", (STATE_DB,))
+        con.execute("PRAGMA st.journal_mode=WAL")
+        con.execute("PRAGMA st.synchronous=NORMAL")
+        con.executescript(STATE_TABLES.format(p="st."))
+    elif not READONLY:
+        con.executescript(STATE_TABLES.format(p=""))
     return con

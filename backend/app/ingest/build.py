@@ -47,8 +47,8 @@ def build(data_dir: Path, out: Path):
     if out.exists():
         out.unlink()
     out.parent.mkdir(parents=True, exist_ok=True)
-    con = db.connect(out)
-    con.executescript(db.SCHEMA)
+    con = db.connect(out, state=False)
+    con.executescript(db.CATALOG_SCHEMA)
 
     # ---- shops
     shops = []
@@ -141,6 +141,8 @@ def build(data_dir: Path, out: Path):
     con.commit()
     con.execute("ANALYZE")
     con.commit()
+    con.execute("PRAGMA journal_mode=DELETE")  # single immutable file, no -wal/-shm
+    con.execute("VACUUM")
     con.close()
     print(f"done in {time.time()-t0:.0f}s -> {out}  ({out.stat().st_size/1e6:.0f} MB)")
 

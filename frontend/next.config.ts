@@ -1,13 +1,8 @@
 import type { NextConfig } from "next";
 
-// The browser talks to /api/* on this origin; Next proxies it to the FastAPI backend.
-const API_URL = process.env.API_URL ?? "http://localhost:8765";
-
+// /api/* is proxied to the FastAPI backend at runtime by src/app/api/[...path]/route.ts (API_URL env var).
 const nextConfig: NextConfig = {
-  async rewrites() {
-    // `fallback` runs after app routes (incl. dynamic ones), so src/app/api/** handlers can override single endpoints.
-    return { beforeFiles: [], afterFiles: [], fallback: [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }] };
-  },
+  output: "standalone", // self-contained server for the Docker image
 };
 
 export default nextConfig;
