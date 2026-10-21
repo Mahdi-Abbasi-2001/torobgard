@@ -28,14 +28,14 @@ class OpenAICompatLLM:
     def configured(self) -> bool:
         return bool(self.s["api_key"])
 
-    async def stream(self, messages: list[dict], tools: list[dict] | None = None) -> AsyncIterator[tuple[str, object]]:
+    async def stream(self, messages: list[dict], tools: list[dict] | None = None, json_mode: bool = False) -> AsyncIterator[tuple[str, object]]:
         """Yields ('text', delta) and finally ('tool_calls', [{id,name,arguments(str)}]) when the model calls tools."""
         if not self.configured:
             raise LLMUnavailable("no API key configured")
         effort = self.s.get("reasoning_effort") or ("none" if self.s["model"] in _NEEDS_EFFORT_NONE else None)
         for _ in range(3):  # each provider quirk costs at most one cheap failed request, then it is remembered
             try:
-                async for ev in self._once(messages, tools, effort):
+                async for ev in self._once(messages, tools, effort, json_mode):
                     yield ev
                 return
             except _EffortRequired:
@@ -46,7 +46,7 @@ class OpenAICompatLLM:
             except _UsageRejected:
                 _NO_USAGE.add(self.s["model"])
 
-    async def _once(self, messages, tools, effort):
+    async def _once(self, messages, tools, effort, json_mode=False):
         body = {"model": self.s["model"], "messages": messages, "stream": True}
         if effort:
             body["reasoning_effort"] = effort
@@ -54,6 +54,8 @@ class OpenAICompatLLM:
             body["temperature"] = 0.3
         if tools:
             body["tools"] = tools
+        if json_mode:
+            body["response_format"] = {"type": "json_object"}
         if self.s["model"] not in _NO_USAGE:
             body["stream_options"] = {"include_usage": True}
         calls: dict[int, dict] = {}

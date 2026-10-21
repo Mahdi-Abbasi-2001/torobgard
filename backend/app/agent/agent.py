@@ -9,7 +9,7 @@ from ..services import inquiries as inq
 from ..services.hours import now_tehran, DAY_FA
 from ..services.text import split_budget
 from .llm import LLMUnavailable, OpenAICompatLLM
-from .tools import TOOLS, Ctx, run_tool
+from .tools import TOOLS, Ctx, run_tool_async
 from ..services import catalog
 
 MAX_STEPS = 4
@@ -37,6 +37,7 @@ SYSTEM = """تو «ترب‌گرد» هستی؛ دستیار خرید حضوری
 17. قانون انتخاب کالا (اجباری): بین کالاهای مرتبط، کالایی را انتخاب کن که shops_selling آن ۳ یا بیشتر است، حتی اگر کالای دیگری کمی «مناسب‌تر» به نظر برسد؛ چون ارزش این محصول در مقایسه و استعلام از چند فروشگاه است. فقط اگر هیچ کالای مرتبطی با ۳ فروشگاه نبود سراغ کالای کم‌فروشگاه برو. تعداد فروشگاه‌ها را در توضیحت بگو.
 19. هرگز برای قدم بدیهی بعدی اجازه نگیر («اگر بخواهید…»). بعد از انتخاب کالا همان لحظه find_shops را صدا بزن و در همان پیام ادامه بده؛ اگر کاربر استعلام خواست، بعد از find_shops همان لحظه propose_inquiry را هم بزن.
 20. اگر کالا پیدا نشد، هیچ فروشگاهی آن را ثبت نکرده، یا کاربر پرسید «کجا بخرم / کجا برم»، حتماً where_to_look را صدا بزن و در متن بگو کجا بروند (پاساژ/محله، تعداد فروشگاه‌های هم‌دسته در داده و فاصله). دانش عمومی خودت دربارهٔ بورس‌ها و راسته‌های بازار تهران را فقط به‌صورت knowledge_hint بده و در متن حتماً با عبارت «طبق اطلاعات عمومی (تأییدنشده)» برچسب بزن. اگر confidence پایین یا none بود صریح بگو داده فروشگاه‌ها این دسته را کم پوشش می‌دهد.
+22. وقتی کاربر می‌پرسد کالایی «خوبه؟»، کدام بهتر است، یا نظر می‌خواهد، product_review را صدا بزن. فقط از همان خروجی بگو؛ بخش reputation_unverified را حتماً با «طبق اطلاعات عمومی (تأییدنشده)» برچسب بزن و هرگز امتیاز، تعداد نظر یا عدد نساز.
 21. هر فیلد مرتبطی که در خروجی ابزار هست را نادیده نگیر: اگر فروشگاه اینستاگرام یا وب‌سایت دارد، گارانتی، ارسال فوری، قسطی یا توضیح فروشنده (seller_note) دارد و به تصمیم کاربر مربوط است، حتماً اشاره کن (لینک اینستاگرام/سایت را کامل بنویس).
 18. بعد از search_products اگر چند گزینه هست، یکی را با دلیل پیشنهاد بده (کارت‌ها را کاربر می‌بیند). اگر نتایج به‌وضوح نامرتبط‌اند (مثلاً لوازم جانبی یا کالای متفاوت) صادقانه بگو و جستجوی دقیق‌تری بزن.
 """
@@ -89,7 +90,7 @@ async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = 
                         args = {}
                     yield {"type": "tool_status", "tool": c["name"], "text": _STATUS.get(c["name"], "در حال بررسی…")}
                     try:
-                        result, block = run_tool(ctx, c["name"], args)
+                        result, block = await run_tool_async(ctx, c["name"], args, llm)
                     except Exception as e:  # tool bug must not kill the chat
                         result, block = {"error": str(e)[:200]}, None
                     if block:

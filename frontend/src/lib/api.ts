@@ -64,6 +64,13 @@ export interface WhereToLook {
   places: WherePlace[]; dataset_shops: number; search_link?: string | null;
 }
 
+export interface ReviewPoint { text: string; spec_key: string; spec_value: string }
+export interface ProductReview {
+  product_id: string; title: string; key_specs: { key: string; value: string }[]; pros: ReviewPoint[]; cons: ReviewPoint[]; tips: string[];
+  reputation: { text: string; confidence: "high" | "medium"; source: "general_knowledge"; verified: false } | null;
+  generated_by: string | null; cached: boolean; disclaimer: string;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
@@ -111,6 +118,7 @@ export const api = {
   mall: (key: string) => req<MallDirectory>(`/malls/${encodeURIComponent(key)}`),
   whereToLook: (p: { q: string; category?: string | null; hint?: string | null }, loc: Loc) =>
     req<WhereToLook>(`/where-to-look${qs({ q: p.q, category: p.category, hint: p.hint, ...at(loc) })}`),
+  review: (id: string) => req<ProductReview>(`/products/${encodeURIComponent(id)}/review`),
   topCategories: (limit = 8) => req<{ items: { name: string; multi_shop_products: number }[] }>(`/categories/top${qs({ limit })}`),
   getSession: (id: string) => req<Record<string, unknown>>(`/sessions/${id}`),
   putSession: (id: string, state: Record<string, unknown>) => req(`/sessions/${id}`, { method: "PUT", body: JSON.stringify({ state }) }),

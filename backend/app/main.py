@@ -108,6 +108,20 @@ def compare(body: CompareIn, con: Con):
     return catalog.compare_products(con, body.ids)
 
 
+@app.get("/api/products/{product_id}/review", tags=["products"])
+async def product_review(product_id: str):
+    """Short grounded review: pros/cons only from real specs; general reputation (if any) is labelled unverified. Cached."""
+    from .services import review
+    con = db.connect()
+    try:
+        r = await review.build(con, product_id, OpenAICompatLLM())
+    finally:
+        con.close()
+    if not r:
+        raise HTTPException(404, "محصول پیدا نشد")
+    return r
+
+
 @app.get("/api/products/{product_id}/similar", tags=["products"])
 def similar(product_id: str, con: Con, limit: int = 8):
     return {"items": catalog.similar_products(con, product_id, limit)}

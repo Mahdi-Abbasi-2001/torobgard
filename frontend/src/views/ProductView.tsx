@@ -8,6 +8,7 @@ import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductCard } from "@/components/cards";
 import { SourceNote } from "@/components/honesty";
+import { ProductReview } from "@/components/ReviewCard";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards, Steps, Thumb } from "@/components/ui";
 
 const KEY_SPECS = ["نوع اتصال", "مناسب برای", "قابلیت های مقاومتی", "عمر باتری هدفون در حالت استندبای", "نسخه بلوتوث", "وزن", "حافظه داخلی", "مقدار RAM", "تعداد کانال", "رزولوشن"];
@@ -84,6 +85,7 @@ export default function ProductView({ id }: { id: string }) {
           </>
         )}
 
+        <ProductReview id={d.product_id} />
         <div id="specs">
           <div className="h4" style={{ marginBottom: 6 }}>مشخصات کلیدی</div>
           {d.specs.length === 0

@@ -33,6 +33,10 @@ TOOLS = [
         "description": "When the product is not found, no shop lists it, or the user asks where to buy something: returns the malls/areas where shops of that category concentrate (from the dataset's real shop locations) with map links, and renders a location widget. Put your own general knowledge of Tehran's market clusters (a short place phrase, e.g. «بازار بزرگ تهران، راسته کفاش‌ها») in knowledge_hint; it is shown as unverified.",
         "parameters": {"type": "object", "properties": {"query": {"type": "string", "description": "product phrase, e.g. «کفش کتونی»"}, "knowledge_hint": {"type": "string"}}, "required": ["query"]}}},
     {"type": "function", "function": {
+        "name": "product_review",
+        "description": "Short honest review of a product: pros/cons grounded in its real specs, in-shop buying tips, and (if the brand is well known) an unverified general reputation line. Use when the user asks if a product is good, which is better, or wants opinions.",
+        "parameters": {"type": "object", "properties": {"product_id": {"type": "string"}}, "required": ["product_id"]}}},
+    {"type": "function", "function": {
         "name": "ask_user",
         "description": "Ask the user ONE short clarifying question with 2-5 tappable answers. Use only when the need is genuinely ambiguous (use-case, budget, brand). Never ask more than one question per turn.",
         "parameters": {"type": "object", "properties": {"question": {"type": "string"}, "options": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5}}, "required": ["question", "options"]}}},
@@ -152,3 +156,17 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
                   "alternatives": (i.get("alternatives") or {}).get("kind")} for i in items]
         return {"inquiries": brief}, ({"type": "inquiry_status", "items": items} if items else None)
     return {"error": f"unknown tool {name}"}, None
+
+
+async def run_tool_async(ctx: Ctx, name: str, a: dict, llm=None) -> tuple[Any, dict | None]:
+    """Async-aware dispatcher: tools that call the LLM (review) are awaited; the rest run synchronously."""
+    if name == "product_review":
+        from ..services import review
+        from .llm import OpenAICompatLLM
+        r = await review.build(ctx.con, a.get("product_id", ""), llm or OpenAICompatLLM())
+        if r is None:
+            return {"error": "product not found"}, None
+        return ({"pros": [x["text"] for x in r["pros"]], "cons": [x["text"] for x in r["cons"]], "tips": r["tips"],
+                 "reputation_unverified": r["reputation"] and r["reputation"]["text"], "key_specs": r["key_specs"][:4]},
+                {"type": "review", **r})
+    return run_tool(ctx, name, a)

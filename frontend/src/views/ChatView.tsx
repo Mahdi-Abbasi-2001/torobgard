@@ -13,6 +13,7 @@ import { Icon } from "@/components/Icon";
 import { ProductCard, ShopCard } from "@/components/cards";
 import { InquiryCard } from "@/components/inquiry";
 import { WhereToLookCard } from "@/components/WhereToLook";
+import { ReviewCardView } from "@/components/ReviewCard";
 import { AppBar, Bidi, BottomNav } from "@/components/ui";
 
 type Msg = { me: boolean; text: string; blocks: Block[]; err?: string };
@@ -125,6 +126,7 @@ function BlockView({ b, onPick }: { b: Block; onPick: (t: string) => void }) {
       {b.product && <button type="button" className="btn pri block" onClick={() => { setPicks(b.product!.product_id, b.shops.map((s) => s.shop_id)); router.push(`/p/${b.product!.product_id}/ask`); }}>بازبینی و ارسال استعلام</button>}
     </div>
   );
+  if (b.type === "review") return <ReviewCardView r={b} />;
   if (b.type === "location_widget") return <WhereToLookCard data={b} />;
   if (b.type === "inquiry_status") return (
     <div className="stack" style={{ gap: 8 }}>
