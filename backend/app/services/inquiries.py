@@ -156,14 +156,17 @@ def alternatives(con, session_id: str, product_id: str, k: int = 3) -> dict:
     loc = state.get("location")
     origin = (loc["lat"], loc["lon"]) if loc else None
     res = catalog.find_shops(con, [product_id], origin=origin, include_category_only=False, sort="best", limit=30)
-    shops = [s for s in res["listed"] if s["shop_id"] not in asked and s["open"]["state"] != "closed"][:k]
+    fresh = [s for s in res["listed"] if s["shop_id"] not in asked]
+    # prefer shops that are open; if none are (e.g. at night) still offer the others, their cards say "closed"
+    shops = ([s for s in fresh if s["open"]["state"] != "closed"] or fresh)[:k]
     if shops:
         return {"kind": "same_product", "shops": shops, "products": []}
     sims = catalog.similar_products(con, product_id, limit=4)
     out = []
     for p in sims:
         r2 = catalog.find_shops(con, [p["product_id"]], origin=origin, include_category_only=False, limit=10)
-        cand = [s for s in r2["listed"] if s["shop_id"] not in asked and s["open"]["state"] != "closed"]
+        fresh2 = [s for s in r2["listed"] if s["shop_id"] not in asked]
+        cand = [s for s in fresh2 if s["open"]["state"] != "closed"] or fresh2
         if cand:
             out.append((p, cand[0]))
         if len(out) >= k:
@@ -206,6 +209,12 @@ async def _simulate(inquiry_id: str):
     await asyncio.sleep(rnd.uniform(3, 6))
     con = db.connect()
     try:
+        # demo-friendliness: the first shop asked in a batch always has the product, so the flow never dead-ends
+        first = con.execute("SELECT id FROM inquiries WHERE session_id=(SELECT session_id FROM inquiries WHERE id=?) "
+                            "AND product_id=(SELECT product_id FROM inquiries WHERE id=?) ORDER BY created_at, rowid LIMIT 1",
+                            (inquiry_id, inquiry_id)).fetchone()
+        if first and first[0] == inquiry_id and outcome in ("unavailable", "silent"):
+            outcome = rnd.choice(["available", "price_changed"])
         mark_delivered(con, inquiry_id)
         publish(con.execute("SELECT session_id FROM inquiries WHERE id=?", (inquiry_id,)).fetchone()[0],
                 {"type": "inquiry", "inquiry": view(con, inquiry_id)})

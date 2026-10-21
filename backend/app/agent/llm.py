@@ -14,6 +14,10 @@ class LLMUnavailable(Exception):
 
 _NEEDS_EFFORT_NONE: set[str] = set()  # models that told us to use reasoning_effort="none" (remembered per process)
 _NO_TEMPERATURE: set[str] = set()     # reasoning models that reject a custom temperature
+_NO_USAGE: set[str] = set()           # providers that reject stream_options (usage then isn't counted)
+
+# Process-wide token counters, exposed by /api/chat-status so cost can be watched live.
+USAGE = {"calls": 0, "prompt_tokens": 0, "cached_tokens": 0, "completion_tokens": 0}
 
 
 class OpenAICompatLLM:
@@ -39,6 +43,8 @@ class OpenAICompatLLM:
                 effort = "none"
             except _TemperatureRejected:
                 _NO_TEMPERATURE.add(self.s["model"])
+            except _UsageRejected:
+                _NO_USAGE.add(self.s["model"])
 
     async def _once(self, messages, tools, effort):
         body = {"model": self.s["model"], "messages": messages, "stream": True}
@@ -48,6 +54,8 @@ class OpenAICompatLLM:
             body["temperature"] = 0.3
         if tools:
             body["tools"] = tools
+        if self.s["model"] not in _NO_USAGE:
+            body["stream_options"] = {"include_usage": True}
         calls: dict[int, dict] = {}
         try:
             async with httpx.AsyncClient(timeout=httpx.Timeout(self.s["timeout"], connect=10)) as c:
@@ -59,6 +67,8 @@ class OpenAICompatLLM:
                             raise _EffortRequired()
                         if r.status_code == 400 and "temperature" in err and "temperature" in body:
                             raise _TemperatureRejected()
+                        if r.status_code == 400 and "stream_options" in err and "stream_options" in body:
+                            raise _UsageRejected()
                         raise LLMUnavailable(f"LLM HTTP {r.status_code}: {err[:200]}")
                     async for line in r.aiter_lines():
                         if not line.startswith("data:"):
@@ -67,8 +77,18 @@ class OpenAICompatLLM:
                         if data == "[DONE]":
                             break
                         try:
-                            ch = json.loads(data)["choices"][0]["delta"]
-                        except (KeyError, IndexError, json.JSONDecodeError):
+                            obj = json.loads(data)
+                        except json.JSONDecodeError:
+                            continue
+                        u = obj.get("usage")
+                        if u:  # final chunk when include_usage is on
+                            USAGE["calls"] += 1
+                            USAGE["prompt_tokens"] += u.get("prompt_tokens", 0)
+                            USAGE["completion_tokens"] += u.get("completion_tokens", 0)
+                            USAGE["cached_tokens"] += (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+                        try:
+                            ch = obj["choices"][0]["delta"]
+                        except (KeyError, IndexError):
                             continue
                         if ch.get("content"):
                             yield "text", ch["content"]
@@ -89,4 +109,8 @@ class _EffortRequired(Exception):
 
 
 class _TemperatureRejected(Exception):
+    pass
+
+
+class _UsageRejected(Exception):
     pass

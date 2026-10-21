@@ -334,4 +334,5 @@ async def chat(session_id: str, body: ChatIn, request: Request):
 @app.get("/api/chat-status", tags=["chat"])
 def chat_status():
     l = OpenAICompatLLM()
-    return {"llm_configured": l.configured, "model": l.s["model"], "base_url": l.s["base_url"]}
+    from .agent.llm import USAGE
+    return {"llm_configured": l.configured, "model": l.s["model"], "base_url": l.s["base_url"], "usage_since_start": USAGE}
