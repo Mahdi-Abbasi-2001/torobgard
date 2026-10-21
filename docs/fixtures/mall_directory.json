@@ -1,0 +1,2769 @@
+{
+  "mall_key": "علالدین",
+  "mall": "پاساژ علاالدین",
+  "area": "فردوسی",
+  "lat": 35.697412242301034,
+  "lon": 51.424802541732795,
+  "shop_count": 263,
+  "floors": [
+    {
+      "floor": -2,
+      "label": "طبقه منفی 2",
+      "shops": [
+        {
+          "shop_id": "shop_f9355377a5fe805fc504c989",
+          "name": "ماندیس روآرا",
+          "unit": null,
+          "plaque": "150",
+          "offer_count": 1,
+          "categories": [
+            "باتری گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_03f8a83aa0bfa395147b698d",
+          "name": "مهردیس آذردیس",
+          "unit": null,
+          "plaque": "666",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_49b9854ac58b71ef66bd529b",
+          "name": "دیسینا نیکیس",
+          "unit": null,
+          "plaque": "138",
+          "offer_count": 210,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "پاوربانک و شارژر همراه"
+          ]
+        },
+        {
+          "shop_id": "shop_59ad696fe2dd6b441ad79e4c",
+          "name": "ماهدیس پاکآرا",
+          "unit": null,
+          "plaque": "133",
+          "offer_count": 113,
+          "categories": [
+            "اسپیکر و سیستم صوتی",
+            "هدفون، هدست و هندزفری",
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_9160fe522d53c735d96c394c",
+          "name": "ماننوش دیسیسا",
+          "unit": null,
+          "plaque": "170",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_c195fd6d0e98729ab89edb21",
+          "name": "ماهوان آریرا",
+          "unit": null,
+          "plaque": "155/1",
+          "offer_count": 27,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "پاوربانک و شارژر همراه"
+          ]
+        },
+        {
+          "shop_id": "shop_9fe6e4c813a200cd7c4fe6b7",
+          "name": "ماهیلا ویوان",
+          "unit": null,
+          "plaque": "138",
+          "offer_count": 0,
+          "categories": []
+        }
+      ]
+    },
+    {
+      "floor": -1,
+      "label": "طبقه منفی 1",
+      "shops": [
+        {
+          "shop_id": "shop_d7ed74324abb6a2d80c276b7",
+          "name": "نوینا نیکینا",
+          "unit": null,
+          "plaque": "63",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_3aeb5443a91c3af53747b19e",
+          "name": "رامانوش دیسآرا",
+          "unit": null,
+          "plaque": "71",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_b99ae8c4cd1ec1598653822d",
+          "name": "پاکوان نیکنوش",
+          "unit": null,
+          "plaque": "19/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_a6e25ee7b07e798f19f5e106",
+          "name": "رووان آذرین",
+          "unit": null,
+          "plaque": "83",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_777dd5c20b79e1de1b3c8f48",
+          "name": "مانیلا آذریرا",
+          "unit": null,
+          "plaque": "17",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_581a1537f338b30d6c462ec1",
+          "name": "مانآرا آوین",
+          "unit": "62",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "زیبایی و بهداشت پوست",
+            "کرم و ماسک",
+            "سایر آرایش و مراقبت لب"
+          ]
+        },
+        {
+          "shop_id": "shop_04eef0e6c51a5a566df20818",
+          "name": "مانیار نیکآرا",
+          "unit": null,
+          "plaque": "42",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_05981cd6c1512471b630b605",
+          "name": "نییس ماهیرا",
+          "unit": null,
+          "plaque": "71",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_7ca814c8123fe49eed2b2eaf",
+          "name": "آذروش وینوش",
+          "unit": null,
+          "plaque": "53",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_bae86e7540c15980a3fee991",
+          "name": "راموان ویان",
+          "unit": "77",
+          "plaque": null,
+          "offer_count": 13,
+          "categories": [
+            "میکروفون",
+            "هدفون، هدست و هندزفری",
+            "اسپیکر و سیستم صوتی"
+          ]
+        },
+        {
+          "shop_id": "shop_334a7703e9493a5d7e30d150",
+          "name": "نووان پاکینا",
+          "unit": null,
+          "plaque": "63/1",
+          "offer_count": 36,
+          "categories": [
+            "باتری گوشی موبایل",
+            "قاب، شاسی و درب گوشی",
+            "شارژر گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_8b57f928b2207bc45262b2ed",
+          "name": "مهرین رووان",
+          "unit": null,
+          "plaque": "43",
+          "offer_count": 181,
+          "categories": [
+            "فلش مموری",
+            "کارت حافظه",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_2a3247ffd2029ea58c2d76b4",
+          "name": "آوان مانان",
+          "unit": null,
+          "plaque": "7",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_040d8bc07289dd495d0ce1c4",
+          "name": "رویار رامیرا",
+          "unit": null,
+          "plaque": "49",
+          "offer_count": 0,
+          "categories": [
+            "عطر و ادکلن"
+          ]
+        },
+        {
+          "shop_id": "shop_fd81c6d06eb0d82a04a0446e",
+          "name": "فریس سرودیس",
+          "unit": null,
+          "plaque": "52",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d777864bddee0e69558dec5c",
+          "name": "نوان نیدیس",
+          "unit": null,
+          "plaque": "52",
+          "offer_count": 36,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "کاور و لوازم جانبی ایرپاد",
+            "کیف و کاور هدفون و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_9cc4d956c980f3f44f0babac",
+          "name": "آریس آرآرا",
+          "unit": null,
+          "plaque": "71",
+          "offer_count": 2,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_387ec3cbab8debc32e6ab239",
+          "name": "وییار وییس",
+          "unit": "8",
+          "plaque": "8",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_d712880b0975f3ffcd2fa6b3",
+          "name": "دیسیرا نویلا",
+          "unit": null,
+          "plaque": "62",
+          "offer_count": 1,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_d49ee2b6f71ee5d7d3141ce8",
+          "name": "مهریرا ماهوان",
+          "unit": "18",
+          "plaque": "18",
+          "offer_count": 5,
+          "categories": [
+            "شارژر گوشی",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_786bdfb207a37cb0d65873e2",
+          "name": "پاکانوش دیسیس",
+          "unit": null,
+          "plaque": "82",
+          "offer_count": 301,
+          "categories": [
+            "محافظ صفحه نمایش گوشی",
+            "کیف و کاور گوشی",
+            "محافظ لنز دوربین گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_0e0c351535fd311c34a34ec3",
+          "name": "مهریسا رامدیس",
+          "unit": "18",
+          "plaque": "18",
+          "offer_count": 4,
+          "categories": [
+            "شارژر گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_bdaac805b2ea405ab7adf601",
+          "name": "نیکیرا نیوان",
+          "unit": null,
+          "plaque": "9",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 0,
+      "label": "همکف",
+      "shops": [
+        {
+          "shop_id": "shop_71228ae8325df942b9a9d3e4",
+          "name": "پاکین سروین",
+          "unit": null,
+          "plaque": "44",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_e1109c2292c6e0ed5c1ed645",
+          "name": "سرووش پاکآرا",
+          "unit": null,
+          "plaque": "42",
+          "offer_count": 61,
+          "categories": [
+            "گوشی موبایل",
+            "ساعت و مچ بند هوشمند",
+            "تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_66319f0c4cd18d703d0f4eac",
+          "name": "پاکیرا نیدیس",
+          "unit": null,
+          "plaque": "56",
+          "offer_count": 155,
+          "categories": [
+            "ساعت و مچ بند هوشمند",
+            "گوشی موبایل",
+            "قلم لمسی"
+          ]
+        },
+        {
+          "shop_id": "shop_a2d6e921f6b33280c51cbb7c",
+          "name": "مهران آوورا",
+          "unit": "32",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_4c51dfaeed2b19133fd40077",
+          "name": "مانآرا وییس",
+          "unit": null,
+          "plaque": "19",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_4199e7054a50f9ebc8977c6e",
+          "name": "رونوش رووش",
+          "unit": null,
+          "plaque": "14/16",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_409ec4f0c6442f80d513496f",
+          "name": "نوآرا وییسا",
+          "unit": null,
+          "plaque": "11",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_44c6c3f0fd4861c400649ed2",
+          "name": "مانینا آذرین",
+          "unit": null,
+          "plaque": "932",
+          "offer_count": 75,
+          "categories": [
+            "لولا",
+            "سایر قفل درب",
+            "تابلو و جعبه برق"
+          ]
+        },
+        {
+          "shop_id": "shop_954dad250293d5b78ee0e837",
+          "name": "آرآرا رامانوش",
+          "unit": null,
+          "plaque": "20",
+          "offer_count": 7,
+          "categories": [
+            "چمدان و ساک",
+            "کیف و کوله"
+          ]
+        },
+        {
+          "shop_id": "shop_d6bcf7fc585a643135d3f9bd",
+          "name": "مهردیس پاکآرا",
+          "unit": null,
+          "plaque": "89",
+          "offer_count": 31,
+          "categories": [
+            "گوشی موبایل",
+            "اسپیکر و سیستم صوتی",
+            "ساعت و مچ بند هوشمند"
+          ]
+        },
+        {
+          "shop_id": "shop_06b2c6c44f78a501c379c1c2",
+          "name": "رامینا روینا",
+          "unit": null,
+          "plaque": "62",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_10fdb091c78d2960d7c3e7b0",
+          "name": "مهرانوش سرووش",
+          "unit": null,
+          "plaque": "18",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_9624928623ebf638ed03f2e9",
+          "name": "فرین ماهسا",
+          "unit": null,
+          "plaque": "12",
+          "offer_count": 4,
+          "categories": [
+            "گوشی موبایل",
+            "پاوربانک و شارژر همراه"
+          ]
+        },
+        {
+          "shop_id": "shop_f1a0be110d87d35455d18b5f",
+          "name": "دیسیار رویار",
+          "unit": null,
+          "plaque": "10",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_be3098bb326a722b54f7a99a",
+          "name": "فرورا وینوش",
+          "unit": "2",
+          "plaque": "832",
+          "offer_count": 306,
+          "categories": [
+            "ماشین اصلاح و ریش‌ تراش",
+            "سشوار و برس حرارتی",
+            "اتو و صاف کننده مو"
+          ]
+        },
+        {
+          "shop_id": "shop_7a1bb4cee046ff75a148f00a",
+          "name": "نیکدیس ماهینا",
+          "unit": "5",
+          "plaque": null,
+          "offer_count": 4,
+          "categories": [
+            "هدلایت خودرو",
+            "منبع تغذیه سوییچینگ"
+          ]
+        },
+        {
+          "shop_id": "shop_2c52b9d2747d5f41f80bca7c",
+          "name": "پاکیسا آونوش",
+          "unit": null,
+          "plaque": "66/77",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_b8568116361c7f1ed3b7c613",
+          "name": "دیسینا سرویلا",
+          "unit": null,
+          "plaque": "19",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_8747ce1172bd0dd15cfa452d",
+          "name": "رویرا آویسا",
+          "unit": "90",
+          "plaque": "90",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_e969441e7ca9e98fe81475a8",
+          "name": "دیسدیس روآرا",
+          "unit": "25",
+          "plaque": "25",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0ed774b66119c6b531de3764",
+          "name": "فران آرورا",
+          "unit": "1",
+          "plaque": "20",
+          "offer_count": 2,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_792c4e76a3d588a309448167",
+          "name": "آذرآرا وییسا",
+          "unit": "84",
+          "plaque": "84",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_41499056b90bb445b9e19b00",
+          "name": "نیسا فرینا",
+          "unit": null,
+          "plaque": "69",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_8ebb17c8a2691474e0507d4c",
+          "name": "ماهیرا روسا",
+          "unit": null,
+          "plaque": "63",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_5f54f29dfdb2472c06d86e02",
+          "name": "دیسیار فریس",
+          "unit": null,
+          "plaque": "80",
+          "offer_count": 20,
+          "categories": [
+            "گوشی موبایل",
+            "تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_dd0b626200b03b37a3fa8546",
+          "name": "آریسا آردیس",
+          "unit": "85",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_65f61bbda43415b5f2bd1b7c",
+          "name": "دیسیار نیکیسا",
+          "unit": null,
+          "plaque": "38",
+          "offer_count": 2,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_632965f5324fce28fe9bd469",
+          "name": "آرسا سروسا",
+          "unit": null,
+          "plaque": "72/76",
+          "offer_count": 5,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_e0881bd1d581a5e81be1738b",
+          "name": "ویدیس رووان",
+          "unit": "83",
+          "plaque": "83",
+          "offer_count": 15,
+          "categories": [
+            "گوشی موبایل",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_467b07fb7ad3936205c3efec",
+          "name": "نیین نیکدیس",
+          "unit": "5",
+          "plaque": "5",
+          "offer_count": 5,
+          "categories": [
+            "دوربین عکاسی و فیلمبرداری",
+            "لنز دوربین"
+          ]
+        },
+        {
+          "shop_id": "shop_8a62bc94f29d1e64957c1b74",
+          "name": "آویرا آذروان",
+          "unit": "60/61",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_2bf2460bf6ba1508a28339f8",
+          "name": "آرین ماهیرا",
+          "unit": "82/1",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_751e24ff1f9395b7fa4d7d47",
+          "name": "ماهیار دیسیار",
+          "unit": "51",
+          "plaque": "51",
+          "offer_count": 1,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_be36cf38cfbaf883312f2b70",
+          "name": "رامیلا مهرانوش",
+          "unit": null,
+          "plaque": "73 و 74",
+          "offer_count": 7,
+          "categories": [
+            "ساعت و مچ بند هوشمند",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_81746901256b35b5124cc799",
+          "name": "آریار نییار",
+          "unit": "84",
+          "plaque": "84",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_3256cf9777b2431a0cef290c",
+          "name": "پاکیسا ماهانوش",
+          "unit": null,
+          "plaque": "45",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_c060bc5ea37b78e00ece4bdb",
+          "name": "نیکورا ویوان",
+          "unit": null,
+          "plaque": "44",
+          "offer_count": 300,
+          "categories": [
+            "گوشی موبایل",
+            "هدفون، هدست و هندزفری",
+            "کیف و کاور هدفون و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_0190ae9d8cf49a7884b0db6e",
+          "name": "موبیفون",
+          "unit": null,
+          "plaque": "65",
+          "offer_count": 11,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_e31a5b73908ea869f50af78e",
+          "name": "دیسیلا مانسا",
+          "unit": "238",
+          "plaque": "238",
+          "offer_count": 61,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "اسپیکر و سیستم صوتی"
+          ]
+        },
+        {
+          "shop_id": "shop_5517fcbf271c7a3f0623754e",
+          "name": "فریسا نیوان",
+          "unit": "232",
+          "plaque": "232",
+          "offer_count": 1,
+          "categories": [
+            "گیفت کارت اپل"
+          ]
+        },
+        {
+          "shop_id": "shop_2846f0981e3f1018cf35d63e",
+          "name": "فردیس رویلا",
+          "unit": null,
+          "plaque": "241",
+          "offer_count": 11,
+          "categories": [
+            "فشارسنج پزشکی",
+            "بی بی چک",
+            "چسب و پد درمانی"
+          ]
+        },
+        {
+          "shop_id": "shop_5a3dff98030541ce333caf2b",
+          "name": "راموان نییرا",
+          "unit": null,
+          "plaque": "7",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_e530d759e02471a9994b6d98",
+          "name": "وینوش آذرسا",
+          "unit": null,
+          "plaque": "628",
+          "offer_count": 1,
+          "categories": [
+            "کنسول بازی  PS5"
+          ]
+        },
+        {
+          "shop_id": "shop_9293d0ee1dccd28ea937470c",
+          "name": "سرودیس نییار",
+          "unit": null,
+          "plaque": "19",
+          "offer_count": 18,
+          "categories": [
+            "شارژر گوشی",
+            "پاوربانک و شارژر همراه",
+            "قلم لمسی"
+          ]
+        },
+        {
+          "shop_id": "shop_096b1b533f0a16733760cbc0",
+          "name": "پاکآرا رامیرا",
+          "unit": null,
+          "plaque": "43",
+          "offer_count": 18,
+          "categories": [
+            "دوربین عکاسی و فیلمبرداری",
+            "گیمبال و استابلایزر دوربین",
+            "تجهیزات جانبی فیلمبرداری"
+          ]
+        },
+        {
+          "shop_id": "shop_449ce53b5ce9f4b9481b20ac",
+          "name": "فرین مهریس",
+          "unit": "77",
+          "plaque": "6677",
+          "offer_count": 5,
+          "categories": [
+            "تبلت",
+            "گوشی موبایل",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_0b2d387c5a2ecd7d8d3e5065",
+          "name": "مهرورا آرینا",
+          "unit": null,
+          "plaque": "62",
+          "offer_count": 44,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_5c88f2c34041fe14c7c72341",
+          "name": "فرورا سرووان",
+          "unit": null,
+          "plaque": "19",
+          "offer_count": 2,
+          "categories": [
+            "هارد اکسترنال",
+            "ساعت و مچ بند هوشمند"
+          ]
+        },
+        {
+          "shop_id": "shop_39115339347282ee8d90a6f3",
+          "name": "آذریار نویسا",
+          "unit": null,
+          "plaque": "26",
+          "offer_count": 104,
+          "categories": [
+            "چمدان و ساک",
+            "کیف و کوله",
+            "کاور کیف و چمدان"
+          ]
+        },
+        {
+          "shop_id": "shop_b352e12be2b03a4cd9cf2cce",
+          "name": "رووش نیوان",
+          "unit": null,
+          "plaque": "32",
+          "offer_count": 2,
+          "categories": [
+            "قلم لمسی",
+            "کابل و تبدیل Lightning"
+          ]
+        },
+        {
+          "shop_id": "shop_258f0db6b03d7626b3ef2f59",
+          "name": "ماهیلا ماهنوش",
+          "unit": null,
+          "plaque": "30",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_80f1ac7202199c661f1f230e",
+          "name": "دیسیار راموش",
+          "unit": null,
+          "plaque": "67 و 68",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_9ed3fdb253b311bb9baab844",
+          "name": "نیآرا مانانوش",
+          "unit": null,
+          "plaque": "6",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_c873068772648d5e0b8a9389",
+          "name": "وییس نویرا",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        }
+      ]
+    },
+    {
+      "floor": 1,
+      "label": "طبقه 1",
+      "shops": [
+        {
+          "shop_id": "shop_c75c5ab16fcd8298c5b24009",
+          "name": "دیسینا نوآرا",
+          "unit": null,
+          "plaque": "137",
+          "offer_count": 300,
+          "categories": [
+            "انگشتر",
+            "دستبند و بنگل",
+            "گردنبند"
+          ]
+        },
+        {
+          "shop_id": "shop_43a627d5e39af9c8fdacd93d",
+          "name": "نوان رامیار",
+          "unit": null,
+          "plaque": "159",
+          "offer_count": 98,
+          "categories": [
+            "تاچ و ال سی دی گوشی و تبلت",
+            "دوربین گوشی و تبلت",
+            "فلت و برد گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_c6410132a367bd2389dfaaf7",
+          "name": "راموش نینوش",
+          "unit": null,
+          "plaque": "115/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_af89ee5e456f178de273b48e",
+          "name": "آوسا دیسسا",
+          "unit": null,
+          "plaque": "102",
+          "offer_count": 300,
+          "categories": [
+            "کیسه بوکس",
+            "پایه نگهدارنده گوشی و تبلت",
+            "ماساژور و لوازم ماساژ"
+          ]
+        },
+        {
+          "shop_id": "shop_57b29d5af71cdf929f0666e9",
+          "name": "رووش ماهین",
+          "unit": "149",
+          "plaque": null,
+          "offer_count": 5,
+          "categories": [
+            "رم کامپیوتر",
+            "لپ تاپ و نوت بوک",
+            "هاب USB"
+          ]
+        },
+        {
+          "shop_id": "shop_b555e4a9acf573b0d3f102ec",
+          "name": "دیسنوش فریرا",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_d3c3dbfe5b91d49c3b361654",
+          "name": "آودیس نیکورا",
+          "unit": null,
+          "plaque": "184",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_c69f4ac1d0265255d5397668",
+          "name": "ماهوش راموش",
+          "unit": "178",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_3dfaf5b5f42309b372585c52",
+          "name": "رامینا راموش",
+          "unit": null,
+          "plaque": "113",
+          "offer_count": 339,
+          "categories": [
+            "دوربین گوشی و تبلت",
+            "قاب، شاسی و درب گوشی",
+            "فلت و برد گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_2c564e1ed8be34db1bb94957",
+          "name": "سرودیس نیسا",
+          "unit": "120",
+          "plaque": null,
+          "offer_count": 319,
+          "categories": [
+            "ماسک پوستی",
+            "کوکتل و مواد ویتامینه",
+            "لایه بردار و اسکراب"
+          ]
+        },
+        {
+          "shop_id": "shop_61afbbaf181807210c01dee8",
+          "name": "روورا آوانوش",
+          "unit": null,
+          "plaque": "159",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_e90e607aa3ec650a755facbb",
+          "name": "ماهیس نیکینا",
+          "unit": null,
+          "plaque": "179",
+          "offer_count": 1,
+          "categories": [
+            "تاچ و ال سی دی گوشی و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_700dd01249a5201ed43cb523",
+          "name": "آروش آرنوش",
+          "unit": "108",
+          "plaque": null,
+          "offer_count": 25,
+          "categories": [
+            "دوربین مدار بسته",
+            "سیم سیار و چندراهی برق",
+            "تلفن تحت شبکه"
+          ]
+        },
+        {
+          "shop_id": "shop_03ada233ccc72e8c36ebf71c",
+          "name": "پاکدیس مهرانوش",
+          "unit": "114",
+          "plaque": "114",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d5c6cc4766b1a406dd87f902",
+          "name": "دیسیرا مانیار",
+          "unit": "185",
+          "plaque": "666",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_28111132100821b642832b86",
+          "name": "نیکین مانان",
+          "unit": "182",
+          "plaque": "182",
+          "offer_count": 6,
+          "categories": [
+            "محافظ لنز دوربین گوشی",
+            "شارژر گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_cb3d724bb577ffda33bee9b2",
+          "name": "رویس نیینا",
+          "unit": null,
+          "plaque": "155/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_ecf4d2da925522d85803475d",
+          "name": "نودیس آذریس",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 110,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "اسپیکر و سیستم صوتی",
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_b92566704ca123b0419b5829",
+          "name": "نینوش روان",
+          "unit": "104",
+          "plaque": null,
+          "offer_count": 17,
+          "categories": [
+            "دوربین گوشی و تبلت",
+            "تاچ و ال سی دی گوشی و تبلت",
+            "قاب، شاسی و درب گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_32e0c80b6a20b19b07869871",
+          "name": "دیسان مانانوش",
+          "unit": "104",
+          "plaque": "104",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_07ed6af54af39fd86ac4e1ac",
+          "name": "آذروش ویدیس",
+          "unit": "104",
+          "plaque": null,
+          "offer_count": 16,
+          "categories": [
+            "دوربین گوشی و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_74538d17cf6b1fd031895e3f",
+          "name": "نیکیرا مهروان",
+          "unit": "45",
+          "plaque": "45",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_b0a0b28d5e0fc3037e776c20",
+          "name": "پاکان فرینا",
+          "unit": "130",
+          "plaque": "152",
+          "offer_count": 1,
+          "categories": [
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_111b051e4f0e99ed9921deb7",
+          "name": "ماهین رامانوش",
+          "unit": "108",
+          "plaque": null,
+          "offer_count": 2,
+          "categories": [
+            "دستگاه تاتو و میکروپگمنتیشن",
+            "بی حسی تاتو"
+          ]
+        },
+        {
+          "shop_id": "shop_f73d607ec5b2a83ac8352092",
+          "name": "مانیس ماهیار",
+          "unit": "160/1",
+          "plaque": "160/1",
+          "offer_count": 6,
+          "categories": [
+            "قاب، شاسی و درب گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_ab0a451d616a34a9d083b57b",
+          "name": "روسا نیکنوش",
+          "unit": "121",
+          "plaque": null,
+          "offer_count": 300,
+          "categories": [
+            "لوازم جانبی دستگاه‌های زیبایی",
+            "ماسک پوستی",
+            "دستگاه جوانسازی و لیفتینگ"
+          ]
+        },
+        {
+          "shop_id": "shop_37befbca4fa26b53e5bae5bf",
+          "name": "آریلا آووان",
+          "unit": "181",
+          "plaque": null,
+          "offer_count": 324,
+          "categories": [
+            "لپ تاپ و نوت بوک",
+            "مودم LTE/3G/4G/5G",
+            "شارژر لپ تاپ"
+          ]
+        },
+        {
+          "shop_id": "shop_13336f1a0d2ec0b16bbd60aa",
+          "name": "مهریسا نوین",
+          "unit": "3",
+          "plaque": "3",
+          "offer_count": 17,
+          "categories": [
+            "شارژر گوشی",
+            "پاوربانک و شارژر همراه",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_8239f5b53795bda784715033",
+          "name": "مهرانوش دیسآرا",
+          "unit": "167",
+          "plaque": null,
+          "offer_count": 4,
+          "categories": [
+            "مخلوط کن برقی",
+            "جارو شارژی",
+            "ماساژور و لوازم ماساژ"
+          ]
+        },
+        {
+          "shop_id": "shop_13a90cd8e34b94087808ab09",
+          "name": "سروسا فریس",
+          "unit": null,
+          "plaque": "125",
+          "offer_count": 1,
+          "categories": [
+            "سایر منبع تغذیه"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 2,
+      "label": "طبقه 2",
+      "shops": [
+        {
+          "shop_id": "shop_81d929edfc87e73a4c0b59e8",
+          "name": "ویین فریرا",
+          "unit": null,
+          "plaque": "71",
+          "offer_count": 128,
+          "categories": [
+            "لوپ تعمیر موبایل",
+            "هیتر و هویه",
+            "باتری گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_ec6deb89612a2c4c5de37390",
+          "name": "فرآرا آذریرا",
+          "unit": "242",
+          "plaque": null,
+          "offer_count": 58,
+          "categories": [
+            "ماساژور و لوازم ماساژ",
+            "فشارسنج پزشکی",
+            "اکسیژن ساز و نبولایزر"
+          ]
+        },
+        {
+          "shop_id": "shop_20cf70f467d39a57e6fd7f1b",
+          "name": "آذرورا آریرا",
+          "unit": null,
+          "plaque": "285",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_1be5f26655ca83ca00578980",
+          "name": "ماهانوش ماهوش",
+          "unit": null,
+          "plaque": "276",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_4e3b1ee8dcf7a0f9fe3e8925",
+          "name": "مهردیس پاکیس",
+          "unit": null,
+          "plaque": "242",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_525f5ae34742685577230f69",
+          "name": "نیکیسا فروان",
+          "unit": null,
+          "plaque": "259/1",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_69c30dabca3dfc5ff2e9b261",
+          "name": "سرویس نیکوش",
+          "unit": null,
+          "plaque": "285",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_acf32ee4b0deb56369b74d73",
+          "name": "آویسا فرسا",
+          "unit": null,
+          "plaque": "155",
+          "offer_count": 79,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "شارژر گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_6ab046ca9b60786330da1427",
+          "name": "مانان نیینا",
+          "unit": null,
+          "plaque": "253",
+          "offer_count": 41,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "اتو"
+          ]
+        },
+        {
+          "shop_id": "shop_91998c48d0a75cf1bdb9d060",
+          "name": "مانیرا روینا",
+          "unit": null,
+          "plaque": "213",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_7d5ad2d49931652d5dda645d",
+          "name": "فرسا آذرآرا",
+          "unit": null,
+          "plaque": "283",
+          "offer_count": 151,
+          "categories": [
+            "محافظ صفحه نمایش تبلت",
+            "تبلت",
+            "لپ تاپ و نوت بوک"
+          ]
+        },
+        {
+          "shop_id": "shop_6cfd3ef432cccb437f43b9fd",
+          "name": "فروان آران",
+          "unit": null,
+          "plaque": "269",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_51652ff561c4742a519de703",
+          "name": "دیسیلا آرسا",
+          "unit": null,
+          "plaque": "177",
+          "offer_count": 7,
+          "categories": [
+            "پایه نگهدارنده گوشی و تبلت",
+            "هدفون، هدست و هندزفری",
+            "تبدیل دو شاخه برق"
+          ]
+        },
+        {
+          "shop_id": "shop_39c894d09b8a43ae81f5cb06",
+          "name": "آریرا سرونوش",
+          "unit": "240",
+          "plaque": "240",
+          "offer_count": 9,
+          "categories": [
+            "پاوربانک و شارژر همراه",
+            "هدفون، هدست و هندزفری",
+            "چراغ اضطراری و شارژی"
+          ]
+        },
+        {
+          "shop_id": "shop_ce277ec287daec2526765f6a",
+          "name": "نییرا مانین",
+          "unit": null,
+          "plaque": "231",
+          "offer_count": 213,
+          "categories": [
+            "باتری گوشی موبایل",
+            "باتری تبلت",
+            "کابل و تبدیل Lightning"
+          ]
+        },
+        {
+          "shop_id": "shop_6cea98e9fed58e9df93bdfc5",
+          "name": "ماهین آذرانوش",
+          "unit": "221",
+          "plaque": "221",
+          "offer_count": 46,
+          "categories": [
+            "دستگاه لاک خشک‌کن",
+            "پودر کاشت ناخن",
+            "پلی ژل ناخن"
+          ]
+        },
+        {
+          "shop_id": "shop_c007bc396741a11b1fe8d66e",
+          "name": "آرینا رامنوش",
+          "unit": "251",
+          "plaque": "251",
+          "offer_count": 25,
+          "categories": [
+            "تاچ و ال سی دی گوشی و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_7661e12c16fcacba11a8839d",
+          "name": "رویسا آریس",
+          "unit": null,
+          "plaque": "223",
+          "offer_count": 4,
+          "categories": [
+            "چراغ مطالعه",
+            "اسپیکر و سیستم صوتی",
+            "ساعت و تقویم دیجیتال"
+          ]
+        },
+        {
+          "shop_id": "shop_2b0ff5518f047aff8a069422",
+          "name": "آوینا آرانوش",
+          "unit": null,
+          "plaque": "231",
+          "offer_count": 111,
+          "categories": [
+            "باتری گوشی موبایل",
+            "شارژر گوشی",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_e2d7cc7d384ba5099e0a1eb9",
+          "name": "نیوش آرین",
+          "unit": "263",
+          "plaque": "263",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0ed3218e85e38e99ab0a9d2e",
+          "name": "نوآرا نیکورا",
+          "unit": "2",
+          "plaque": "10",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_c2b364aeea411d9305553493",
+          "name": "آذرسا ماهانوش",
+          "unit": null,
+          "plaque": "215/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_fc03c34d8d8d26a197676d00",
+          "name": "مانیرا دیسانوش",
+          "unit": "110",
+          "plaque": "210",
+          "offer_count": 0,
+          "categories": [
+            "لپ تاپ و نوت بوک",
+            "مانیتور",
+            "کامپیوتر دسکتاپ"
+          ]
+        },
+        {
+          "shop_id": "shop_51f97e6bd4c787a2026f4366",
+          "name": "نیکانوش آووان",
+          "unit": null,
+          "plaque": "240",
+          "offer_count": 37,
+          "categories": [
+            "پاوربانک و شارژر همراه",
+            "هدفون، هدست و هندزفری",
+            "کابل و تبدیل Type C"
+          ]
+        },
+        {
+          "shop_id": "shop_7fa7c47f5407c1c38077aaef",
+          "name": "پاکیرا دیسدیس",
+          "unit": null,
+          "plaque": "276",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_8f0ea5c1233b768500683635",
+          "name": "آذرانوش پاکیلا",
+          "unit": "263",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_981f48aa83355d98f252a1c5",
+          "name": "روین ویانوش",
+          "unit": null,
+          "plaque": "149",
+          "offer_count": 10,
+          "categories": [
+            "باتری گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_2bb7c5340d90c41f7ccd7d55",
+          "name": "دیسان آریس",
+          "unit": "275",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "مرکز خرید"
+          ]
+        },
+        {
+          "shop_id": "shop_7c4155802e3007f4dbc1a9fa",
+          "name": "دیسیس ماهدیس",
+          "unit": "250",
+          "plaque": "250",
+          "offer_count": 1,
+          "categories": [
+            "تاچ و ال سی دی گوشی و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_10302e3382072e37754e9116",
+          "name": "آرینا روورا",
+          "unit": null,
+          "plaque": "207",
+          "offer_count": 8,
+          "categories": [
+            "ماساژور و لوازم ماساژ"
+          ]
+        },
+        {
+          "shop_id": "shop_a701213018d42c58720fcb40",
+          "name": "روینا آویلا",
+          "unit": "204",
+          "plaque": "204",
+          "offer_count": 0,
+          "categories": [
+            "زیبایی و بهداشت پوست",
+            "کرم و ماسک",
+            "آرایش و مراقبت چشم و ابرو"
+          ]
+        },
+        {
+          "shop_id": "shop_04a927be8eb9e79da90df7e4",
+          "name": "وییسا ویینا",
+          "unit": "213",
+          "plaque": "856",
+          "offer_count": 36,
+          "categories": [
+            "ماسک پوستی",
+            "سایر تجهیزات پزشکی",
+            "میکرونیدلینگ درمارولر و درماپن"
+          ]
+        },
+        {
+          "shop_id": "shop_7ef44ba4fbcc6e756b5fa378",
+          "name": "فردیس مانان",
+          "unit": "204",
+          "plaque": "204",
+          "offer_count": 0,
+          "categories": [
+            "زیبایی و بهداشت پوست",
+            "کرم و ماسک",
+            "آرایش و مراقبت چشم و ابرو"
+          ]
+        },
+        {
+          "shop_id": "shop_b206622a574c00af765f6cda",
+          "name": "آرین فرینا",
+          "unit": null,
+          "plaque": "20",
+          "offer_count": 0,
+          "categories": [
+            "زیبایی و بهداشت پوست",
+            "کرم و ماسک",
+            "سایر آرایش و مراقبت لب"
+          ]
+        },
+        {
+          "shop_id": "shop_13ab65a4e0b2a6d5a3ea9c72",
+          "name": "فرانوش مانیرا",
+          "unit": null,
+          "plaque": "240",
+          "offer_count": 17,
+          "categories": [
+            "دسته بازی مخصوص موبایل",
+            "فن خنک کننده موبایل و تبلت",
+            "اسپیکر و سیستم صوتی"
+          ]
+        },
+        {
+          "shop_id": "shop_93e768df053e4864d8cddc79",
+          "name": "مهرورا رامنوش",
+          "unit": null,
+          "plaque": "267",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d60c3798028db4c3f15662d6",
+          "name": "مانیس ویدیس",
+          "unit": null,
+          "plaque": "237/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_90e993353cab35e2b45ec398",
+          "name": "آذرآرا آویار",
+          "unit": null,
+          "plaque": "288",
+          "offer_count": 0,
+          "categories": []
+        }
+      ]
+    },
+    {
+      "floor": 3,
+      "label": "طبقه 3",
+      "shops": [
+        {
+          "shop_id": "shop_347f5f86eba46cdd587575d6",
+          "name": "نیکیلا رویار",
+          "unit": "350",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_6492b65ad8b242465783e74d",
+          "name": "فرورا ماهوان",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0c4b4f163a02a4c609ac644e",
+          "name": "نونوش نیکینا",
+          "unit": null,
+          "plaque": "330",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_da9927c2d611b3e2df810155",
+          "name": "آرانوش وییلا",
+          "unit": null,
+          "plaque": "383",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_34b8c3688452a96bd0b2122c",
+          "name": "آذریسا نیکدیس",
+          "unit": null,
+          "plaque": "370",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_51c284c6eb862f66687ae944",
+          "name": "رامانوش نیین",
+          "unit": null,
+          "plaque": "388",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_24ccf2f686fc9d2793698f04",
+          "name": "رویار مهران",
+          "unit": null,
+          "plaque": "318",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_9f7da98a575f950a845ff6d3",
+          "name": "فریلا نیکسا",
+          "unit": null,
+          "plaque": "347",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_9c35164f429546d91a5c6288",
+          "name": "فریس نویرا",
+          "unit": null,
+          "plaque": "348",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_afb306da37064164bd9ce8a1",
+          "name": "نیکانوش روانوش",
+          "unit": null,
+          "plaque": "349",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_da25ff6c4ffec23d8acf9ae7",
+          "name": "فریار آویرا",
+          "unit": "338",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_8c315c7ccfbe32633967e860",
+          "name": "پاکوان پاکان",
+          "unit": null,
+          "plaque": "332",
+          "offer_count": 2,
+          "categories": [
+            "کیف و کاور گوشی",
+            "کاور و لوازم جانبی ایرپاد"
+          ]
+        },
+        {
+          "shop_id": "shop_bac29dc392875be6d45c30b0",
+          "name": "نوورا سرویلا",
+          "unit": "335",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0981a6346e97ca743d2fe671",
+          "name": "آوانوش نیکیلا",
+          "unit": null,
+          "plaque": "380",
+          "offer_count": 10,
+          "categories": [
+            "محافظ صفحه نمایش گوشی",
+            "آویز و بند موبایل",
+            "کابل و تبدیل OTG"
+          ]
+        },
+        {
+          "shop_id": "shop_7e8bbf5c197b0c8cc532a541",
+          "name": "فرینا رامورا",
+          "unit": null,
+          "plaque": "380",
+          "offer_count": 19,
+          "categories": [
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_25eb54b4a797c29cea73f205",
+          "name": "فرین نوینا",
+          "unit": null,
+          "plaque": "363",
+          "offer_count": 300,
+          "categories": [
+            "کیف و کاور گوشی",
+            "محافظ صفحه نمایش گوشی",
+            "محافظ لنز دوربین گوشی"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 4,
+      "label": "طبقه 4",
+      "shops": [
+        {
+          "shop_id": "shop_57b0cdf0d946521e246f47c7",
+          "name": "مانیس پاکورا",
+          "unit": "469",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_1e9f4260bce692098d59f17c",
+          "name": "ویدیس نیکیسا",
+          "unit": null,
+          "plaque": "452/1",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_077f80ad9275646efa54683a",
+          "name": "آووش ویینا",
+          "unit": "415",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_29e1788754ddb417a39fdfdd",
+          "name": "آردیس آروش",
+          "unit": "453",
+          "plaque": null,
+          "offer_count": 302,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "پایه نگهدارنده گوشی و تبلت",
+            "اسپیکر و سیستم صوتی"
+          ]
+        },
+        {
+          "shop_id": "shop_aacd15c91c166af7b3bd7cd6",
+          "name": "نیکیلا فرینا",
+          "unit": null,
+          "plaque": "458",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_29d840651744fa20b5209aec",
+          "name": "فریلا آرین",
+          "unit": null,
+          "plaque": "462",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_151ed51a1c6c75258e0e5414",
+          "name": "دیسانوش نیکدیس",
+          "unit": "122",
+          "plaque": null,
+          "offer_count": 184,
+          "categories": [
+            "باتری قلمی، سکه‌ای و کتابی",
+            "کابل و تبدیل HDMI",
+            "ماوس"
+          ]
+        },
+        {
+          "shop_id": "shop_5228cb0a9a805dafef1fc39f",
+          "name": "ماهین نییسا",
+          "unit": "487",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_54d1a720e782a6a711773b50",
+          "name": "مانآرا نوان",
+          "unit": null,
+          "plaque": "412",
+          "offer_count": 0,
+          "categories": [
+            "جواهر و زیورآلات",
+            "ست و نیم‌ ست جواهرات",
+            "سایر لوازم مربوط به جواهر و زیورآلات"
+          ]
+        },
+        {
+          "shop_id": "shop_ff011b15c2e96d06fc589756",
+          "name": "سرونوش مهریلا",
+          "unit": "424",
+          "plaque": "424",
+          "offer_count": 207,
+          "categories": [
+            "پکیج سیستم‌های نظارتی و امنیتی",
+            "دزدگیر اماکن و لوازم جانبی",
+            "دوربین مدار بسته"
+          ]
+        },
+        {
+          "shop_id": "shop_3d721a93d1f442b06ddd4d29",
+          "name": "ویورا وییار",
+          "unit": null,
+          "plaque": "476",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_40076dabaad5fa446cf4fc4b",
+          "name": "آذریار رویس",
+          "unit": null,
+          "plaque": "432",
+          "offer_count": 133,
+          "categories": [
+            "فلش مموری",
+            "کارت حافظه",
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_860fc8f9cd977c0439f4616c",
+          "name": "نییرا فریس",
+          "unit": null,
+          "plaque": "133",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_2e5ee02cfc9960495277ada0",
+          "name": "فرانوش آوآرا",
+          "unit": "413",
+          "plaque": "413",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_00ac3b4fb49c15656aaf5ea9",
+          "name": "پاکیرا آوان",
+          "unit": null,
+          "plaque": "422",
+          "offer_count": 82,
+          "categories": [
+            "کیف و کاور گوشی",
+            "محافظ صفحه نمایش گوشی",
+            "محافظ لنز دوربین گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_420cbaab404e3889893aeb85",
+          "name": "رویرا نییسا",
+          "unit": "446",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_b85b528c584868160d230076",
+          "name": "فریس رویسا",
+          "unit": "436",
+          "plaque": null,
+          "offer_count": 6,
+          "categories": [
+            "کیف و کاور گوشی",
+            "تابلو و قاب عکس",
+            "عروسک لبوبو"
+          ]
+        },
+        {
+          "shop_id": "shop_4fcb6656c67bc4956787ad5e",
+          "name": "سرویار دیسیسا",
+          "unit": null,
+          "plaque": "493",
+          "offer_count": 4,
+          "categories": [
+            "کوکتل و مواد ویتامینه",
+            "فیلر و بوتاکس",
+            "مکمل غذایی و دارویی"
+          ]
+        },
+        {
+          "shop_id": "shop_2a54887b30fecc0bcb5c1472",
+          "name": "دیسسا آذریس",
+          "unit": null,
+          "plaque": "423",
+          "offer_count": 40,
+          "categories": [
+            "کیف و کاور گوشی",
+            "لوازم رزین",
+            "تابلو و قاب عکس"
+          ]
+        },
+        {
+          "shop_id": "shop_744db338e9b53b4d91844144",
+          "name": "روان نووان",
+          "unit": null,
+          "plaque": "424",
+          "offer_count": 1,
+          "categories": [
+            "دوربین مدار بسته"
+          ]
+        },
+        {
+          "shop_id": "shop_7f303b40d644255f02a0efcc",
+          "name": "پاکورا مانین",
+          "unit": null,
+          "plaque": "468/1",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 5,
+      "label": "طبقه 5",
+      "shops": [
+        {
+          "shop_id": "shop_3f5f535645741dc5e06f4bb2",
+          "name": "رامین آووان",
+          "unit": null,
+          "plaque": "576",
+          "offer_count": 25,
+          "categories": [
+            "تبلت",
+            "کیف و کاور تبلت",
+            "محافظ صفحه نمایش تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_f6368de6d9adf13eed16c626",
+          "name": "ویین آرنوش",
+          "unit": null,
+          "plaque": "557",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_1b46a314fb1f1f097bd5a2eb",
+          "name": "آوسا فریس",
+          "unit": null,
+          "plaque": "507",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_3f672fc04fd6fd56c498d797",
+          "name": "دیسانوش مهرانوش",
+          "unit": "567",
+          "plaque": null,
+          "offer_count": 62,
+          "categories": [
+            "ساعت و مچ بند هوشمند",
+            "پایه نگهدارنده گوشی و تبلت",
+            "خوشبو کننده خودرو"
+          ]
+        },
+        {
+          "shop_id": "shop_0e66bed6b89e576197afdf9f",
+          "name": "فروش سروانوش",
+          "unit": "538",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_ad13f7990c0de0d53bc37089",
+          "name": "فریار وییار",
+          "unit": null,
+          "plaque": "545",
+          "offer_count": 1,
+          "categories": [
+            "کابل و تبدیل Lightning"
+          ]
+        },
+        {
+          "shop_id": "shop_d7558b46bca548a151ff3f27",
+          "name": "نویرا نووش",
+          "unit": null,
+          "plaque": "516",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_a137bf160dfd55f277ca4f7c",
+          "name": "مانیسا رووان",
+          "unit": null,
+          "plaque": "512",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_c24ba812c682b7e92f260bfd",
+          "name": "ویوش مانوان",
+          "unit": null,
+          "plaque": "519",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_3e406b7b8a5b6d75f6a6de1c",
+          "name": "آرانوش آوانوش",
+          "unit": "583",
+          "plaque": null,
+          "offer_count": 50,
+          "categories": [
+            "کیف و کاور گوشی",
+            "گوشی موبایل",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_1b5b65108a3eb02fed750fca",
+          "name": "روانوش آریرا",
+          "unit": "512",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_2f7849e017d0ec76529a20c2",
+          "name": "فروان نیآرا",
+          "unit": null,
+          "plaque": "588",
+          "offer_count": 127,
+          "categories": [
+            "پایه نگهدارنده گوشی و تبلت",
+            "دانگل بلوتوث",
+            "هاب USB"
+          ]
+        },
+        {
+          "shop_id": "shop_da2d611873c5a5bea0092abd",
+          "name": "راموان ویسا",
+          "unit": null,
+          "plaque": "521",
+          "offer_count": 3,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_8a21e1e55705d0d28da1f588",
+          "name": "فرنوش روینا",
+          "unit": null,
+          "plaque": "566",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_74bed15b0d87315dbc956107",
+          "name": "مهرسا نیآرا",
+          "unit": "583",
+          "plaque": null,
+          "offer_count": 1,
+          "categories": [
+            "کیف و کاور لپ تاپ"
+          ]
+        },
+        {
+          "shop_id": "shop_abed8e1271bcad6cb4047c55",
+          "name": "آویسا نیان",
+          "unit": "557",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_bbebd1ed03452261dad95e14",
+          "name": "دیسآرا وییار",
+          "unit": "561",
+          "plaque": "561",
+          "offer_count": 1,
+          "categories": [
+            "پاوربانک و شارژر همراه"
+          ]
+        },
+        {
+          "shop_id": "shop_c9a2a5811535a30d4a56ba1b",
+          "name": "نویلا ویآرا",
+          "unit": "559",
+          "plaque": "559",
+          "offer_count": 5,
+          "categories": [
+            "کارت حافظه"
+          ]
+        },
+        {
+          "shop_id": "shop_e3be64327666d14a6661b9a2",
+          "name": "فرآرا نونوش",
+          "unit": "504",
+          "plaque": "504",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_335fd9a782166691e694ea82",
+          "name": "نییسا نیینا",
+          "unit": "536",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0ac37bd41cfc2229ac2c7153",
+          "name": "رامان ماهان",
+          "unit": null,
+          "plaque": "516",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_fcc82180c48ef5f0cc3360bd",
+          "name": "پاکان ماهدیس",
+          "unit": null,
+          "plaque": "522",
+          "offer_count": 2,
+          "categories": [
+            "کتاب‌خوان و کاغذ دیجیتال",
+            "تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_83db4094d7aa458941686f4a",
+          "name": "ماهوش سرووان",
+          "unit": null,
+          "plaque": "542",
+          "offer_count": 1,
+          "categories": [
+            "پایه نگهدارنده گوشی و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_872f00565325e164a1e09cb1",
+          "name": "آذریسا وینوش",
+          "unit": "501",
+          "plaque": "514",
+          "offer_count": 0,
+          "categories": [
+            "تلویزیون"
+          ]
+        },
+        {
+          "shop_id": "shop_82e4ace8a15febb27b6877e7",
+          "name": "دیسینا ماهیس",
+          "unit": "524",
+          "plaque": "524",
+          "offer_count": 0,
+          "categories": [
+            "لپ تاپ و نوت بوک",
+            "مانیتور",
+            "کامپیوتر دسکتاپ"
+          ]
+        },
+        {
+          "shop_id": "shop_a7de22cd5280f49393e1a32f",
+          "name": "مهرسا دیسیرا",
+          "unit": "566",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_9a4f53e29312c28550c04964",
+          "name": "مهرینا ماهیار",
+          "unit": "542",
+          "plaque": null,
+          "offer_count": 77,
+          "categories": [
+            "شارژر گوشی",
+            "هدفون، هدست و هندزفری",
+            "پنکه"
+          ]
+        },
+        {
+          "shop_id": "shop_ee66db7e6ec0955aea86fd20",
+          "name": "نیوش نووان",
+          "unit": "547",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 6,
+      "label": "طبقه 6",
+      "shops": [
+        {
+          "shop_id": "shop_539f4a371b4d8fcb9c38c717",
+          "name": "ویان وییلا",
+          "unit": "656",
+          "plaque": null,
+          "offer_count": 106,
+          "categories": [
+            "محافظ صفحه نمایش گوشی",
+            "گوشی موبایل",
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_e923082082e15f06ebbcd4ff",
+          "name": "مهریار مهرورا",
+          "unit": null,
+          "plaque": "657",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0fd82c059e0575e5e5bdc6ee",
+          "name": "آذریسا مهرورا",
+          "unit": null,
+          "plaque": "633",
+          "offer_count": 2,
+          "categories": [
+            "سیم کارت همراه اول",
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_be8cf3f84cbf37588609b392",
+          "name": "روانوش نیسا",
+          "unit": null,
+          "plaque": "666",
+          "offer_count": 14,
+          "categories": [
+            "گوشی موبایل",
+            "شارژر گوشی",
+            "تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_59233d30afa302e6d85c2725",
+          "name": "رامان نویلا",
+          "unit": null,
+          "plaque": "649",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_27f20bde8b90f1b398ecad4f",
+          "name": "روسا نیوان",
+          "unit": "631",
+          "plaque": null,
+          "offer_count": 27,
+          "categories": [
+            "اسپیکر و سیستم صوتی",
+            "گوشی موبایل",
+            "هدفون، هدست و هندزفری"
+          ]
+        },
+        {
+          "shop_id": "shop_5ae53d53a61c442cf7900129",
+          "name": "مهرانوش نیکآرا",
+          "unit": "683",
+          "plaque": null,
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_273d51d4a874a51a67fafe28",
+          "name": "دیسیسا آذروان",
+          "unit": "625",
+          "plaque": null,
+          "offer_count": 3,
+          "categories": [
+            "گوشی موبایل"
+          ]
+        },
+        {
+          "shop_id": "shop_0795262280dbebad8b2d4399",
+          "name": "فران آوان",
+          "unit": "11",
+          "plaque": "8",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_2efc36d014a4ef9cd706e0c5",
+          "name": "نیین رامآرا",
+          "unit": "642",
+          "plaque": "642",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_91703fc3e642c6f98cf078a7",
+          "name": "مانیرا سروانوش",
+          "unit": null,
+          "plaque": "661",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_f920c7b8171d2e586cd4939f",
+          "name": "نییس ماهوان",
+          "unit": "675",
+          "plaque": "675",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_f00b274ca67a1f71018e1f05",
+          "name": "فریلا ماهیس",
+          "unit": "646",
+          "plaque": null,
+          "offer_count": 2,
+          "categories": [
+            "باتری قلمی، سکه‌ای و کتابی"
+          ]
+        },
+        {
+          "shop_id": "shop_29fd53b5afcefd8b6c010f98",
+          "name": "نیکدیس ویین",
+          "unit": null,
+          "plaque": "613",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_b36baed63fcacb8c989a2e84",
+          "name": "مانیلا رامیس",
+          "unit": null,
+          "plaque": "664",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_28fea73ebb580e0f34224fe2",
+          "name": "رامنوش نیانوش",
+          "unit": "652",
+          "plaque": null,
+          "offer_count": 112,
+          "categories": [
+            "اسپیکر و سیستم صوتی",
+            "گوشی موبایل",
+            "تبلت"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": 7,
+      "label": "طبقه 7",
+      "shops": [
+        {
+          "shop_id": "shop_7c0aefc65fe6a1a8d6b470ee",
+          "name": "رامسا پاکین",
+          "unit": "707",
+          "plaque": "1",
+          "offer_count": 13,
+          "categories": [
+            "گوشی موبایل",
+            "باتری گوشی موبایل",
+            "تلفن رومیزی"
+          ]
+        }
+      ]
+    },
+    {
+      "floor": null,
+      "label": "طبقه نامشخص",
+      "shops": [
+        {
+          "shop_id": "shop_ca405314edf95ece0653d26b",
+          "name": "پاکورا مانوان",
+          "unit": null,
+          "plaque": "9",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_a5c36ca397d84fc1c1cbd085",
+          "name": "رامیلا وییرا",
+          "unit": null,
+          "plaque": "35",
+          "offer_count": 302,
+          "categories": [
+            "ابزار جراحی",
+            "سایر تجهیزات پزشکی",
+            "فشارسنج پزشکی"
+          ]
+        },
+        {
+          "shop_id": "shop_d4b7098382f4a0552c80e36b",
+          "name": "رامنوش نویلا",
+          "unit": null,
+          "plaque": "140",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_0cee29df7743d11e7e1df400",
+          "name": "نوورا پاکنوش",
+          "unit": null,
+          "plaque": "226",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_3407fbec64fefe8497870da6",
+          "name": "فرسا ویان",
+          "unit": null,
+          "plaque": "39",
+          "offer_count": 22,
+          "categories": [
+            "مرطوب‌کننده و آبرسان",
+            "ترمیم کننده و ضد التهاب",
+            "هدبند"
+          ]
+        },
+        {
+          "shop_id": "shop_018837f160738d9d1308c78b",
+          "name": "فریلا نویسا",
+          "unit": null,
+          "plaque": "676",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_4f819aed5f5c1247dfca1cb1",
+          "name": "نوآرا پاکین",
+          "unit": null,
+          "plaque": "24",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_17512df6ecd6b8f38faefe35",
+          "name": "آوآرا فرنوش",
+          "unit": null,
+          "plaque": "20",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_45f257bfd1688ba89b2c64c5",
+          "name": "نیکورا ویسا",
+          "unit": null,
+          "plaque": "569",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_3723cc9d37b89362b3635c3e",
+          "name": "رامین روآرا",
+          "unit": null,
+          "plaque": "340",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_2da28905bfa1e5d5319d7fb3",
+          "name": "سرویس ماهسا",
+          "unit": null,
+          "plaque": "923",
+          "offer_count": 67,
+          "categories": [
+            "سایر قفل درب",
+            "سایر تجهیزات جانبی برق صنعتی",
+            "نوار درب، صندوق و کاپوت خودرو"
+          ]
+        },
+        {
+          "shop_id": "shop_82243504d8e596222320b430",
+          "name": "آذروش سرودیس",
+          "unit": null,
+          "plaque": "238",
+          "offer_count": 150,
+          "categories": [
+            "هدفون، هدست و هندزفری",
+            "ساعت و مچ بند هوشمند",
+            "پاوربانک و شارژر همراه"
+          ]
+        },
+        {
+          "shop_id": "shop_f91958a5d3cb3be3118932f5",
+          "name": "مهرینا نیان",
+          "unit": null,
+          "plaque": "65",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_52909b6c35460d0ca0299c6e",
+          "name": "نیکنوش سروان",
+          "unit": null,
+          "plaque": "232",
+          "offer_count": 205,
+          "categories": [
+            "گوشی موبایل",
+            "قاب، شاسی و درب گوشی",
+            "قلم لمسی"
+          ]
+        },
+        {
+          "shop_id": "shop_1d3b2124ff8d11469bd26d40",
+          "name": "فریار مهرینا",
+          "unit": null,
+          "plaque": "232",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_3d4c9669b631dbf98718883f",
+          "name": "مانانوش ماهیس",
+          "unit": null,
+          "plaque": "533",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_d70892acb9e655ad692fd4b9",
+          "name": "رامانوش روآرا",
+          "unit": "356",
+          "plaque": null,
+          "offer_count": 1,
+          "categories": [
+            "کیف و کاور گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_ed812ae91d2f362c31627ca5",
+          "name": "مهریرا سروین",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 4,
+          "categories": [
+            "کراتین و بوتاکس مو",
+            "شامپو و نرم کننده",
+            "پودر دکلره"
+          ]
+        },
+        {
+          "shop_id": "shop_d0aa03bd346ed295cc241131",
+          "name": "سروان رامیلا",
+          "unit": null,
+          "plaque": "116",
+          "offer_count": 252,
+          "categories": [
+            "ماسک پوستی",
+            "کوکتل و مواد ویتامینه",
+            "مرطوب‌کننده و آبرسان"
+          ]
+        },
+        {
+          "shop_id": "shop_98058a44a3039babd699ef25",
+          "name": "رامان دیسیلا",
+          "unit": null,
+          "plaque": "47",
+          "offer_count": 386,
+          "categories": [
+            "کیف و کاور گوشی",
+            "محافظ صفحه نمایش گوشی",
+            "محافظ لنز دوربین گوشی"
+          ]
+        },
+        {
+          "shop_id": "shop_616e0712311399cb23dc06ea",
+          "name": "ماهین مانآرا",
+          "unit": null,
+          "plaque": "246",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d8ae1c6e19358638487a6003",
+          "name": "سروینا ماهسا",
+          "unit": "206",
+          "plaque": "206",
+          "offer_count": 2,
+          "categories": [
+            "شمش نقره"
+          ]
+        },
+        {
+          "shop_id": "shop_1747bc583444b5fdda461a5a",
+          "name": "نیوان نویلا",
+          "unit": "206",
+          "plaque": "206",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_0b310a4edb28d4e4a40b6d3a",
+          "name": "پاکورا مهریلا",
+          "unit": null,
+          "plaque": "35",
+          "offer_count": 0,
+          "categories": [
+            "گوشی موبایل",
+            "لوازم جانبی موبایل و تبلت"
+          ]
+        },
+        {
+          "shop_id": "shop_139ecb52d2a0fa7334361936",
+          "name": "سرویسا سرودیس",
+          "unit": null,
+          "plaque": "222",
+          "offer_count": 2,
+          "categories": [
+            "سیم کارت همراه اول"
+          ]
+        },
+        {
+          "shop_id": "shop_d775d0d12b42ea91770f699c",
+          "name": "پاکیلا فریار",
+          "unit": null,
+          "plaque": null,
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d11169517b6578b6181f81c0",
+          "name": "آویلا نوانوش",
+          "unit": null,
+          "plaque": "43",
+          "offer_count": 23,
+          "categories": [
+            "تجهیزات جانبی فیلمبرداری",
+            "گیمبال و استابلایزر دوربین",
+            "ضبط‌کننده صدا"
+          ]
+        },
+        {
+          "shop_id": "shop_49b5f1525fe99e871c1cb7c3",
+          "name": "فروان ماهیسا",
+          "unit": null,
+          "plaque": "361",
+          "offer_count": 0,
+          "categories": []
+        },
+        {
+          "shop_id": "shop_d38ad1922f7f0a083bcb47f9",
+          "name": "دیسدیس مانانوش",
+          "unit": null,
+          "plaque": "63",
+          "offer_count": 10,
+          "categories": [
+            "گوشی موبایل",
+            "ساعت و مچ بند هوشمند"
+          ]
+        }
+      ]
+    }
+  ]
+}

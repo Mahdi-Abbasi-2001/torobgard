@@ -1,0 +1,39 @@
+{
+  "shop_id": "shop_51d0c1a6edf81ba759726bab",
+  "name": "موبایل تخت جمشید",
+  "name_is_verified": true,
+  "address": "خیابان جمهوری، نرسیده به پل حافظ، نبش کوچه کلانتری، پاساژ خانه موبایل، طبقه چهارم، پلاک 412",
+  "area": "شیخ هادی",
+  "lat": 35.695329620242966,
+  "lon": 51.410700800954594,
+  "mall": "پاساژ خانه موبایل",
+  "mall_key": "خانه موبایل",
+  "floor": 4,
+  "floor_label": "طبقه 4",
+  "unit": null,
+  "plaque": "412",
+  "distance_km": 0.21,
+  "walk_min": 3,
+  "open": {
+    "state": "unknown",
+    "label": "ساعت کاری ثبت نشده",
+    "closes_at": null,
+    "opens_at": null,
+    "quality": "missing"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": null,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": "https://takhtjamshidmobile.com/",
+  "phone_is_placeholder": true,
+  "phone": "۰۲۱۷۶۵۵۷۶۲۴",
+  "categories": [
+    "گوشی موبایل",
+    "لوازم جانبی موبایل و تبلت"
+  ],
+  "weekly_hours": null,
+  "offer_count": 0,
+  "offers": []
+}

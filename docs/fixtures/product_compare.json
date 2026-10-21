@@ -1,0 +1,352 @@
+{
+  "products": [
+    {
+      "product_id": "product_24e20485148d72cb2f46305d",
+      "title": "هندزفری گردنی انکر مدل Life U2i",
+      "brand": "انکر",
+      "category": "هدفون، هدست و هندزفری",
+      "image": "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg",
+      "price_min": 2490000,
+      "price_median": 3589000,
+      "price_max": 4750000,
+      "shop_count": 19,
+      "offer_count": 19,
+      "images": [
+        "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg",
+        "https://image.torob.com/base/images/Kd/SI/KdSI0WNwIs4y-V1k.jpg"
+      ],
+      "model": null
+    },
+    {
+      "product_id": "product_8d6ee2141b8d6e09e5fb8e0f",
+      "title": "هندزفری بلوتوثی شیائومی هایلو مدل Mori Plus",
+      "brand": "شیائومی",
+      "category": "هدفون، هدست و هندزفری",
+      "image": "https://image.torob.com/base/images/Qf/8i/Qf8iQfEOT8KFUhgE.jpg",
+      "price_min": 3335000,
+      "price_median": 3899000,
+      "price_max": 5625000,
+      "shop_count": 9,
+      "offer_count": 9,
+      "images": [
+        "https://image.torob.com/base/images/Qf/8i/Qf8iQfEOT8KFUhgE.jpg",
+        "https://image.torob.com/base/images/-5/TY/-5TYQnmxi8TjC_cA.jpg"
+      ],
+      "model": null
+    }
+  ],
+  "rows": [
+    {
+      "key": "ابعاد",
+      "values": [
+        "32 × 124 × 166 میلی‌ متر",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "اقلام همراه",
+      "values": [
+        "کابل USB-C, سری گوشی اضافه S/M/L",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "اقلام همراه هدفون، هندزفری و هدست",
+      "values": [
+        null,
+        "بدون اقلام همراه"
+      ],
+      "differs": true
+    },
+    {
+      "key": "امپدانس",
+      "values": [
+        "۱۶ اهم",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "درگاه شارژ",
+      "values": [
+        null,
+        "USB Type-C"
+      ],
+      "differs": true
+    },
+    {
+      "key": "درگاه‌های ارتباطی",
+      "values": [
+        "USB Type-C",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "رابط‌ها",
+      "values": [
+        null,
+        "بلوتوث , USB Type-C"
+      ],
+      "differs": true
+    },
+    {
+      "key": "رنگ",
+      "values": [
+        null,
+        "سفید"
+      ],
+      "differs": true
+    },
+    {
+      "key": "زمان مورد نیاز برای شارژ محفظه",
+      "values": [
+        null,
+        "حدود 2 ساعت"
+      ],
+      "differs": true
+    },
+    {
+      "key": "زمان موردنیاز برای شارژ هدفون",
+      "values": [
+        null,
+        "حدود 1.5 ساعت"
+      ],
+      "differs": true
+    },
+    {
+      "key": "سایر مشخصات",
+      "values": [
+        "ایربادهای مغناطیسی, طراحی ارگونومیک و راحت, خاصیت Dual-EQ, بهینه‌سازی تماس با هوش مصنوعی",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "ظرفیت باتری",
+      "values": [
+        null,
+        "35 میلی‌آمپر‌ساعت"
+      ],
+      "differs": true
+    },
+    {
+      "key": "ظرفیت باتری محفظه شارژ",
+      "values": [
+        null,
+        "400 میلی‌آمپر‌ساعت"
+      ],
+      "differs": true
+    },
+    {
+      "key": "عمر باتری هدفون در حالت استندبای",
+      "values": [
+        "22 ساعت",
+        "تا 35 ساعت"
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت حذف صدای مزاحم (Noise Cancelling)",
+      "values": [
+        "دارد",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت مکالمه",
+      "values": [
+        "دارد",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت نویز کنسلینگ",
+      "values": [
+        null,
+        "نویز کنسلینگ فعال (ANC)"
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت های مقاومتی",
+      "values": [
+        "مقاوم در برابر آب",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت‌های شارژ",
+      "values": [
+        null,
+        "شارژ باسیم"
+      ],
+      "differs": true
+    },
+    {
+      "key": "قابلیت‌های مقاومتی",
+      "values": [
+        null,
+        "مقاوم در برابر رطوبت و عرق"
+      ],
+      "differs": true
+    },
+    {
+      "key": "قطر درایور",
+      "values": [
+        "۲ درایور ۱۰ میلی‌متری",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "محدوده فرکانسی",
+      "values": [
+        "۲۰-۲۰۰۰۰ هرتز",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "مدت زمان شارژ گوشی ها",
+      "values": [
+        "2 ساعت",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "مشخصات باتری",
+      "values": [
+        null,
+        "لیتیوم یون"
+      ],
+      "differs": true
+    },
+    {
+      "key": "مشخصات میکروفون",
+      "values": [
+        null,
+        "دارای فناوری Anti-wind Noise جهت حذف صدای باد / دارای 3 میکروفون در هر گوشی"
+      ],
+      "differs": true
+    },
+    {
+      "key": "مناسب برای",
+      "values": [
+        "مکالمه، ورزش، موسیقی",
+        "کاربری عمومی"
+      ],
+      "differs": true
+    },
+    {
+      "key": "منبع انرژی",
+      "values": [
+        null,
+        "باتری قابل شارژ"
+      ],
+      "differs": true
+    },
+    {
+      "key": "نسخه بلوتوث",
+      "values": [
+        "۵.۰",
+        "6"
+      ],
+      "differs": true
+    },
+    {
+      "key": "نشانگر LED",
+      "values": [
+        "nhvn",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع اتصال",
+      "values": [
+        "بی سیم",
+        "بی‌سیم"
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع باتری",
+      "values": [
+        "لیتیوم پلیمری",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع طراحی",
+      "values": [
+        "طراحی ارگونومیک",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع هدفون",
+      "values": [
+        "تو گوشی - Earbud/Earphone",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع هدفون، هدست و هندزفری",
+      "values": [
+        null,
+        "تو گوشی (Earbud/Earphone)"
+      ],
+      "differs": true
+    },
+    {
+      "key": "نوع کاربری",
+      "values": [
+        "عمومی",
+        null
+      ],
+      "differs": true
+    },
+    {
+      "key": "وزن",
+      "values": [
+        "۱۰۰ گرم",
+        "37 گرم"
+      ],
+      "differs": true
+    },
+    {
+      "key": "ویژگی‌های خاص",
+      "values": [
+        "Noise Cancelling Headphone",
+        "پشتیبانی از فرمان لمسی"
+      ],
+      "differs": true
+    },
+    {
+      "key": "محدوده عملکرد",
+      "values": [
+        "10 متر",
+        "10 متر"
+      ],
+      "differs": false
+    },
+    {
+      "key": "نوع گوشی",
+      "values": [
+        "دو گوشی",
+        "دو گوشی"
+      ],
+      "differs": false
+    }
+  ]
+}

@@ -1,0 +1,480 @@
+{
+  "shop_id": "shop_3f93a30a9e66c6dece07cdff",
+  "name": "فرورا رویس",
+  "name_is_verified": false,
+  "address": "خیابان جمهوری، نبش شیخ هادی، پاساژ علالدین 2، طبقه 6، واحد 622",
+  "area": "شیخ هادی",
+  "lat": 35.694991526310005,
+  "lon": 51.407137248405895,
+  "mall": "پاساژ علالدین 2",
+  "mall_key": "علالدین 2",
+  "floor": 6,
+  "floor_label": "طبقه 6",
+  "unit": "622",
+  "plaque": null,
+  "distance_km": 0.53,
+  "walk_min": 7,
+  "open": {
+    "state": "closing_soon",
+    "label": "باز است · 18 دقیقه تا بسته شدن (19:00)",
+    "closes_at": "19:00",
+    "opens_at": null,
+    "quality": "ok"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": null,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۲۱۲۶۴۶۷۱۸۰",
+  "categories": [
+    "دوربین مدار بسته",
+    "ضبط کننده ویدیویی دوربین‌های نظارتی و امنیتی",
+    "دوربین خودرو و موتور سیکلت",
+    "دوربین و مانیتور کنترل کودک",
+    "دوربین امنیتی خورشیدی",
+    "دوربین مخفی",
+    "هارد دیسک اینترنال",
+    "آداپتور برق",
+    "پکیج سیستم‌های نظارتی و امنیتی",
+    "تجهیزات فیبر نوری",
+    "دزدگیر اماکن و لوازم جانبی",
+    "منبع تغذیه UPS",
+    "جارو رباتیک",
+    "چشمی درب",
+    "آینه مانیتور دار خودرو",
+    "دوربین آندوسکوپی",
+    "لوازم جانبی سیستم‌های نظارتی و امنیتی",
+    "سایر سیم کارت ها و خطوط تلفن"
+  ],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "14:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 87,
+  "offers": [
+    {
+      "offer_id": "offer_5f2f5e9137b8ebfbcf6723e6",
+      "product_id": "product_54f1fa90dd702652d49217cc",
+      "seller_title": "هارددیسک اینترنال وسترن دیجیتال ظرفیت 2 ترابایت",
+      "title": "حافظه اچ دی دی اینترنال وسترن دیجیتال مدل بنفش ظرفیت 2 ترابایت گارانتی شرکتی",
+      "price": 25000000,
+      "changed_at": "2026-10-12T10:13:34.613883+00:00",
+      "age_days": 9,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_e5cfe9acd41acf47735ac1fa",
+      "product_id": "product_c70167f958dabb59850140ff",
+      "seller_title": "هارددیسک اینترنال وسترن دیجیتال ظرفیت 1 ترابایت",
+      "title": "هارد دیسک اینترنال وسترن دیجیتال مدل WD10PURZ ظرفیت ۱ ترابایت",
+      "price": 13600000,
+      "changed_at": "2026-10-12T10:12:33.275978+00:00",
+      "age_days": 9,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_59d21f0d4d3aa06fb67dfc7f",
+      "product_id": "product_70adf970d662240ffb610610",
+      "seller_title": "هارددیسک اینترنال وسترن دیجیتال ظرفیت 4 ترابایت",
+      "title": "هارددیسک اینترنال وسترن دیجیتال مدل Purple WD40PURZ ظرفیت 4 ترابایت",
+      "price": 39000000,
+      "changed_at": "2026-10-12T10:11:10.551275+00:00",
+      "age_days": 9,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_2327236b6caba97aff4ebb21",
+      "product_id": "product_344957fa3ffa02dd8f61ab14",
+      "seller_title": "آداپتور 30 آمپر 12 ولت",
+      "title": "آداپتور 30 آمپر 12 ولت",
+      "price": 2580000,
+      "changed_at": "2026-10-12T09:37:50.853401+00:00",
+      "age_days": 9,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a760b0f9495503e8299d334a",
+      "product_id": "product_1debfa3077b69f91980cba64",
+      "seller_title": "آداپتور 12 ولت 10 آمپر",
+      "title": "منبع تغذیه 12 ولت 10 آمپر ادیسون مدل S-120-12",
+      "price": 1650000,
+      "changed_at": "2026-10-12T09:36:58.483465+00:00",
+      "age_days": 9,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_128d4c1a5ad1a82a74238461",
+      "product_id": "product_9cfb922df0cdf38c83fd6a8b",
+      "seller_title": "دوربین مینی اسپید دام 3 مگاپیکسل v380",
+      "title": "دوربین مینی اسپید دام 3 مگاپیکسل v380",
+      "price": 5850000,
+      "changed_at": "2026-10-11T10:29:41.301634+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_4dcfefd334d9d1781e798517",
+      "product_id": "product_29f4038fbdbd59ece2dff0e6",
+      "seller_title": "دوربین اسپید دام دو لنز 4K خورشیدی سیم کارتی V380 مدل DA808",
+      "title": "دوربین اسپید دام دو لنز 4K خورشیدی سیمکارتی V380 مدل DA808",
+      "price": 11950000,
+      "changed_at": "2026-10-11T10:27:26.345550+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_755c5e231574a359f8a799cf",
+      "product_id": "product_f8b930e45f1f7cc7408bef44",
+      "seller_title": "دوربین مداربسته اسپیددام سیم کارتی دو لنزه سولار خورشیدی O-KAM Pro",
+      "title": "دوربین مداربسته اسپیددام سیم کارتی دو لنزه سولار خورشیدی O-KAM Pro",
+      "price": 12900000,
+      "changed_at": "2026-10-11T10:26:01.479747+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_869248c2b11d65fe978dc851",
+      "product_id": "product_472d8b4918eca5a213f80336",
+      "seller_title": "دوربین لامپی مدار بسته بیسیم چرخشی 3 مگاپیکسل",
+      "title": "دوربین لامپی مدار بسته بیسیم چرخشی 3 مگاپیکسل",
+      "price": 2800000,
+      "changed_at": "2026-10-11T10:24:13.327770+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_9c7a7891936c09aa4bd2c2e1",
+      "product_id": "product_53e7cd009ea7f7f9f175712a",
+      "seller_title": "دوربین اسپیددام 2 لنز وای فای تحت شبکه 8 مگاپیکسل v380",
+      "title": "دوربین اسپیددام 2 لنز وای فای تحت شبکه 8 مگاپیکسل v380",
+      "price": 9150000,
+      "changed_at": "2026-10-11T10:22:39.619480+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_b80202c65ba9c70c1d4558df",
+      "product_id": "product_c6798999595ce9bbf7b347e2",
+      "seller_title": "دوربین بی‌بی کم دو لنز O Kam pro",
+      "title": "دوربین بی‌بی کم دو لنز O Kam pro",
+      "price": 5980000,
+      "changed_at": "2026-10-11T10:12:23.110099+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_ed29616a7b9286d0e5b25d4d",
+      "product_id": "product_23164c25ae29ce82144745dd",
+      "seller_title": "دوربین ثبت وقایع موتورسیکلت 2 لنزه وای فای دار و مانیتور لمسی مدل M772",
+      "title": "دوربین ثبت وقایع موتورسیکلت 2 لنزه وای فای دار و مانیتور لمسی مدل M772",
+      "price": 54500000,
+      "changed_at": "2026-10-11T10:11:15.081508+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_85e211e27db1ae47d9b3c7b3",
+      "product_id": "product_2a8e651af389a8645d4ebe56",
+      "seller_title": "دستگاه فیوژن فیبر نوری AI9+ضمانت شش ماهه",
+      "title": "دستگاه فیوژن سیگنال فایر مدل AI9",
+      "price": 245000000,
+      "changed_at": "2026-10-11T10:10:08.330551+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_0b7e32200954f31595b10a4e",
+      "product_id": "product_b32450b4134e50cd098d5b73",
+      "seller_title": "دوربین سولار خورشیدی اسپیددام دو لنز سه تصویر",
+      "title": "دوربین سولار خورشیدی اسپیددام دو لنز سه تصویر",
+      "price": 11350000,
+      "changed_at": "2026-10-11T10:07:18.596186+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_ff5c7e29f6a3cfa7db615ed8",
+      "product_id": "product_eabebf250f01008f4a43ee6c",
+      "seller_title": "دوربین محافظ کودک و سالمند 8 مگاپیکسل 3 تصویر بیبیکم مدل Z32",
+      "title": "دوربین بی بی کم دو لنز سیم کارتی مدل V380 Pro",
+      "price": 7900000,
+      "changed_at": "2026-10-11T10:06:42.395273+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_1c18d75123db1c3b8e90be56",
+      "product_id": "product_71e907a42a6f7a12854183f7",
+      "seller_title": "دوربین پرستار کودک سیمکارتی اوکم پرو 4G 8MP Z6 camera",
+      "title": "دوربین بی بی کم وای فای دو لنز مدل z6",
+      "price": 7650000,
+      "changed_at": "2026-10-11T10:05:38.539223+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f424eea7d070b41bd2561c7e",
+      "product_id": "product_6bb803cf9b0d58f061d3c140",
+      "seller_title": "دوربین پرستار کودک سیمکارتی اوکم پرو 3MP Z7 camera 4G",
+      "title": "دوربین پرستار کودک سیمکارتی اوکم پرو 3MP Z7 camera 4G",
+      "price": 6550000,
+      "changed_at": "2026-10-11T10:05:09.019391+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_d0ef6f344f51c2a6a3af9488",
+      "product_id": "product_0f0e17cb704e6cc4637938c3",
+      "seller_title": "دوربین 3 لنز 4G اوکم پرو مدل l3",
+      "title": "دوربین مداربسته سیمکارتی L3 ۱۲ مگاپیکسل دید در شب رنگی",
+      "price": 13500000,
+      "changed_at": "2026-10-11T10:04:36.741570+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_3b39878d69fb9cb0fc8304f9",
+      "product_id": "product_fb17d2d3ba5dee148362b3e7",
+      "seller_title": "جاروبرقی هوشمند تویا اسمارت (TUYA SMART) مدل M8 با قابلیت شستشوی سطوح مرطوب و خشک(Robot Vacuum Cleaner)",
+      "title": "جاروبرقی هوشمند تویا اسمارت (TUYA SMART) مدل M8 با قابلیت شستشوی سطوح مرطوب و خشک(Robot Vacuum Cleaner)",
+      "price": 56000000,
+      "changed_at": "2026-10-11T09:56:38.364302+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f6fb3e947a3b33acdc36ad14",
+      "product_id": "product_5328699516bafac13072b1da",
+      "seller_title": "دوربین اسپیدام ۴ لنز سیم کارت خور Hi Easy سرور ایرانی",
+      "title": "دوربین اسپیدام ۴ لنز سیم کارت خور Hi Easy سرور ایرانی",
+      "price": 16000000,
+      "changed_at": "2026-10-11T09:50:44.944809+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_229223af749faff72b24b963",
+      "product_id": "product_d73db926a00f0313434cb5c0",
+      "seller_title": "دوربین بولت آنالوگ ۲ مگاپیکسل برایتون مدل UVC-211B19M-C",
+      "title": "دوربین مداربسته بولت برایتون مدل UVC-211B19M-C کیفیت ۲ مگاپیکسل",
+      "price": 4280000,
+      "changed_at": "2026-10-11T09:47:26.982173+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_0beb7486d62e714cf1afa4a7",
+      "product_id": "product_762fe4fcbedefa07afc8f733",
+      "seller_title": "دوربین اسپیددام سه لنز سیم کارتی",
+      "title": "دوربین اسپیددام سه لنز سیم کارتی",
+      "price": 13250000,
+      "changed_at": "2026-10-11T09:46:22.315414+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_89e9ac75a55a99c38b6e4a48",
+      "product_id": "product_51f6383e6cd2bbb0d0a3aea8",
+      "seller_title": "دوربین بولت آنالوگ ۲ مگاپیکسل برایتون مدل UVC-211B19P-C",
+      "title": "دوربین مداربسته بولت برایتون مدل UVC-211B19P-C کیفیت ۲ مگاپیکسل",
+      "price": 3950000,
+      "changed_at": "2026-10-11T09:42:30.156675+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_e7281d60005fad4d2fcd2019",
+      "product_id": "product_4ef397a0e5b82eac509faafa",
+      "seller_title": "دوربین بولت آنالوگ ۲ مگاپیکسل برایتون مدل UVC-222B49M-MC",
+      "title": "دوربین مداربسته بولت برایتون مدل UVC222B49M2 کیفیت ۲ مگاپیکسل",
+      "price": 5980000,
+      "changed_at": "2026-10-11T09:36:59.267940+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_124ac6baf0a264205edacf7b",
+      "product_id": "product_ab23e5e52f9bb717576c6185",
+      "seller_title": "دوربین وای فای ۴ مگاپیکسل برایتون مدل IOT-74P8M",
+      "title": "دوربین وای فای برایتون مدل IOT-74P8M ۴ مگاپیکسل",
+      "price": 10580000,
+      "changed_at": "2026-10-11T09:24:05.744352+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_da3d2ef5384c2750b234c13f",
+      "product_id": "product_bc0e0edca459ac4e873438ef",
+      "seller_title": "دوربین وای فای ۵ مگاپیکسل برایتون مدل IOT-65P12M-TMSU",
+      "title": "دوربین مداربسته برایتون مدل IOT-65P12M-TMSU کیفیت ۵ مگاپیکسل با دید در شب",
+      "price": 12500000,
+      "changed_at": "2026-10-11T09:22:45.902552+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a0ea8f4760dd25dbe86016e3",
+      "product_id": "product_e870c0668e39e9e17e1f7c9c",
+      "seller_title": "دوربین بولت وای فای ۲ مگاپیکسل برایتون مدل IOT-72B72-TMSC",
+      "title": "دوربین مداربسته بالت برایتون مدل IOT-72B72-TMSC کیفیت ۲ مگابیکسل",
+      "price": 11480000,
+      "changed_at": "2026-10-11T09:16:12.291457+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f6e0cff9297873b7449e2b22",
+      "product_id": "product_ff5d5a471acdcc865c847df1",
+      "seller_title": "دوربین بولت آنالوگ ۵ مگاپیکسل برایتون مدل UVC-522B59M-M",
+      "title": "UVC-522B59M-M",
+      "price": 7560000,
+      "changed_at": "2026-10-11T09:00:03.196283+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_c8e456aaa851a4542c908c7c",
+      "product_id": "product_4f7d401307f114074a480409",
+      "seller_title": "دوربین مداربسته آنالوگ برایتون مدل UVC-511B19M-MC",
+      "title": "دوربین مداربسته برایتون مدل UVC-511B19M-MC کیفیت ۵ مگاپیکسل بولت",
+      "price": 6780000,
+      "changed_at": "2026-10-11T08:58:43.824257+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_92ed80ddfd6d07627fc54cda",
+      "product_id": "product_9feba6788e8702c3ad274c3a",
+      "seller_title": "دوربین بولت آنالوگ ۵ مگاپیکسل برایتون مدل UVC-532B59R-MC",
+      "title": "دوربین مداربسته برایتون مدل UVC-532B59R ظرفیت ۵ مگاپیکسل",
+      "price": 7700000,
+      "changed_at": "2026-10-11T08:57:13.276586+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    }
+  ]
+}

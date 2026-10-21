@@ -1,0 +1,986 @@
+<title>همراه خرید Screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300..900&display=swap">
+<style>
+/* Layout: a design canvas. Each screen is a row of 375px phone artboards (scrolls sideways inside its own track);
+   annotations in English for the team, phones in Persian RTL. Lapis accent; status colours are reserved for meaning. */
+/* Torob family (ترب = radish): radish red + white cards on pale slate; red for actions/selection, blue for info/explanations,
+   danger is a darker brick red always paired with an alert icon. Status colours keep meaning. */
+:root{
+  --canvas:#E2E8F0; --paper:#F1F5F9; --card:#FFFFFF; --sunk:#E9EEF5;
+  --ink:#1E293B; --ink-2:#475569; --ink-3:#64748B; --line:#E2E8F0; --line-2:#CBD5E1;
+  --accent:#D73948; --accent-ink:#B0283A; --accent-soft:#FDECEE; --on-accent:#FFFFFF;
+  --accent-grad:linear-gradient(90deg,#C42E3F,#E04A5A);
+  --brand:#D73948; --brand-soft:#FCE9EB; --on-brand:#FFFFFF; --leaf:#3F9A4A;
+  --info:#2563EB; --info-ink:#1D4ED8; --info-soft:#EAF1FE;
+  --ok:#15803D; --ok-soft:#E3F5E8; --warn:#A95E00; --warn-soft:#FEF1D9; --bad:#9A1B1B; --bad-soft:#FBEAE4;
+  --unk:#7A8699; --unk-soft:#EEF2F6;
+  --device:#0F172A; --shadow:0 1px 2px rgba(15,23,42,.06),0 12px 32px rgba(15,23,42,.10);
+  --map-bg:#EEF2EC; --map-road:#FFFFFF; --map-block:#E2E8DF; --map-major:#F8E7B5;
+  --f-body:"Vazirmatn",Tahoma,"Segoe UI",system-ui,sans-serif;
+  --f-display:"Vazirmatn",Tahoma,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --canvas:#111720; --paper:#1A212C; --card:#232B38; --sunk:#1E2631;
+  --ink:#E5E9F0; --ink-2:#AEB8C7; --ink-3:#8592A6; --line:#2E3746; --line-2:#3C4757;
+  --accent:#F0606E; --accent-ink:#FF9AA4; --accent-soft:#3A1F27; --on-accent:#FFFFFF;
+  --accent-grad:linear-gradient(90deg,#C42E3F,#E04A5A);
+  --brand:#E5505E; --brand-soft:#3D1E24; --on-brand:#FFFFFF; --leaf:#5DBB68;
+  --info:#6EA0FA; --info-ink:#A3C3FF; --info-soft:#1E2E4E;
+  --ok:#4ACB85; --ok-soft:#14301F; --warn:#F1B44E; --warn-soft:#352812; --bad:#FF8F6E; --bad-soft:#3B1E16;
+  --unk:#8A96A9; --unk-soft:#212A36;
+  --device:#000000; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  --map-bg:#1B2330; --map-road:#2E3848; --map-block:#222B38; --map-major:#4A4228;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --canvas:#111720; --paper:#1A212C; --card:#232B38; --sunk:#1E2631;
+  --ink:#E5E9F0; --ink-2:#AEB8C7; --ink-3:#8592A6; --line:#2E3746; --line-2:#3C4757;
+  --accent:#F0606E; --accent-ink:#FF9AA4; --accent-soft:#3A1F27; --on-accent:#FFFFFF;
+  --accent-grad:linear-gradient(90deg,#C42E3F,#E04A5A);
+  --brand:#E5505E; --brand-soft:#3D1E24; --on-brand:#FFFFFF; --leaf:#5DBB68;
+  --info:#6EA0FA; --info-ink:#A3C3FF; --info-soft:#1E2E4E;
+  --ok:#4ACB85; --ok-soft:#14301F; --warn:#F1B44E; --warn-soft:#352812; --bad:#FF8F6E; --bad-soft:#3B1E16;
+  --unk:#8A96A9; --unk-soft:#212A36;
+  --device:#000000; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.45);
+  --map-bg:#1B2330; --map-road:#2E3848; --map-block:#222B38; --map-major:#4A4228;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.6;margin:0}
+bdi{unicode-bidi:isolate}
+.wrap{padding-inline:24px;padding-block:28px 80px;max-width:1680px;margin-inline:auto}
+@media (max-width:600px){.wrap{padding-inline:16px}}
+/* ---------- canvas chrome ---------- */
+.mast{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding-block-end:20px;border-bottom:1px solid var(--line)}
+@media (max-width:800px){.mast{grid-template-columns:1fr}}
+.mast h1{font-family:var(--f-display);font-weight:900;font-size:40px;line-height:1.1;margin:0;letter-spacing:0}
+.mast h1 small{display:block;font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--ink-2);margin-top:8px;letter-spacing:0}
+.mast p{margin:10px 0 0;color:var(--ink-2);max-width:68ch}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.toc a{font-size:12.5px;color:var(--ink-2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--accent);color:var(--accent-ink);outline:none}
+.toc a b{color:var(--accent-ink);font-weight:700;margin-inline-end:4px}
+.themes{display:flex;gap:4px;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--card)}
+.themes button{font:inherit;font-size:12.5px;border:0;background:none;color:var(--ink-2);padding:5px 10px;border-radius:7px;cursor:pointer}
+.themes button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.sec{padding-block:40px 8px;border-bottom:1px solid var(--line)}
+.sec-h{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;align-items:baseline;max-width:980px}
+.sec-n{font-family:var(--f-display);font-weight:900;font-size:30px;color:var(--brand);line-height:1;grid-row:span 2}
+.sec-h h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.sec-h p{margin:0;color:var(--ink-2);max-width:78ch}
+.sec-h .src{font-size:12px;color:var(--ink-3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.core{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border-radius:4px;padding:1px 6px;margin-inline-start:8px;vertical-align:3px}
+.track{display:flex;gap:28px;overflow-x:auto;padding-block:24px 28px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.art{margin:0;flex:0 0 auto;scroll-snap-align:start;display:flex;flex-direction:column;gap:10px;width:375px;max-width:calc(100vw - 32px)}
+.art figcaption{font-size:13px;color:var(--ink-2);line-height:1.5;min-height:40px}
+.art figcaption b{color:var(--ink);font-weight:650;display:block}
+.replay{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);border:0;border-radius:8px;padding:5px 10px;cursor:pointer;margin-top:4px}
+.replay:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* ---------- device ---------- */
+.device{width:375px;height:780px;border-radius:44px;background:var(--device);padding:9px;box-shadow:var(--shadow);max-width:100%}
+.screen{position:relative;height:100%;border-radius:36px;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;
+  font-family:var(--f-body);font-size:15px;line-height:1.7;color:var(--ink);direction:rtl;text-align:start;font-feature-settings:"ss01"}
+.sbar{height:38px;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding-inline:28px;font-size:13px;font-weight:650;direction:ltr}
+.sbar .r{display:flex;gap:5px;align-items:center}
+.sbar i{display:inline-block;background:currentColor;border-radius:1px}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;position:relative}
+.content::-webkit-scrollbar{display:none}
+/* ---------- app primitives ---------- */
+.pad{padding-inline:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:8px}
+.wrapr{display:flex;flex-wrap:wrap;gap:6px}
+.hscroll{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-inline:16px}
+.hscroll::-webkit-scrollbar{display:none}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)} .sm{font-size:13px;line-height:1.6} .xs{font-size:12px;line-height:1.5}
+.b{font-weight:700} .num{font-variant-numeric:tabular-nums}
+.ic{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:16px;height:16px} .ic.l{width:24px;height:24px}
+.appbar{display:flex;align-items:center;gap:8px;padding:6px 12px 10px;background:var(--paper);position:sticky;top:0;z-index:5}
+.appbar h3{margin:0;font-size:16px;font-weight:700;line-height:1.4;flex:1;min-width:0}
+.appbar .t2{display:block;font-size:12px;font-weight:500;color:var(--ink-3)}
+.iconbtn{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:var(--ink);background:none;border:0;flex:0 0 auto}
+.iconbtn.soft{background:var(--card);border:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:0 16px 10px}
+.steps div{font-size:11px;color:var(--ink-3);display:flex;flex-direction:column;gap:5px;line-height:1.3}
+.steps div::before{content:"";height:4px;border-radius:2px;background:var(--line)}
+.steps .done::before{background:var(--accent)} .steps .now{color:var(--accent-ink);font-weight:700}
+.steps .now::before{background:linear-gradient(to left,var(--accent) 55%,var(--line) 55%)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.btn{font:inherit;font-weight:650;font-size:15px;min-height:48px;border-radius:14px;border:0;padding:0 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.btn.pri{background:var(--accent-grad);color:var(--on-accent);box-shadow:0 4px 12px -4px rgba(215,57,72,.45)}
+.btn.brand{background:var(--brand);color:var(--on-brand)}
+.sbtn{width:44px;height:44px;border-radius:12px;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;flex:0 0 auto;border:0}
+.mark{width:30px;height:30px;border-radius:10px;background:var(--brand);color:var(--on-brand);display:grid;place-items:center}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--card)}
+.tabs div{flex:1;text-align:center;padding:10px 4px 9px;font-size:13.5px;font-weight:600;color:var(--ink-3);display:flex;align-items:center;justify-content:center;gap:6px}
+.tabs .on{color:var(--ink);box-shadow:inset 0 -2.5px 0 var(--brand)}
+.tabs .cnt{font-size:11px;background:var(--sunk);color:var(--ink-2);border-radius:6px;padding:1px 6px}
+.btn.sec{background:var(--card);color:var(--accent-ink);border:1px solid var(--line-2)}
+.btn.ghost{background:none;color:var(--accent-ink);padding:0 10px;min-height:44px}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.55;cursor:default}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-size:13.5px;font-weight:500;white-space:nowrap;color:var(--ink)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);font-weight:650}
+.chip .x{opacity:.7}
+.chip.from{border-style:solid}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1;padding:5px 8px;border-radius:7px;white-space:nowrap;font-weight:550}
+.sticky-cta{position:absolute;inset-inline:0;bottom:0;padding:12px 16px 26px;background:linear-gradient(to top,var(--paper) 72%,transparent);z-index:8}
+.nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--card);padding:6px 0 22px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--ink-3);min-height:44px;justify-content:center}
+.nav .on{color:var(--accent-ink);font-weight:700}
+.h4{font-size:15px;font-weight:750;margin:0;display:flex;align-items:center;gap:8px}
+.h4 .n{font-weight:600;color:var(--ink-3);font-size:13px}
+.lede{font-size:13px;color:var(--ink-2);margin:2px 0 0;line-height:1.6}
+.divider{height:8px;background:var(--sunk);margin-block:6px}
+/* ---------- honesty system ---------- */
+.price{font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.price small{font-size:12px;font-weight:500;color:var(--ink-3);margin-inline-start:3px}
+.pb{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.fresh{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-3);line-height:1.4}
+.fresh::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.fresh.fresh-fresh::before,.fresh.fresh-recent::before{background:var(--ink-3)}
+.fresh.fresh-stale{color:var(--warn)} .fresh.fresh-stale::before{background:var(--warn)}
+.fresh.fresh-very_stale{color:var(--bad)} .fresh.fresh-very_stale::before{background:var(--bad)}
+.confirmed{display:inline-flex;align-items:center;gap:5px;background:var(--ok-soft);color:var(--ok);border-radius:8px;padding:3px 8px;font-size:12px;font-weight:650;line-height:1.5}
+.pb.is-confirmed .price{color:var(--ok)}
+.unknown{display:inline-flex;align-items:center;gap:6px;border:1.5px dashed var(--unk);color:var(--unk);border-radius:10px;padding:5px 10px;font-size:13px;font-weight:600;background:var(--unk-soft);line-height:1.4}
+.warnbox{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:10px;font-size:12.5px;line-height:1.55;font-weight:550}
+.warnbox.bad{background:var(--bad-soft);color:var(--bad)} .warnbox.warn{background:var(--warn-soft);color:var(--warn)}
+.warnbox.info{background:var(--info-soft);color:var(--info-ink)} .warnbox.ok{background:var(--ok-soft);color:var(--ok)}
+.warnbox.unk{background:var(--unk-soft);color:var(--ink-2);border:1px dashed var(--unk)}
+.oc{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;line-height:1.4}
+.oc::before{content:"";width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.oc.open{color:var(--ok)} .oc.open::before{background:var(--ok)}
+.oc.closing_soon{color:var(--warn)} .oc.closing_soon::before{background:var(--warn)}
+.oc.closed{color:var(--ink-3)} .oc.closed::before{background:var(--ink-3)}
+.oc.unknown{color:var(--unk)} .oc.unknown::before{background:none;border:1.5px dashed var(--unk);width:7px;height:7px}
+.feat{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:1.3;padding:5px 8px;border-radius:8px;background:var(--sunk);color:var(--ink-2);font-weight:550}
+.feat.yes{color:var(--ink)} .feat.no{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.feat.unk{background:none;border:1px dashed var(--unk);color:var(--unk)}
+.inst{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:1.3;padding:5px 8px;border-radius:8px;font-weight:600}
+.inst.conf{background:var(--ok-soft);color:var(--ok)}
+.inst.decl{border:1px solid var(--line-2);color:var(--ink-2);background:var(--card)}
+/* ---------- shop card ---------- */
+.shop{padding:12px 14px;display:flex;flex-direction:column;gap:9px;position:relative}
+.shop.cat{background:transparent;border:1.5px dashed var(--line-2)}
+.shop-top{display:flex;gap:10px;align-items:flex-start}
+.shop-name{font-weight:750;font-size:15px;line-height:1.45}
+.shop-name .unv{font-size:11px;font-weight:500;color:var(--ink-3);margin-inline-start:6px}
+.loc{font-size:12.5px;color:var(--ink-2);line-height:1.5;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.loc .sep{color:var(--ink-3)}
+.sel{width:26px;height:26px;border-radius:8px;border:1.8px solid var(--line-2);flex:0 0 auto;display:grid;place-items:center;margin-top:1px;background:var(--card)}
+.sel.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.why{font-size:12.5px;color:var(--ink-2);display:flex;gap:6px;align-items:flex-start;line-height:1.55}
+.why b{color:var(--info-ink);font-weight:700;flex:0 0 auto}
+.shop-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.shop.flash{animation:flash 1.4s ease}
+@keyframes flash{0%{box-shadow:0 0 0 0 var(--accent)}30%{box-shadow:0 0 0 4px var(--accent-soft)}100%{box-shadow:0 0 0 0 transparent}}
+/* ---------- product ---------- */
+.thumb{width:76px;height:76px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;position:relative;overflow:hidden;
+  background:radial-gradient(120% 90% at 30% 20%,var(--card),var(--sunk));border:1px solid var(--line);color:var(--accent)}
+.thumb .ic{width:38px;height:38px;stroke-width:1.4}
+.thumb .br{position:absolute;bottom:4px;inset-inline-end:6px;font-size:10px;color:var(--ink-3);font-weight:600}
+.thumb.none{background:repeating-linear-gradient(-45deg,var(--sunk) 0 6px,var(--card) 6px 12px);color:var(--ink-3)}
+.pcard{display:flex;gap:12px;padding:12px}
+.ptitle{font-weight:700;font-size:14.5px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.range{font-size:12.5px;color:var(--ink-2)}
+/* ---------- skeleton ---------- */
+.sk{background:linear-gradient(90deg,var(--sunk),var(--line),var(--sunk));background-size:200% 100%;animation:sk 1.4s linear infinite;border-radius:8px}
+@keyframes sk{to{background-position:-200% 0}}
+/* ---------- sheet ---------- */
+.scrim{position:absolute;inset:0;background:rgba(10,14,30,.42);z-index:20}
+.sheet{position:absolute;inset-inline:0;bottom:0;background:var(--paper);border-radius:24px 24px 0 0;z-index:21;padding:8px 16px 26px;display:flex;flex-direction:column;gap:14px;max-height:88%;overflow-y:auto;scrollbar-width:none}
+.sheet::before{content:"";width:40px;height:5px;border-radius:3px;background:var(--line-2);align-self:center;flex:0 0 auto}
+.sheet h3{margin:0;font-size:17px;font-weight:750}
+.field{display:flex;align-items:center;gap:8px;min-height:50px;border-radius:14px;background:var(--card);border:1px solid var(--line);padding:0 12px;font-size:15px}
+.field.big{align-items:flex-start;min-height:96px;padding:12px 14px;font-size:16px;line-height:1.7}
+.toggle{width:46px;height:28px;border-radius:14px;background:var(--line-2);position:relative;flex:0 0 auto}
+.toggle::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:var(--card);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle.on{background:var(--accent)} .toggle.on::after{inset-inline-start:21px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--sunk);border-radius:12px;padding:3px;gap:3px}
+.seg div{min-height:38px;display:grid;place-items:center;font-size:13px;border-radius:9px;color:var(--ink-2);font-weight:550;text-align:center;line-height:1.3;padding-inline:4px}
+.seg .on{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.frow{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px}
+.slider{position:relative;height:28px;margin-inline:6px}
+.slider .rail{position:absolute;inset-inline:0;top:12px;height:4px;border-radius:2px;background:var(--line)}
+.slider .fill{position:absolute;top:12px;height:4px;border-radius:2px;background:var(--accent)}
+.slider .knob{position:absolute;top:2px;width:24px;height:24px;border-radius:50%;background:var(--card);border:2px solid var(--accent);transform:translateX(50%)}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;font-size:13px;line-height:1.6}
+.banner.warn{background:var(--warn-soft);color:var(--warn)} .banner.bad{background:var(--bad-soft);color:var(--bad)}
+.banner.info{background:var(--info-soft);color:var(--info-ink)} .banner.unk{background:var(--unk-soft);color:var(--ink-2)}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:28px 24px}
+.empty .art-i{width:96px;height:96px;border-radius:28px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.empty .art-i .ic{width:44px;height:44px;stroke-width:1.5}
+.empty h4{margin:0;font-size:17px;font-weight:750;text-wrap:balance}
+.empty p{margin:0;font-size:14px;color:var(--ink-2);max-width:30ch}
+.toast{position:absolute;bottom:112px;inset-inline:12px;z-index:30;background:var(--ink);color:var(--paper);border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.6;box-shadow:var(--shadow)}
+.toast .ic{color:var(--warn)}
+/* ---------- tracker ---------- */
+.tl{display:flex;align-items:center;gap:0;margin-top:2px}
+.tl span{display:flex;align-items:center;gap:4px;font-size:11.5px;color:var(--ink-3);white-space:nowrap}
+.tl span::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line-2);background:var(--card);flex:0 0 auto}
+.tl span.done{color:var(--ink-2)} .tl span.done::before{background:var(--accent);border-color:var(--accent)}
+.tl span.live::before{border-color:var(--accent);animation:pulse 1.3s ease infinite}
+.tl i{flex:1;height:1.5px;background:var(--line);margin-inline:5px;min-width:10px}
+.tl i.done{background:var(--accent)}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--accent-soft)}}
+.qa{background:var(--sunk);border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.6}
+.st{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
+.st.sent,.st.delivered{background:var(--info-soft);color:var(--info-ink)}
+.st.answered{background:var(--ok-soft);color:var(--ok)} .st.unavailable{background:var(--bad-soft);color:var(--bad)}
+.st.no_reply{background:var(--unk-soft);color:var(--ink-2);border:1px dashed var(--unk)}
+.diff{font-size:12px;font-weight:700;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:2px 6px}
+.strike{text-decoration:line-through;color:var(--ink-3);font-size:12.5px}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sum div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 8px;text-align:center;font-size:11.5px;color:var(--ink-2);line-height:1.4}
+.sum b{display:block;font-size:18px;color:var(--ink);font-weight:800}
+/* ---------- map ---------- */
+.map{position:relative;height:250px;background:var(--map-bg);overflow:hidden}
+.map svg{display:block;width:100%;height:100%}
+.pin-lbl{font:700 11px var(--f-body)}
+.mapctl{position:absolute;inset-inline-start:12px;bottom:12px;display:flex;flex-direction:column;gap:6px}
+.maplegend{position:absolute;inset-inline-end:10px;top:10px;background:var(--card);border-radius:10px;padding:6px 9px;font-size:11px;display:flex;flex-direction:column;gap:3px;border:1px solid var(--line);line-height:1.4}
+.lg{display:flex;align-items:center;gap:6px}
+.lg i{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.lg i.c{background:none;border:1.5px dashed var(--ink-3)}
+.lg i.u{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+/* ---------- mall locator ---------- */
+.mloc{display:flex;gap:12px;align-items:stretch;padding:12px}
+.floors{display:flex;flex-direction:column-reverse;gap:2px;width:54px;flex:0 0 auto}
+.floors div{height:11px;border-radius:3px;background:var(--sunk);font-size:8px;line-height:11px;text-align:center;color:var(--ink-3)}
+.floors .hit{background:var(--accent);color:var(--on-accent);font-weight:700;height:15px;line-height:15px}
+.floors .unk{background:none;border:1px dashed var(--unk)}
+.crumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-weight:700;font-size:14px;line-height:1.5}
+.crumb .ar{color:var(--ink-3);font-weight:400}
+.crumb .u{color:var(--unk);border:1px dashed var(--unk);border-radius:6px;padding:0 6px;font-weight:600;font-size:12.5px}
+/* ---------- tables ---------- */
+.hours{width:100%;border-collapse:collapse;font-size:13.5px}
+.hours td{padding:7px 10px;border-bottom:1px solid var(--line)}
+.hours tr.today td{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+.hours tr.fri td{color:var(--ink-3)}
+.hours td:last-child{text-align:left;direction:ltr;font-variant-numeric:tabular-nums}
+.hours .bad{color:var(--bad);font-weight:650}
+.ctab{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.ctab th,.ctab td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top;text-align:start;line-height:1.55}
+.ctab th{font-weight:600;color:var(--ink-2);font-size:12px;width:30%}
+.ctab tr.d td{background:var(--warn-soft)}
+.ctab tr.d th{box-shadow:inset -3px 0 0 var(--warn)}
+.cell-unk{color:var(--unk);border:1px dashed var(--unk);border-radius:6px;padding:1px 6px;font-size:12px;display:inline-block}
+/* ---------- chat ---------- */
+.msg{max-width:84%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.75}
+.msg.me{align-self:flex-start;background:var(--accent);color:var(--on-accent);border-end-start-radius:6px}
+.msg.ai{align-self:flex-end;background:var(--card);border:1px solid var(--line);border-end-end-radius:6px}
+.toolline{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3);align-self:flex-end}
+.spin{width:14px;height:14px;border-radius:50%;border:2px solid var(--line-2);border-top-color:var(--accent);animation:spin 0.9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.caret{display:inline-block;width:2px;height:1em;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.mini{width:150px;flex:0 0 auto;padding:10px;display:flex;flex-direction:column;gap:6px}
+.mini .thumb{width:100%;height:78px}
+/* ---------- seller side ---------- */
+.seller .appbar{background:var(--ink);color:var(--paper)}
+.bigbtn{min-height:64px;border-radius:16px;font:inherit;font-size:18px;font-weight:750;border:0;display:flex;align-items:center;justify-content:center;gap:10px}
+.bigbtn.ok{background:var(--ok);color:var(--card)} .bigbtn.no{background:var(--bad-soft);color:var(--bad);border:1.5px solid var(--bad)}
+/* ---------- component board ---------- */
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding-block:22px 28px}
+.spec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.spec h3{margin:0;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
+.spec .rtl{direction:rtl;font-size:15px;display:flex;flex-direction:column;gap:12px}
+.spec .lbl{direction:ltr;font-size:11.5px;color:var(--ink-3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-align:left}
+.spec .item{display:flex;flex-direction:column;gap:5px;padding-bottom:10px;border-bottom:1px dashed var(--line)}
+.spec .item:last-child{border-bottom:0;padding-bottom:0}
+.micro{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding-block:22px 28px}
+.micro .m{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;direction:rtl;display:flex;flex-direction:column}
+.micro .m .lbl{direction:ltr;font-size:11.5px;color:var(--ink-3);padding:8px 12px;border-top:1px solid var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:auto}
+.note{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+<script type="application/json" id="data">/*__DATA__*/</script>
+<script>
+const D = JSON.parse(document.getElementById('data').textContent);
+/* ---------- helpers ---------- */
+const FA='۰۱۲۳۴۵۶۷۸۹';
+const fa = s => String(s ?? '').replace(/\d/g, d => FA[d]);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const bidi = s => esc(s).replace(/([A-Za-z][A-Za-z0-9.\-_/()+]*(?:[ ][A-Za-z0-9.\-_/()+]+)*)/g, '<bdi>$1</bdi>');
+const faT = s => fa(esc(s));
+const money = n => fa(Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '٬'));
+const mil = n => { const m = n/1e6; return m >= 1 ? fa((m >= 10 ? m.toFixed(1) : m.toFixed(2)).replace(/0+$/,'').replace(/\.$/,'').replace('.','٫')) + ' میلیون' : fa(Math.round(n/1000)) + ' هزار'; };
+const hm = t => fa((t||'').slice(0,5));
+const P = {
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  fwd:'<path d="m15 6-6 6 6 6"/>', back:'<path d="m9 6 6 6-6 6"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>', clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+  chat:'<path d="M5 18.5V6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7a2.5 2.5 0 0 1-2.5 2.5H9z"/>',
+  home:'<path d="M4 11 12 4l8 7v8.5a.5.5 0 0 1-.5.5H15v-6H9v6H4.5a.5.5 0 0 1-.5-.5z"/>',
+  bag:'<path d="M5 8h14l-1 12H6zM9 8V6.5a3 3 0 0 1 6 0V8"/>',
+  walk:'<circle cx="13" cy="4.5" r="1.8"/><path d="m10 21 2-6 3 3v3M8 12l2.5-4.5 4 1.5 2 3M12 15l-1.5-4"/>',
+  card:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 14.5h4"/>',
+  truck:'<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/>',
+  alert:'<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+  x:'<path d="m6 6 12 12M18 6 6 18"/>',
+  store:'<path d="M4 9.5 5.5 4h13L20 9.5M4 9.5h16v.5a3 3 0 0 1-5.3 1.9 3 3 0 0 1-5.4 0A3 3 0 0 1 4 10zM5.5 13v7h13v-7"/>',
+  send:'<path d="M20 4 3.5 11l6.5 2.5L12.5 20z"/><path d="m10 13.5 4-4"/>',
+  layers:'<path d="m12 4 8.5 4.5L12 13 3.5 8.5z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/>',
+  map:'<path d="m9 5-5 2v12l5-2 6 2 5-2V5l-5 2z"/><path d="M9 5v12M15 7v12"/>',
+  spark:'<path d="M12 3.5 13.8 10 20.5 12l-6.7 2L12 20.5 10.2 14 3.5 12l6.7-2z"/>',
+  wifi:'<path d="M3 4l18 16M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 4-2.5M12 10.2a10 10 0 0 1 7 2.8M2 9.5A15 15 0 0 1 7 6.6M11 5.1a15 15 0 0 1 11 4.4"/>',
+  eye:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
+  shield:'<path d="M12 3.5 19 6v6c0 4.5-3 7.5-7 8.5-4-1-7-4-7-8.5V6z"/><path d="m9 12 2 2 4-4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>', minus:'<path d="M5 12h14"/>',
+  loc:'<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/>',
+  q:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17v.3"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  sort:'<path d="M7 4v16M4 7l3-3 3 3M17 20V4M14 17l3 3 3-3"/>',
+  hp:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+  neck:'<path d="M5 9c0 5 3 8 7 8s7-3 7-8"/><circle cx="5" cy="7" r="2.2"/><circle cx="19" cy="7" r="2.2"/><path d="M7.5 15.5 6 19M16.5 15.5 18 19"/>',
+  mic:'<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/>',
+  list:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  route:'<circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h7.5a3 3 0 0 0 0-6h-7a3 3 0 0 1 0-6H16"/>',
+  refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>',
+  inbox:'<path d="M4 13.5 6.5 5h11l2.5 8.5V19H4z"/><path d="M4 13.5h5l1 2h4l1-2h5"/>',
+  compare:'<rect x="3.5" y="4" width="7" height="16" rx="1.5"/><rect x="13.5" y="4" width="7" height="16" rx="1.5"/>',
+  cam:'<rect x="3" y="7" width="13" height="10" rx="2"/><path d="m16 11 5-3v8l-5-3"/>',
+};
+const ic = (n, c='') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const status = (t='۱۸:۴۲') => `<div class="sbar"><span>${t}</span><span class="r"><i style="width:3px;height:5px"></i><i style="width:3px;height:7px"></i><i style="width:3px;height:9px"></i><i style="width:3px;height:11px;opacity:.35"></i><span style="margin-inline-start:6px;border:1.5px solid currentColor;border-radius:3px;width:22px;height:11px;display:inline-block;position:relative"><i style="position:absolute;inset:1.5px;right:8px;border-radius:1px"></i></span></span></div>`;
+const NAVS = [['home','خانه'],['chat','گفتگو'],['bag','خریدهای من']];
+const nav = on => `<div class="nav">${NAVS.map(([i,l],k)=>`<div class="${k===on?'on':''}">${ic(i)}<span>${l}</span></div>`).join('')}</div>`;
+const STEPS = ['انتخاب کالا','فروشگاه‌ها','مقایسه','استعلام و بازدید'];
+const steps = n => `<div class="steps" aria-label="مرحله ${fa(n+1)} از ۴">${STEPS.map((s,i)=>`<div class="${i<n?'done':i===n?'now':''}">${s}</div>`).join('')}</div>`;
+const appbar = (title, sub='', {back=true, end=''}={}) => `<div class="appbar">${back?`<button class="iconbtn" aria-label="بازگشت">${ic('back')}</button>`:''}<h3>${title}${sub?`<span class="t2">${sub}</span>`:''}</h3>${end}</div>`;
+const phone = ({cap, sub='', body, time, navOn, cta='', over='', id='', cls='', extra=''}) =>
+  `<figure class="art"><div class="device"><div class="screen ${cls}" lang="fa" dir="rtl" ${id?`id="${id}"`:''}>${status(time)}<div class="content">${body}</div>${cta}${navOn!=null?nav(navOn):''}${over}</div></div><figcaption><b>${cap}</b>${sub}${extra}</figcaption></figure>`;
+const section = (n, id, title, desc, src, arts, core=false) =>
+  `<section class="sec" id="${id}"><div class="sec-h"><div class="sec-n">${n}</div><h2>${title}${core?'<span class="core">Core demo path</span>':''}</h2><p>${desc}<br><span class="src">${src}</span></p></div><div class="track">${arts.join('')}</div></section>`;
+
+/* ---------- honesty components ---------- */
+const FRESH = {fresh:'ثبت‌شده', recent:'ثبت‌شده', stale:'قیمت قدیمی ·', very_stale:'خیلی قدیمی ·'};
+const ago = d => d === 0 ? 'امروز' : `${fa(d)} روز پیش`;
+function priceBadge(o, {confirmed=null, compact=false}={}) {
+  if (confirmed) return `<div class="pb is-confirmed"><span class="price">${money(confirmed.price)}<small>تومان</small></span><span class="confirmed">${ic('check','s')}تأیید شده توسط فروشنده · ${confirmed.ago}</span></div>`;
+  if (!o || o.price == null || o.freshness === 'no_price') return `<div class="pb"><span class="unknown">${ic('q','s')}قیمت نامشخص — بپرسید</span></div>`;
+  let line;
+  if (o.freshness === 'unknown_age' || o.age_days == null) line = `<span class="fresh" style="color:var(--unk)">تاریخ ثبت قیمت نامشخص</span>`;
+  else line = `<span class="fresh fresh-${o.freshness}">${FRESH[o.freshness]||'ثبت‌شده'} ${o.freshness==='stale'||o.freshness==='very_stale'?'ثبت ':''}${ago(o.age_days)}</span>`;
+  const sus = o.suspicious ? `<div class="warnbox bad">${ic('alert','s')}<span>قیمت مشکوک، حتماً استعلام بگیرید</span></div>` : '';
+  return `<div class="pb"><span class="price">${money(o.price)}<small>تومان</small></span>${line}${sus}</div>`;
+}
+const OC_LBL = {open:'باز است', closing_soon:'به‌زودی می‌بندد', closed:'بسته است', unknown:'ساعت نامشخص'};
+function openChip(o) {
+  const lbl = o.state === 'unknown' ? (o.quality==='suspicious' ? 'ساعت این روز نامشخص' : 'ساعت کاری ثبت نشده') : faT(o.label);
+  const q = o.quality === 'suspicious' && o.state !== 'unknown' ? ` <span class="tag" style="background:var(--warn-soft);color:var(--warn)">ساعت‌ها ممکن است دقیق نباشد</span>` : '';
+  return `<span class="oc ${o.state}">${lbl}</span>${q}`;
+}
+const fast = v => v === true ? `<span class="feat yes">${ic('truck','s')}ارسال سریع</span>` : v === false ? `<span class="feat no">${ic('truck','s')}ارسال سریع ندارد</span>` : `<span class="feat unk">${ic('truck','s')}ارسال سریع: نامشخص</span>`;
+function instChips(s, full=false) {
+  if (!s.installment || !s.payments?.length) return full ? `<span class="feat no">${ic('card','s')}قسطی ندارد</span>` : '';
+  return s.payments.map(p => p.confirmed_in_store
+    ? `<span class="inst conf">${ic('card','s')}${esc(p.provider)} · پذیرش حضوری تأییدشده</span>`
+    : `<span class="inst decl">${ic('card','s')}${esc(p.provider)}${full?' · اعلام‌شده؛ نوع پذیرش نامشخص':''}</span>`).join('') + (!full && s.payments.some(p=>!p.confirmed_in_store) ? `<span class="xs faint" style="align-self:center">نوع پذیرش نامشخص</span>` : '');
+}
+const floorTxt = s => s.floor_label ? faT(s.floor_label.replace(/^چهار$/,'طبقه ۴')) : null;
+function locLine(s) {
+  const parts = [];
+  parts.push(s.mall ? esc(s.mall) : `<span class="faint">بدون پاساژ · ${faT(s.address.split('،').slice(0,2).join('،'))}</span>`);
+  if (s.mall) parts.push(floorTxt(s) || '<span style="color:var(--unk)">طبقه نامشخص</span>');
+  if (s.unit) parts.push('واحد ' + fa(s.unit)); else if (s.plaque) parts.push('پلاک ' + fa(s.plaque));
+  return `<div class="loc">${parts.join('<span class="sep">←</span>')}<span class="sep">·</span>${ic('walk','s')}${s.walk_min===0?'کمتر از ۱ دقیقه':fa(s.walk_min)+' دقیقه'}</div>`;
+}
+const shopName = s => `<div class="shop-name">${esc(s.name)}${s.name_is_verified?` <span class="tag" style="background:var(--ok-soft);color:var(--ok)">${ic('shield','s')}نام تأییدشده</span>`:''}</div>`;
+function shopCard(s, {sel=false, selectable=true, confirmed=null, why=true}={}) {
+  const cat = s.tier === 'category_only';
+  const price = cat ? `<span class="unknown">${ic('q','s')}موجودی و قیمت نامشخص — بپرسید</span>` : priceBadge(s.offer, {confirmed});
+  const whyTxt = cat ? 'در این دسته فعالیت دارد؛ موجودی را بپرسید' : faT(s.why).replace(/ · /g,' · ');
+  return `<div class="card shop ${cat?'cat':''}" data-id="${s.shop_id}">
+    <div class="shop-top">${selectable?`<span class="sel ${sel?'on':''}" role="checkbox" aria-checked="${sel}">${sel?ic('check','s'):''}</span>`:''}
+      <div style="flex:1;min-width:0">${shopName(s)}${locLine(s)}</div></div>
+    <div class="shop-bottom"><div>${price}</div></div>
+    <div class="wrapr">${openChip(s.open)}</div>
+    <div class="wrapr">${instChips(s)}${fast(s.fast_delivery)}</div>
+    ${why?`<div class="why"><b>چرا اینجا؟</b><span>${whyTxt}</span></div>`:''}
+  </div>`;
+}
+const thumb = (glyph='neck', brand='', none=false, cls='') => none
+  ? `<div class="thumb none ${cls}"><span class="xs" style="text-align:center;line-height:1.4">بدون<br>تصویر</span></div>`
+  : `<div class="thumb ${cls}">${ic(glyph)}${brand?`<span class="br">${esc(brand)}</span>`:''}</div>`;
+const glyphOf = t => /گردنی/.test(t) ? 'neck' : 'hp';
+function productCard(p, {why='', sel=false, badge=''}={}) {
+  const same = p.price_min === p.price_max;
+  return `<div class="card pcard">${thumb(glyphOf(p.title), p.brand)}
+   <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+    <div class="ptitle">${bidi(p.title)}</div>
+    <div class="row" style="justify-content:space-between;align-items:baseline"><span class="price" style="font-size:16px">${same?'':'از '}${mil(p.price_min)}<small>تومان</small></span>
+      <span class="xs faint">${fa(p.shop_count)} فروشگاه</span></div>
+    ${same?'':`<div class="range">تا ${mil(p.price_max)} · میانه ${mil(p.price_median)}</div>`}
+    ${why?`<div class="why"><b>چرا این؟</b><span>${why}</span></div>`:''}
+    ${badge}
+   </div></div>`;
+}
+function mallLocator(s, floorsRange=[-2,7]) {
+  const items = [];
+  for (let f = floorsRange[0]; f <= floorsRange[1]; f++) items.push(`<div class="${s.floor===f?'hit':''}">${s.floor===f?(f===0?'همکف':fa(f)):''}</div>`);
+  const unk = s.floor == null;
+  const crumbs = [s.mall ? esc(s.mall) : '<span class="u">بدون پاساژ</span>',
+    s.floor_label ? floorTxt(s) : '<span class="u">طبقه نامشخص</span>',
+    s.unit ? 'واحد ' + fa(s.unit) : s.plaque ? 'پلاک ' + fa(s.plaque) : '<span class="u">واحد نامشخص</span>'];
+  return `<div class="card mloc"><div class="floors ${unk?'':''}">${unk?Array.from({length:10},()=>'<div class="unk"></div>').join(''):items.join('')}</div>
+    <div class="stack" style="gap:6px;flex:1;min-width:0"><span class="xs faint">مسیر داخل پاساژ</span>
+    <div class="crumb">${crumbs.join('<span class="ar">←</span>')}</div>
+    <div class="xs muted">${faT(s.address)}</div>
+    ${unk?`<div class="xs" style="color:var(--unk)">طبقه ثبت نشده؛ از نگهبان یا تابلوی ورودی بپرسید.</div>`:''}</div></div>`;
+}
+const srcNote = txt => `<div class="xs faint row" style="gap:6px">${ic('eye','s')}<span>${txt}</span></div>`;
+const productMini = (p, sub) => `<div class="card row" style="padding:10px;gap:10px">${thumb('neck',p.brand).replace('class="thumb ','class="thumb " style="width:48px;height:48px;border-radius:10px"')}<div style="min-width:0;flex:1"><div class="b sm" style="line-height:1.5">${bidi(p.title)}</div><div class="xs faint">${sub}</div></div></div>`;
+
+/* ---------- map ---------- */
+function mapSvg(listed, cat, {sel=[], h=250}={}) {
+  const o = D.shops.origin, k = Math.cos(o[0]*Math.PI/180)*111320, W=357, H=h, sc=0.95, cx=-115, cy=-20;
+  const xy = (lat, lon) => [W/2 - ((lon-o[1])*k - cx)*sc, H/2 - ((lat-o[0])*110540 - cy)*sc];
+  // RTL mirror is wrong for maps: keep geography — east is right
+  const g = (lat,lon) => { const [x,y] = xy(lat,lon); return [W - x, y]; };
+  const [ux,uy] = g(o[0],o[1]);
+  const roads = `
+   <rect width="${W}" height="${H}" fill="var(--map-bg)"/>
+   ${[[20,20,90,60],[130,15,70,50],[225,25,110,55],[18,140,95,80],[128,150,80,70],[230,150,110,80]].map(([x,y,w,hh])=>`<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="6" fill="var(--map-block)"/>`).join('')}
+   <path d="M-10 ${uy+8} L${W+10} ${uy-4}" stroke="var(--map-major)" stroke-width="16"/>
+   <path d="M${ux-14} -10 L${ux-4} ${H+10}" stroke="var(--map-road)" stroke-width="12"/>
+   <path d="M60 -10 L72 ${H+10}" stroke="var(--map-road)" stroke-width="7"/>
+   <path d="M-10 70 L${W+10} 64" stroke="var(--map-road)" stroke-width="6"/>
+   <path d="M-10 ${H-30} L${W+10} ${H-38}" stroke="var(--map-road)" stroke-width="6"/>
+   <text x="${W-12}" y="${uy-10}" text-anchor="end" class="pin-lbl" fill="var(--ink-3)" style="font-weight:600">خیابان جمهوری</text>
+   <text x="${ux+4}" y="${H-12}" class="pin-lbl" fill="var(--ink-3)" style="font-weight:600" transform="rotate(-86 ${ux+4} ${H-12})">خیابان حافظ</text>
+   <rect x="${g(35.6949,51.4114)[0]-34}" y="${g(35.6949,51.4114)[1]-26}" width="70" height="52" rx="10" fill="var(--accent-soft)" stroke="var(--accent)" stroke-dasharray="3 3" stroke-width="1"/>
+   <text x="${g(35.6949,51.4114)[0]}" y="${g(35.6949,51.4114)[1]+42}" text-anchor="middle" class="pin-lbl" fill="var(--accent-ink)">پاساژ علاالدین</text>`;
+  const cats = cat.map(s => { const [x,y] = g(s.lat,s.lon); return `<circle cx="${x}" cy="${y}" r="6" fill="var(--card)" stroke="var(--ink-3)" stroke-width="1.5" stroke-dasharray="2.5 2"/>`; }).join('');
+  // cluster listed pins inside the mall into a stacked badge
+  const pins = listed.slice(0,4).map((s,i) => { const [x,y] = g(s.lat,s.lon); const on = sel.includes(s.shop_id);
+    const lx = x + (i%2? 22:-22), ly = y + (i<2?-14:14);
+    return `<g><circle cx="${x}" cy="${y}" r="5" fill="${on?'var(--accent)':'var(--card)'}" stroke="var(--accent)" stroke-width="2"/></g>`; }).join('');
+  const label = (() => { const [x,y] = g(35.6949,51.4114); return `<g><rect x="${x-78}" y="${y-58}" width="156" height="26" rx="13" fill="var(--accent)"/><text x="${x}" y="${y-41}" text-anchor="middle" class="pin-lbl" fill="var(--on-accent)">${fa(listed.length)} فروشگاه · از ${mil(Math.min(...listed.map(s=>s.offer?.price||1e12)))}</text><path d="M${x-5} ${y-33} L${x} ${y-27} L${x+5} ${y-33}" fill="var(--accent)"/></g>`; })();
+  const user = `<circle cx="${ux}" cy="${uy}" r="14" fill="var(--ok)" opacity=".18"/><circle cx="${ux}" cy="${uy}" r="6.5" fill="var(--ok)" stroke="var(--card)" stroke-width="2.5"/>`;
+  return `<div class="map" style="height:${h}px"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="نقشهٔ فروشگاه‌ها اطراف چهارراه حافظ و جمهوری">${roads}${cats}${pins}${label}${user}</svg>
+   <div class="maplegend"><span class="lg"><i></i>کالا را ثبت کرده</span><span class="lg"><i class="c"></i>فقط در این دسته</span><span class="lg"><i class="u"></i>شما</span></div>
+   <div class="mapctl"><button class="iconbtn soft" aria-label="موقعیت من">${ic('loc')}</button></div></div>`;
+}
+
+/* ======================================================================= */
+const S = D.shops, L = S.listed, C = S.category_only, PD = D.detail, INQ = D.inq;
+const out = [];
+
+/* ---------- masthead ---------- */
+out.push(`<header class="mast"><div><h1>همراه خرید<small>Mobile UI · Persian RTL · in-person shopping in Tehran bazaars</small></h1>
+<p>15 screens, every state drawn from the real fixtures in <code>docs/fixtures/</code>. The core demo path comes first: Home → Product results → Shops for a product → Inquiry tracker. Phones scroll inside; each row scrolls sideways. Scenario clock: Wednesday 29 Mehr, 18:42, standing at Hafez × Jomhouri.</p>
+<nav class="toc" aria-label="Screens">${[['sys','0','Honesty system'],['home','1','Home'],['results','3','Results'],['shops','6','Shops'],['tracker','10','Tracker'],['chat','2','Chat'],['detail','4','Product'],['pcompare','5','Compare'],['shop','7','Shop detail'],['scompare','8','Compare shops'],['composer','9','Composer'],['alts','11','Alternatives'],['plan','12','Visit plan'],['mine','13','My shopping'],['seller','14','Seller inbox'],['mall','15','Mall directory'],['copy','—','Microcopy']].map(([id,n,t])=>`<a href="#${id}"><b>${n}</b>${t}</a>`).join('')}</nav></div>
+<div class="themes" role="group" aria-label="Theme"><button data-t="">System</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div></header>`);
+
+/* ---------- 0. honesty system ---------- */
+{
+  const E = D.edge, sd = D.sd;
+  const spec = (h, items) => `<div class="spec"><h3>${h}</h3><div class="rtl" lang="fa">${items.map(([lbl,html])=>`<div class="item"><span class="lbl">${lbl}</span>${html}</div>`).join('')}</div></div>`;
+  const ans = INQ.find(i=>i.status==='answered');
+  out.push(`<section class="sec" id="sys"><div class="sec-h"><div class="sec-n">0</div><h2>The honesty system</h2><p>Three meanings never share a look: <b>listed</b> price (neutral, with its age), <b>seller-confirmed</b> (green, with minutes since the answer), and <b>unknown</b> (grey dashed, always an action: "بپرسید"). Status colours own meaning. Radish red and white is the brand: red for actions and selection, on white cards. Danger is a darker brick red and always carries a warning icon; explanations and info use a calm blue.<br><span class="src">offer_edge_cases.json · shops_for_product.json · shop_*.json · inquiries_all_states.json</span></p></div>
+  <div class="board">
+   ${spec('PriceBadge', [
+     ['seller-confirmed · inq_demo2', priceBadge(null,{confirmed:{price:ans.answer.price, ago:'۱۲ دقیقه پیش'}})],
+     ['listed · recent · 12 days', priceBadge(L[0].offer)],
+     ['listed · stale · 37 days', priceBadge(L[2].offer)],
+     ['listed · very_stale · 283 days', priceBadge(E.stale_over_90_days.offer)],
+     ['very_stale + suspicious', priceBadge(E.suspicious_price.offer)],
+     ['no_price', priceBadge(E.no_price.offer)],
+     ['unknown_age', priceBadge({...L[1].offer, age_days:null, freshness:'unknown_age'})],
+   ])}
+   ${spec('OpenStatusChip', [
+     ['open · quality ok', openChip(L[0].open)],
+     ['closing_soon', openChip(sd.shop_fast_delivery_false.open)],
+     ['closing_soon · quality suspicious', openChip(E.stale_over_90_days.open)],
+     ['closed', openChip(sd.shop_installment_channel_unknown.open)],
+     ['unknown · missing', openChip(E.no_price.open)],
+     ['unknown · suspicious', openChip(sd.shop_suspicious_hours.open)],
+   ])}
+   ${spec('Fast delivery (tri-state) · Installments', [
+     ['fast_delivery = true', fast(true)],
+     ['fast_delivery = false', fast(false)],
+     ['fast_delivery = null', fast(null)],
+     ['in_person · confirmed_in_store', `<div class="wrapr">${instChips(sd.shop_installment_in_person,true)}</div>`],
+     ['channel unknown · not confirmed', `<div class="wrapr">${instChips(sd.shop_installment_channel_unknown,true)}</div>`],
+     ['installment = false', instChips(L[0],true)],
+   ])}
+   ${spec('ShopCard tiers', [
+     ['tier = listed', shopCard(L[0],{selectable:false})],
+     ['tier = category_only', shopCard(C[0],{selectable:false})],
+   ])}
+   ${spec('MallLocator', [
+     ['mall + floor + unit', mallLocator(sd.shop_full_hours_in_mall)],
+     ['street only (no mall)', mallLocator(sd.shop_no_mall_street_only)],
+   ])}
+   ${spec('DataSourceNote · name honesty', [
+     ['source + age', srcNote('منبع: ترب · قیمت ۴۳ روز پیش ثبت شده')],
+     ['name_is_verified = false', `${shopName(L[0])}<span class="xs faint">نام از داده‌ها نمایش داده می‌شود؛ برند واقعی نیست.</span>`],
+     ['name_is_verified = true', shopName(sd.shop_real_name_with_website)],
+     ['phone_is_placeholder = true', `<div class="warnbox unk">${ic('lock','s')}<span>شمارهٔ تلفن این فروشگاه در داده‌ها معتبر نیست. از «استعلام» استفاده کنید؛ پاسخ را همین‌جا می‌بینید.</span></div>`],
+   ])}
+  </div></section>`);
+}
+
+/* ---------- 1. Home ---------- */
+{
+  const cats = D.top.slice(0,6), malls = D.malls.slice(0,6);
+  const searchBox = `<div class="field big" style="flex-direction:column;gap:10px"><span>یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون<span class="caret"></span></span>
+     <div class="row" style="justify-content:space-between;width:100%"><button class="iconbtn soft" aria-label="گفتن با صدا">${ic('mic')}</button><button class="btn brand" style="min-height:44px">${ic('search','s')}پیدا کن</button></div></div>`;
+  const locChip = (txt, state='') => `<button class="chip ${state}" style="min-height:40px">${ic('pin','s')}${txt}${ic('fwd','s')}</button>`;
+  const head = loc => `<div class="pad stack" style="padding-top:6px;gap:14px">
+     <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 9c-4.6 0-8 3.3-8 7.6 0 5 4.4 9.3 8 12.4 3.6-3.1 8-7.4 8-12.4C24 12.3 20.6 9 16 9z" fill="var(--brand)"/><path d="M13.5 13.5c-1.3.8-2.1 2.1-2.3 3.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/><path d="M16 9.5c-.4-3 .8-5.6 3.6-6.8.6 2.8-.8 5.5-3.6 6.8zM15.6 9.6C13.4 8.7 11.6 6.6 11.5 4c2.4.4 4 2.6 4.1 5.6z" fill="var(--leaf)"/></svg><span style="font-weight:900;font-size:20px;line-height:1">همراه خرید</span></span>${loc}</div>`;
+  const how = `<div class="card" style="padding:12px 14px"><div class="xs faint" style="margin-bottom:8px">از «نمی‌دانم کدام» تا «جلوی واحد درست»</div>
+     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">${[['spark','کالا را انتخاب کن'],['map','فروشگاه نزدیک'],['compare','مقایسه'],['send','استعلام و برو']].map(([i,t],k)=>`<div class="xs" style="display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-2)"><span style="width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center">${ic(i,'s')}</span>${fa(k+1)}. ${t}</div>`).join('')}</div></div>`;
+  const ex = `<div class="stack" style="gap:8px"><span class="xs faint">نمونه‌ها را امتحان کنید</span><div class="wrapr">
+     <span class="chip">هندزفری ورزشی زیر ۳ میلیون</span><span class="chip">گوشی ۱۰ تا ۱۵ میلیون، قسطی</span><span class="chip">دوربین مداربسته ۴ کانال</span></div></div>`;
+  const catList = `<div class="stack" style="gap:8px"><div class="h4">دسته‌های پرفروشگاه این محدوده</div><div class="wrapr">${cats.map(c=>`<span class="chip">${esc(c.name)} <span class="xs faint">${fa(c.n)}</span></span>`).join('')}</div></div>`;
+  const mallList = `<div class="stack" style="gap:8px"><div class="h4" style="padding-inline:16px">پاساژهای نزدیک <span class="n">راهنمای طبقه‌به‌طبقه</span></div><div class="hscroll">${malls.map(m=>`<div class="card" style="padding:10px 12px;min-width:138px;flex:0 0 auto"><div class="row" style="gap:6px;color:var(--accent)">${ic('layers','s')}<span class="b sm" style="color:var(--ink)">${esc(m.mall.replace(/ 2$/,' ۲'))}</span></div><div class="xs faint">${esc(m.area)} · ${fa(m.shop_count)} فروشگاه</div></div>`).join('')}</div></div>`;
+  const recent = `<div class="card" style="padding:12px 14px;display:flex;gap:12px;align-items:center">${thumb('neck','انکر','', '').replace('class="thumb ','class="thumb " style="width:52px;height:52px"')}<div style="flex:1;min-width:0"><div class="b sm">${bidi('هندزفری گردنی انکر مدل Life U2i')}</div><div class="xs muted">۵ استعلام · <span style="color:var(--ok);font-weight:650">۱ قیمت تأییدشده</span> · ۱۸:۳۵</div></div>${ic('fwd')}</div>`;
+
+  const A = phone({cap:'A · First run', sub:'Need-first input; location chip shows the guessed spot. Example chips = the three judge scenarios.', navOn:0,
+    body: head(locChip('حافظ × جمهوری')) + `<div><h2 style="margin:4px 0 2px;font-size:22px;font-weight:800;line-height:1.5;text-wrap:balance">دنبال چه هستید؟</h2><p class="lede">بگویید برای چه می‌خواهید و تا چقدر؛ بقیه‌اش با ما.</p></div>${searchBox}${ex}${how}${catList}</div><div style="height:16px"></div>${mallList}<div style="height:20px"></div>`});
+  const B = phone({cap:'B · Location denied', sub:'Never a dead end: pick an area by hand. Bottom sheet, thumb-reachable.', navOn:0,
+    body: head(locChip('موقعیت نامشخص','')) + `<div class="banner warn" style="border-radius:12px">${ic('pin','s')}<span>به موقعیت شما دسترسی نداریم. منطقه را انتخاب کنید تا فاصله‌ها درست حساب شود.</span></div>${searchBox}</div>`,
+    over:`<div class="scrim"></div><div class="sheet"><h3>کجا خرید می‌کنید؟</h3><p class="lede" style="margin-top:-8px">موقعیت شما فقط برای محاسبهٔ فاصله استفاده می‌شود.</p>
+     <div class="wrapr">${['جمهوری','فردوسی','لاله‌زار','بهارستان','شیخ هادی'].map((a,i)=>`<span class="chip ${i===0?'on':''}" style="min-height:44px">${i===0?ic('check','s'):''}${a}</span>`).join('')}</div>
+     <div class="field">${ic('search','s')}<span class="faint">جستجوی خیابان یا پاساژ…</span></div>
+     <button class="btn sec block">${ic('loc','s')}دوباره اجازهٔ موقعیت را بدهم</button>
+     <button class="btn pri block">ادامه با «جمهوری»</button></div>`});
+  const Cc = phone({cap:'C · Returning + offline', sub:'Poor signal in a taxi: last results stay usable, stamped with when they were fetched.', navOn:0, time:'۱۸:۵۱',
+    body: `<div class="banner unk">${ic('wifi','s')}<span>اینترنت قطع یا ضعیف است. آخرین نتایج ذخیره‌شده (۱۸:۳۵) را می‌بینید؛ پاسخ فروشنده‌ها بعد از اتصال می‌رسد.</span></div>` + head(locChip('حافظ × جمهوری')) + `<div class="stack" style="gap:8px"><div class="h4">ادامهٔ خرید قبلی</div>${recent}
+      <div class="card" style="padding:12px 14px;display:flex;gap:12px;align-items:center">${thumb('hp').replace('class="thumb ','class="thumb " style="width:52px;height:52px"')}<div style="flex:1"><div class="b sm">گوشی ۱۰ تا ۱۵ میلیون، قسطی</div><div class="xs muted">۲ استعلام در انتظار · دیروز</div></div>${ic('fwd')}</div></div>
+      <div class="field" style="opacity:.6">${ic('search','s')}<span class="faint">جستجوی جدید بعد از اتصال</span></div>${catList}</div>`});
+  out.push(section('1','home','Home','Describe a need, confirm the location, or jump into a category or mall. The input sits high, but the first action ("پیدا کن") and the location sheet live in the thumb zone.','top_categories.json · malls.json',[A,B,Cc],true));
+}
+
+/* ---------- 3. Results ---------- */
+{
+  const it = D.search.items, by = id => it.find(p=>p.product_id===id);
+  const list = [
+    [PD, 'گردنی و مقاوم در برابر آب؛ ۱۹ فروشگاه نزدیک شما دارند'],
+    [it[1], 'ارزان‌ترین گردنی؛ ۲ فروشگاه'],
+    [it[6], 'گردنی؛ قیمت از ۱٫۷ میلیون در ۳ فروشگاه'],
+    [it[7], 'در بودجه؛ اختلاف قیمت بین فروشگاه‌ها زیاد است'],
+    [it[2], 'سقف بودجه؛ قیمت‌ها از ۲٫۹ تا ۳٫۸ میلیون'],
+  ];
+  const bar = (n=2) => `<div class="pad" style="padding-top:2px;display:flex;flex-direction:column;gap:10px">
+     <div class="field" style="padding-inline:4px 12px"><span class="sbtn" style="width:40px;height:40px">${ic('search','s')}</span><span style="flex:1">هندزفری بی‌سیم برای ورزش</span>${ic('mic','s')}</div></div>
+     <div class="hscroll" style="padding-block:10px 4px"><button class="chip">${ic('filter','s')}فیلترها <b>${fa(n)}</b></button><span class="chip on" title="از متن شما">بودجه: تا ۳ میلیون <span class="xs" style="opacity:.75">· از متن شما</span> ${ic('x','s x')}</span><span class="chip on">گردنی ${ic('x','s x')}</span><span class="chip">قسطی</span><span class="chip">باز است الان</span></div>
+     <div class="pad row" style="justify-content:space-between;padding-block:6px"><span class="sm muted">${fa(D.search.total.toLocaleString('en').replace(/,/g,'٬'))} کالا · <b style="color:var(--ink)">۵ در بودجه</b></span><span class="sm row" style="gap:4px;color:var(--accent-ink);font-weight:650">${ic('sort','s')}مناسب‌ترین</span></div>`;
+  const cards = list.map(([p,w],i)=>productCard(p,{why:w, badge: i<2?`<label class="xs row" style="gap:6px;color:var(--accent-ink);font-weight:650"><span class="sel on" style="width:20px;height:20px;border-radius:6px">${ic('check','s')}</span>در مقایسه</label>`:`<label class="xs row" style="gap:6px;color:var(--ink-3)"><span class="sel" style="width:20px;height:20px;border-radius:6px"></span>افزودن به مقایسه</label>`})).join('');
+  const A = phone({cap:'A · Results, budget parsed from text', sub:'"زیر ۳ میلیون" became a removable chip tagged «از متن شما». Every card says why it is here.',
+    body: appbar('نتایج','',{end:`<button class="iconbtn" aria-label="گفتگو">${ic('chat')}</button>`}) + steps(0) + bar() + `<div class="pad stack" style="gap:10px;padding-bottom:110px">${cards}</div>`,
+    cta:`<div class="sticky-cta"><div class="row"><div class="sm" style="flex:1"><b>۲ کالا</b> انتخاب شد<div class="xs faint">تا ۴ کالا را مقایسه کنید</div></div><button class="btn pri">${ic('compare','s')}مقایسه کن</button></div></div>`});
+  const brands = D.search.facets.brands.slice(0,6);
+  const B = phone({cap:'B · Filter sheet', sub:'Every change re-ranks the list behind the sheet instantly; the button only closes it. Fast delivery keeps its "unknown" shops unless excluded.',
+    body: appbar('نتایج') + steps(0) + bar(3) + `<div class="pad stack">${cards}</div>`,
+    over:`<div class="scrim"></div><div class="sheet"><div class="row" style="justify-content:space-between"><h3>فیلترها</h3><button class="btn ghost">پاک کردن همه</button></div>
+      <div class="stack" style="gap:6px"><div class="frow" style="min-height:0"><span class="b sm">بودجه</span><span class="sm num">تا <b>۳ میلیون</b> تومان</span></div>
+        <div class="slider"><div class="rail"></div><div class="fill" style="inset-inline:0 40%"></div><div class="knob" style="inset-inline-end:40%;transform:none"></div><div class="knob" style="inset-inline-start:-12px;transform:none"></div></div>
+        <div class="row xs faint" style="justify-content:space-between"><span>۰</span><span>۵ میلیون+</span></div></div>
+      <div class="stack" style="gap:6px"><span class="b sm">فاصله از شما</span><div class="seg"><div>۵۰۰ متر</div><div class="on">۱ کیلومتر</div><div>۳ کیلومتر</div><div>همه</div></div></div>
+      <div class="frow"><span><span class="b sm">قسطی</span><div class="xs faint">ترب‌پی، اسنپ‌پی، دیجی‌پی، تارا، ازکی‌وام</div></span><span class="toggle on"></span></div>
+      <div class="frow"><span class="b sm">فقط فروشگاه‌های باز</span><span class="toggle"></span></div>
+      <div class="stack" style="gap:6px"><span class="b sm">ارسال سریع</span><div class="seg"><div class="on">مهم نیست</div><div>دارد یا نامشخص</div><div>فقط دارد</div></div></div>
+      <div class="stack" style="gap:6px"><span class="b sm">برند</span><div class="wrapr">${brands.map((b,i)=>`<span class="chip ${i===1?'on':''}">${esc(b.name)} <span class="xs faint">${fa(b.count)}</span></span>`).join('')}</div></div>
+      <div class="stack" style="gap:6px"><span class="b sm">مرتب‌سازی</span><div class="seg"><div class="on">مناسب‌ترین</div><div>ارزان‌ترین</div><div>نزدیک‌ترین</div><div>تازه‌ترین قیمت</div></div></div>
+      <button class="btn pri block">نمایش ۳ کالا</button></div>`});
+  const skel = `<div class="card pcard"><div class="sk" style="width:76px;height:76px;border-radius:14px"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px;padding-top:4px"><div class="sk" style="height:14px;width:90%"></div><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:18px;width:40%"></div></div></div>`;
+  const Cc = phone({cap:'C · Loading', sub:'Search answers in ~15 ms, so skeletons rarely show; they keep the layout stable on a slow taxi connection.',
+    body: appbar('نتایج') + steps(0) + bar() + `<div class="pad stack" style="gap:10px">${skel.repeat(5)}</div>`});
+  const Dd = phone({cap:'D · No results', sub:'Each suggestion shows how many results it brings back, so relaxing a filter is a one-tap, low-risk move.',
+    body: appbar('نتایج') + steps(0) + `<div class="pad" style="padding-top:2px"><div class="field" style="padding-inline:4px 12px"><span class="sbtn" style="width:40px;height:40px">${ic('search','s')}</span><span style="flex:1">هندزفری استخوانی</span>${ic('x','s')}</div></div>
+      <div class="hscroll" style="padding-block:10px 4px"><span class="chip on">بودجه: تا ۵۰۰ هزار ${ic('x','s x')}</span><span class="chip on">باز است الان ${ic('x','s x')}</span></div>
+      <div class="empty"><div class="art-i">${ic('search')}</div><h4>با این بودجه چیزی پیدا نکردیم</h4><p>هندزفری استخوانی زیر ۵۰۰ هزار تومان در فروشگاه‌های این محدوده ثبت نشده است.</p></div>
+      <div class="pad stack" style="gap:8px"><span class="xs faint">یکی از این‌ها را امتحان کنید</span>
+       <button class="card row" style="padding:12px 14px;justify-content:space-between;font:inherit;color:inherit;width:100%"><span class="sm">بودجه را بردار</span><span class="sm b" style="color:var(--accent-ink)">۴۲ کالا ${ic('fwd','s')}</span></button>
+       <button class="card row" style="padding:12px 14px;justify-content:space-between;font:inherit;color:inherit;width:100%"><span class="sm">«باز است الان» را بردار</span><span class="sm b" style="color:var(--accent-ink)">۳ کالا ${ic('fwd','s')}</span></button>
+       <button class="card row" style="padding:12px 14px;justify-content:space-between;font:inherit;color:inherit;width:100%"><span class="sm">هندزفری گردنی ورزشی (مشابه)</span><span class="sm b" style="color:var(--accent-ink)">۸ کالا ${ic('fwd','s')}</span></button></div>`});
+  out.push(section('3','results','Product results + filters','Cards with price range, shop count and a "why this one" line. Budget, radius, installment, open-now and fast-delivery are one tap each; results re-rank in place.','search_results.json (items, facets.brands, total) · product_detail.json',[A,B,Cc,Dd],true));
+}
+
+/* ---------- 6. Shops for product ---------- */
+const SEL = [L[0].shop_id, L[1].shop_id, L[2].shop_id];
+{
+  const head = (sub) => appbar('فروشگاه‌های نزدیک', '', {end:`<button class="iconbtn" aria-label="فهرست">${ic('list')}</button>`}) + steps(1) +
+     `<div class="pad">${productMini(PD, sub)}</div>`;
+  const tabs = (a,b,on=0) => `<div class="tabs"><div class="${on===0?'on':''}">${ic('store','s')}این کالا را دارند <span class="cnt">${fa(a)}</span></div><div class="${on===1?'on':''}">${ic('q','s')}فقط در این دسته <span class="cnt">${fa(b)}</span></div></div>`;
+  const chips = (inst=false, id='') => `<div class="hscroll" style="padding-block:10px" ${id?`id="${id}"`:''}><button class="chip ${inst?'on':''}" data-toggle="inst">${inst?ic('check','s'):ic('card','s')}قسطی</button><span class="chip">باز است الان</span><span class="chip on">تا ۱ کیلومتر</span><span class="chip">ارسال سریع</span><span class="chip">${ic('sort','s')}مناسب‌ترین</span></div>`;
+  const listedHead = (n, total) => `<div class="pad" style="padding-top:4px"><div class="h4">${ic('store','s')}این کالا را ثبت کرده‌اند <span class="n">${fa(n)} از ${fa(total)}</span></div><p class="lede">قیمت ثبت‌شده توسط خود فروشگاه؛ تاریخ هر قیمت کنارش است.</p></div>`;
+  const catHead = `<div class="pad" style="padding-top:8px"><div class="h4" style="color:var(--ink-2)">${ic('q','s')}فقط در این دسته فعالیت دارند <span class="n">${fa(S.counts.category_only)}</span></div><p class="lede">این فروشگاه‌ها هندزفری می‌فروشند، اما این مدل را ثبت نکرده‌اند. موجودی را باید بپرسید.</p></div>`;
+  const cta = n => `<div class="sticky-cta"><button class="btn pri block">${ic('send','s')}استعلام از ${fa(n)} فروشگاه</button><div class="xs faint" style="text-align:center;margin-top:6px">موجودی، قیمت امروز و ساعت را یک‌جا می‌پرسیم</div></div>`;
+  const listedCards = L.map((s,i)=>shopCard(s,{sel:SEL.includes(s.shop_id)})).join('');
+  const A = phone({cap:'A · Map + list (listed first)', sub:'Map clusters the mall into one badge; selected shops fill in. Three are pre-picked by score.',
+    id:'shopsA',
+    body: head(`${fa(S.counts.listed)} فروشگاه · از ${mil(PD.price_min)} تومان`) + `<div style="height:10px"></div>` + tabs(S.counts.listed, S.counts.category_only) + chips(false,'shopsChips') + mapSvg(L,C,{sel:SEL,h:230}) +
+     `<div id="shopsList" class="stack" style="gap:10px;padding-top:12px">${listedHead(L.length, S.counts.listed)}<div class="pad stack" style="gap:10px">${listedCards}</div>${catHead}<div class="pad stack" style="gap:10px;padding-bottom:110px">${C.slice(0,3).map(s=>shopCard(s)).join('')}</div></div>`,
+    cta: cta(3), extra:`<button class="replay" data-act="inst">Tap «قسطی» on the phone to filter live</button>`});
+  const B = phone({cap:'B · List mode, the boundary', sub:'Listed and category-only never mix. Category-only cards are dashed, have no price, and ask instead of promising.',
+    body: appbar('فروشگاه‌های نزدیک','',{end:`<button class="iconbtn" aria-label="نقشه">${ic('map')}</button>`}) + steps(1) + tabs(S.counts.listed, S.counts.category_only, 1) + chips() +
+     `<div class="pad stack" style="gap:10px">${shopCard(L[2],{sel:true})}${shopCard(L[5])}</div>
+     <div class="pad" style="padding-block:14px 4px"><button class="btn sec block">نمایش ${fa(S.counts.listed-6)} فروشگاه دیگر که ثبت کرده‌اند</button></div>
+     <div class="divider"></div>${catHead}<div class="pad stack" style="gap:10px;padding-bottom:110px">${C.slice(1,5).map(s=>shopCard(s)).join('')}</div>`,
+    cta: cta(3)});
+  const I = D.shopsInst;
+  const Cc = phone({cap:'C · Installment filter + slow map', sub:'Filter applied: only shops that declared an installment provider. None confirmed in-store acceptance, and the card says so. Map tiles are slow, so the list comes first.',
+    body: head(`${fa(I.counts.listed)} فروشگاه قسطی · از ${mil(Math.min(...I.listed.map(s=>s.offer.price)))} تومان`) + chips(true) +
+      `<div class="banner unk" style="margin-inline:16px;border-radius:12px">${ic('map','s')}<span>نقشه کند بارگذاری می‌شود؛ فعلاً فهرست را ببینید. <b style="color:var(--accent-ink)">تلاش دوباره</b></span></div>` +
+      `<div class="stack" style="gap:10px;padding-top:12px">${listedHead(I.listed.length, I.counts.listed)}<div class="pad stack" style="gap:10px;padding-bottom:110px">${I.listed.slice(0,4).map((s,i)=>shopCard(s,{sel:i<2})).join('')}</div></div>`,
+    cta: cta(2)});
+  const Dd = phone({cap:'D · Zero results with filters', sub:'Relax suggestions are ranked by how many shops they recover. Category-only shops are the last fallback, labelled as "ask".',
+    body: appbar('فروشگاه‌های نزدیک') + steps(1) + `<div class="pad">${productMini(PD,'۰ فروشگاه با این فیلترها')}</div>
+     <div class="hscroll" style="padding-block:10px"><span class="chip on">قسطی ${ic('x','s x')}</span><span class="chip on">باز است الان ${ic('x','s x')}</span><span class="chip on">فقط ارسال سریع ${ic('x','s x')}</span><span class="chip on">تا ۵۰۰ متر ${ic('x','s x')}</span></div>
+     <div class="empty" style="padding-block:18px"><div class="art-i">${ic('store')}</div><h4>هیچ فروشگاهی همهٔ این شرایط را ندارد</h4><p>نزدیک‌ترین فروشگاه قسطی ۷۰۰ متر دورتر است.</p></div>
+     <div class="pad stack" style="gap:8px">${[['شعاع را ۱ کیلومتر کن','۲ فروشگاه'],['«فقط ارسال سریع» را بردار','۱ فروشگاه'],['«قسطی» را بردار','۱۹ فروشگاه']].map(([a,b])=>`<button class="card row" style="padding:12px 14px;justify-content:space-between;font:inherit;color:inherit;width:100%"><span class="sm">${a}</span><span class="sm b" style="color:var(--accent-ink)">${b} ${ic('fwd','s')}</span></button>`).join('')}
+     <div class="warnbox unk">${ic('q','s')}<span>${fa(S.counts.category_only)} فروشگاه در این دسته فعالیت دارند. می‌توانیم از ۵ تای نزدیک‌تر بپرسیم این مدل را دارند یا نه.</span></div>
+     <button class="btn sec block">پرسیدن از ۵ فروشگاه این دسته</button></div>`});
+  out.push(section('6','shops','Shops for a product (map + list)','Step 2 of the journey. Two sections, never interleaved: shops that registered this product (with price + age), then shops that only work in the category (must ask). No call buttons anywhere; contact is the in-app inquiry.','shops_for_product.json (19 listed / 238 category_only) · shops_for_product_installment_only.json',[A,B,Cc,Dd],true));
+}
+
+/* ---------- 10. Tracker ---------- */
+const NOREPLY = {id:'inq_demo4', status:'no_reply', label:'پاسخی نیامد', answer:null, shop:L[4], product:INQ[0].product, alternatives:{kind:'similar_product', product:D.similar[2]}};
+const inqAll = [...INQ, NOREPLY];
+const listedOf = id => L.find(s=>s.shop_id===id);
+function tlSteps(st) {
+  const order = ['sent','delivered','answer'], idx = st==='sent'?0:st==='delivered'?1:2;
+  const lbl3 = st==='unavailable'?'ناموجود':st==='no_reply'?'بی‌پاسخ':'پاسخ';
+  return `<div class="tl"><span class="done">ارسال</span><i class="${idx>=1?'done':''}"></i><span class="${idx>=1?'done':'live'}">دیده شد</span><i class="${idx>=2?'done':''}"></i><span class="${idx>=2?'done':idx===1?'live':''}">${lbl3}</span></div>`;
+}
+function inqCard(q, {flash=false}={}) {
+  const s = q.shop, lst = listedOf(s.shop_id);
+  let body = '';
+  if (q.status==='sent'||q.status==='delivered') body = `<div class="xs muted row" style="gap:6px">${ic('clock','s')}${q.status==='sent'?'منتظر دیده شدن…':'فروشنده پیام را دید؛ منتظر پاسخ…'} <span class="num">مهلت ۰۳:۱۲</span></div>${lst?`<div class="xs faint">قیمت ثبت‌شده: ${money(lst.offer.price)} تومان · ${ago(lst.offer.age_days)}</div>`:''}`;
+  if (q.status==='answered') { const a=q.answer, pct=Math.round((a.price-lst.offer.price)/lst.offer.price*100);
+    body = `<div class="row" style="justify-content:space-between;align-items:flex-end">${priceBadge(null,{confirmed:{price:a.price, ago:'همین الان'}})}<div style="text-align:left"><div class="strike num">${money(lst.offer.price)}</div><span class="diff">${pct>0?'+':''}${fa(pct)}٪ نسبت به ثبت‌شده</span></div></div>
+     <div class="qa">«${esc(a.message)}»</div><div class="wrapr"><span class="oc open">باز تا ${hm(a.closes_at)} (طبق گفتهٔ فروشنده)</span>${a.installment?`<span class="inst conf">${ic('card','s')}قسط حضوری: بله</span>`:''}</div>`; }
+  if (q.status==='unavailable') body = `<div class="qa" style="background:var(--bad-soft);color:var(--bad)">ناموجود · «${esc(q.answer.message)}»</div><button class="btn sec block" style="min-height:44px">${fa(q.alternatives.shops.length)} فروشگاه دیگر همین کالا را دارند ${ic('fwd','s')}</button>`;
+  if (q.status==='no_reply') body = `<div class="xs muted">۵ دقیقه گذشت و پاسخی نیامد. شاید فروشنده سرش شلوغ است.</div><button class="btn sec block" style="min-height:44px">مدل مشابه در فروشگاه‌های دیگر ${ic('fwd','s')}</button>`;
+  return `<div class="card shop ${flash?'flash':''}" data-q="${q.id}"><div class="row" style="justify-content:space-between;align-items:flex-start"><div style="min-width:0">${shopName(s)}<div class="loc">${esc(s.mall||'')}<span class="sep">←</span>${s.floor_label?faT(s.floor_label):'<span style="color:var(--unk)">طبقه نامشخص</span>'}</div></div><span class="st ${q.status}">${esc(q.label)}</span></div>${tlSteps(q.status)}${body}</div>`;
+}
+const summary = qs => { const c = k => qs.filter(q=>k.includes(q.status)).length;
+  return `<div class="sum"><div><b style="color:var(--ok)">${fa(c(['answered']))}</b>پاسخ</div><div><b style="color:var(--bad)">${fa(c(['unavailable']))}</b>ناموجود</div><div><b style="color:var(--accent-ink)">${fa(c(['sent','delivered']))}</b>در انتظار</div><div><b style="color:var(--ink-3)">${fa(c(['no_reply']))}</b>بی‌پاسخ</div></div>`; };
+const trackerBody = (qs, banner='') => appbar('پیگیری استعلام', bidi('هندزفری گردنی انکر مدل Life U2i'), {end:`<button class="iconbtn" aria-label="گفتگو">${ic('chat')}</button>`}) + steps(3) + banner +
+  `<div class="pad stack" style="gap:10px;padding-bottom:120px"><div class="row xs muted" style="justify-content:space-between"><span>سؤال‌ها: موجودی الان · قیمت نهایی امروز</span><span class="row" style="gap:4px;color:var(--ok)"><span class="oc open" style="font-size:12px">زنده</span></span></div>
+  <div class="tsum">${summary(qs)}</div><div class="tlist stack" style="gap:10px">${qs.map(q=>inqCard(q)).join('')}</div></div>`;
+{
+  const A = phone({cap:'A · Live tracker', sub:'One price came back 14% above the listed one, one shop is out of stock, one stayed silent. Each bad outcome carries its own way forward.',
+    id:'trk', body: trackerBody(inqAll),
+    over:`<div class="toast" id="trkToast">${ic('alert')}<span><b>قیمت واقعی ۱۴٪ بیشتر از قیمت ثبت‌شده است.</b><br>مهرین رووان: ۲٬۸۵۰٬۰۰۰ به‌جای ۲٬۵۰۰٬۰۰۰ تومان</span></div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block">${ic('route','s')}ساخت برنامهٔ بازدید</button><div class="xs faint" style="text-align:center;margin-top:6px">با ۱ فروشگاه تأییدشده · بقیه را بعداً اضافه می‌کنیم</div></div>`,
+    extra:`<button class="replay" data-act="replay">▶ Replay live updates</button>`});
+  const early = inqAll.map((q,i)=>({...q, status: i%2?'delivered':'sent', label: i%2?'دیده شد':'ارسال شد'}));
+  const B = phone({cap:'B · Just sent, demo mode', sub:'Simulated sellers are labelled at the top, always. Waiting rows pulse; nothing pretends to be an answer yet.', time:'۱۸:۳۶',
+    body: trackerBody(early, `<div class="banner info">${ic('spark','s')}<span><b>پاسخ‌ها شبیه‌سازی‌شده‌اند — حالت نمایشی.</b> فروشنده‌های واقعی در این نسخه پاسخ نمی‌دهند.</span></div>`),
+    cta:`<div class="sticky-cta"><button class="btn sec block">${ic('plus','s')}افزودن فروشگاه (۰ جای خالی)</button></div>`});
+  out.push(section('10','tracker','Inquiry tracker (live)','Status per shop over SSE: sent → seen → answered | unavailable | no_reply. A confirmed price turns green and shows its difference from the listed price; a toast explains it. The no_reply card follows the API status contract (no fixture row for it yet).','inquiries_all_states.json (sent, delivered, answered, unavailable + alternatives) · no_reply built from the status contract',[A,B],true));
+}
+
+/* ---------- 2. Chat ---------- */
+{
+  const it = D.search.items;
+  const mini = (p) => `<div class="card mini">${thumb(glyphOf(p.title),p.brand)}<div class="xs b" style="line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${bidi(p.title)}</div><div class="sm b num">از ${mil(p.price_min)}</div><div class="xs faint">${fa(p.shop_count)} فروشگاه</div></div>`;
+  const A = phone({cap:'A · Streaming with typed blocks', sub:'The assistant writes and also drives the UI: the budget chip at the top updated from the message. Tool-status line while it searches.',
+    body: appbar('دستیار خرید','',{end:''}) + `<div class="hscroll" style="padding-block:4px 10px"><span class="chip on" style="box-shadow:0 0 0 3px var(--accent-soft)">بودجه: تا ۳ میلیون <span class="xs">· از گفتگو</span></span><span class="chip">حافظ × جمهوری</span></div>
+     <div class="pad stack" style="gap:12px;padding-bottom:16px">
+      <div class="msg me">یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</div>
+      <div class="msg ai">برای ورزش، مدل‌های گردنی جا نمی‌افتند و عرق را تحمل می‌کنند. یک سؤال: نویزگیر برایتان مهم است؟</div>
+      <div class="wrapr" style="justify-content:flex-end"><span class="chip">گردنی</span><span class="chip">توگوشی بدون سیم</span><span class="chip on">نویزگیر مهم نیست</span></div>
+      <div class="msg me">گردنی، نویزگیر مهم نیست</div>
+      <div class="msg ai">سه گزینه با فروشنده در نزدیکی شما پیدا کردم<span class="caret"></span></div>
+      <div class="hscroll" style="padding-inline:0">${[PD,it[1],it[6]].map(mini).join('')}</div>
+      <div class="toolline"><span class="spin"></span>در حال یافتن فروشگاه‌ها…</div></div>`,
+    cta:`<div style="padding:8px 12px 24px;border-top:1px solid var(--line);background:var(--card);display:flex;gap:8px;align-items:center"><div class="field" style="flex:1;min-height:46px"><span class="faint">بنویسید یا بپرسید…</span></div><button class="iconbtn" style="background:var(--accent);color:var(--on-accent)" aria-label="ارسال">${ic('send')}</button></div>`});
+  const B = phone({cap:'B · LLM down → simple search', sub:'The same journey works without the assistant: chips and filters, never a blank chat.',
+    body: appbar('دستیار خرید') + `<div class="banner warn">${ic('alert','s')}<span><b>دستیار هوشمند الان در دسترس نیست.</b> جستجوی ساده فعال شد؛ فیلترها همه کار می‌کنند.</span></div>
+     <div class="pad stack" style="gap:12px;padding-top:12px"><div class="msg me">یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</div>
+      <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:8px"><span class="xs faint">از متن شما برداشتیم</span><div class="wrapr"><span class="chip on">هندزفری</span><span class="chip on">بی‌سیم</span><span class="chip on">تا ۳ میلیون</span></div></div>
+      ${productCard(PD)}${productCard(it[1])}<button class="btn sec block">همهٔ نتایج (۵)</button></div>`,
+    cta:`<div style="padding:8px 12px 24px;border-top:1px solid var(--line);background:var(--card);display:flex;gap:8px;align-items:center"><div class="field" style="flex:1;min-height:46px;opacity:.7"><span class="faint">جستجوی کلیدواژه…</span></div><button class="btn ghost">${ic('refresh','s')}تلاش دوباره</button></div>`});
+  out.push(section('2','chat','Chat + inline blocks','A helper, not the only path. Blocks are the same components as the rest of the app (product_cards, chips, shop_list, inquiry_status…), so chat and screens share state.','SSE blocks · search_results.json · product_detail.json',[A,B]));
+}
+
+/* ---------- 4. Product detail ---------- */
+{
+  const keys = ['نوع اتصال','مناسب برای','قابلیت های مقاومتی','عمر باتری هدفون در حالت استندبای','نسخه بلوتوث','وزن'];
+  const specs = keys.map(k=>PD.specs.find(s=>s.key===k)).filter(Boolean);
+  const pos = v => ((v-PD.price_min)/(PD.price_max-PD.price_min)*100).toFixed(1);
+  const A = phone({cap:'A · Product detail', sub:'Price range drawn to scale (min · median · max). Source and age sit right under the numbers.',
+    body: appbar('', '', {end:`<button class="iconbtn" aria-label="مقایسه">${ic('compare')}</button>`}) + steps(0) + `<div class="tabs" style="margin-bottom:12px"><div class="on">${ic('pin','s')}خرید حضوری <span class="cnt">${fa(PD.shop_count)}</span></div><div>مشخصات</div><div>مقایسه</div></div>` +
+     `<div class="pad stack" style="gap:14px;padding-bottom:120px"><div class="thumb" style="width:100%;height:190px;border-radius:20px">${ic('neck')}<span class="br" style="font-size:12px">۱ از ${fa(PD.images.length)}</span></div>
+      <div><div class="xs faint">${esc(PD.brand)} · ${esc(PD.category)}</div><h2 style="margin:2px 0 0;font-size:19px;line-height:1.6;font-weight:800">${bidi(PD.title)}</h2></div>
+      <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div class="row" style="justify-content:space-between;align-items:baseline"><span class="price" style="font-size:20px">از ${mil(PD.price_min)}<small>تومان</small></span><span class="sm muted">${fa(PD.shop_count)} فروشگاه</span></div>
+        <div style="position:relative;height:30px"><div style="position:absolute;inset-inline:0;top:12px;height:6px;border-radius:3px;background:linear-gradient(to left,var(--ok-soft),var(--sunk))"></div>
+        ${[[PD.price_min,'کمترین'],[PD.price_median,'میانه'],[PD.price_max,'بیشترین']].map(([v,l])=>`<span style="position:absolute;top:8px;inset-inline-start:calc(${pos(v)}% - 7px);width:14px;height:14px;border-radius:50%;background:var(--card);border:2.5px solid ${l==='کمترین'?'var(--ok)':'var(--ink-3)'}"></span>`).join('')}</div>
+        <div class="row xs num" style="justify-content:space-between"><span><b>${mil(PD.price_min)}</b><br><span class="faint">کمترین</span></span><span style="text-align:center"><b>${mil(PD.price_median)}</b><br><span class="faint">میانه</span></span><span style="text-align:left"><b>${mil(PD.price_max)}</b><br><span class="faint">بیشترین</span></span></div>
+        ${srcNote('منبع: ترب · قیمت‌های ثبت‌شده، از ۹ تا ۳۷ روز پیش؛ هنوز هیچ‌کدام تأیید نشده')}</div>
+      <div class="warnbox info">${ic('spark','s')}<span><b>چرا این؟</b> گردنی و مقاوم در برابر آب، مناسب ورزش. با ۲٫۴۹ میلیون زیر بودجهٔ شماست و ۶ فروشگاه در پاساژ علاالدین، ۲ دقیقه پیاده، دارندش.</span></div>
+      <div><div class="h4" style="margin-bottom:6px">مشخصات کلیدی</div><table class="ctab">${specs.map(s=>`<tr><th>${esc(s.key)}</th><td>${faT(s.value)}</td></tr>`).join('')}</table><button class="btn ghost" style="padding:0">همهٔ ${fa(PD.specs.length)} مشخصه ${ic('fwd','s')}</button></div></div>`,
+    cta:`<div class="sticky-cta"><div class="row"><button class="btn sec" style="flex:0 0 auto">${ic('compare','s')}مقایسه</button><button class="btn pri" style="flex:1">${ic('map','s')}فروشگاه‌های نزدیک</button></div></div>`});
+  const one = D.similar[0];
+  const B = phone({cap:'B · No image, no specs, single shop', sub:'Three gaps drawn as gaps. The single-shop warning offers the better-stocked twin right away.',
+    body: appbar('') + steps(0) + `<div class="pad stack" style="gap:14px;padding-bottom:120px">${thumb('', '', true).replace('class="thumb none ','class="thumb none " style="width:100%;height:150px;border-radius:20px"')}
+      <div><div class="xs faint">${esc(one.brand)} · ${esc(one.category)}</div><h2 style="margin:2px 0 0;font-size:18px;line-height:1.6;font-weight:800">${bidi(one.title)}</h2></div>
+      <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px"><span class="price" style="font-size:20px">${money(one.price_min)}<small>تومان</small></span><span class="sm muted">فقط ۱ فروشگاه · ۱ پیشنهاد</span></div>
+      <div class="warnbox warn">${ic('alert','s')}<span><b>فقط ۱ فروشگاه این کالا را دارد.</b> اگر ناموجود باشد گزینهٔ دیگری نمی‌ماند؛ جایگزین‌ها را ببینید.</span></div>
+      <div class="warnbox unk">${ic('q','s')}<span>مشخصات فنی برای این کالا ثبت نشده. از فروشنده دربارهٔ اصالت و گارانتی بپرسید.</span></div>
+      <div class="h4">همین مدل با فروشندهٔ بیشتر</div>${productCard(PD,{why:'همان انکر Life U2i؛ ۱۹ فروشگاه و ارزان‌تر'})}</div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block">دیدن جایگزین‌ها</button></div>`});
+  out.push(section('4','detail','Product detail','Specs, price range, shop count and the reason it was suggested.','product_detail.json · similar_products.json',[A,B]));
+}
+
+/* ---------- 5. Compare products ---------- */
+{
+  const CP = D.compare, [p1,p2] = CP.products;
+  const both = CP.rows.filter(r=>r.values.every(v=>v!=null));
+  const one = CP.rows.filter(r=>r.values.some(v=>v==null) && !/nhvn/.test(r.values.join('')));
+  const rows = [...both, ...one.slice(0,7)];
+  const cell = v => v==null ? '<span class="cell-unk">نامشخص</span>' : faT(v);
+  const A = phone({cap:'A · Compare 2 models', sub:`Rows that differ come first and are tinted (${CP.rows.filter(r=>r.differs).length} of ${CP.rows.length}). Missing cells say "نامشخص", never blank.`,
+    body: appbar('مقایسهٔ کالاها','۲ مدل') + steps(0) +
+     `<div class="pad stack" style="gap:12px;padding-bottom:110px"><div style="display:grid;grid-template-columns:30% 1fr 1fr;gap:8px;align-items:end"><span></span>${[p1,p2].map((p,i)=>`<div class="stack" style="gap:6px">${thumb(glyphOf(p.title),p.brand).replace('class="thumb ','class="thumb " style="width:100%;height:64px"')}<div class="xs b" style="line-height:1.5">${bidi(p.title)}</div><div class="sm b num">از ${mil(p.price_min)}</div><div class="xs faint">${fa(p.shop_count)} فروشگاه</div></div>`).join('')}</div>
+      <div class="warnbox info">${ic('spark','s')}<span><b>برای شما کدام بهتر است؟</b> برای ورزش با بودجهٔ ۳ میلیون، <b>انکر Life U2i</b>: مقاوم در برابر آب، زیر بودجه و ۱۹ فروشگاه. هایلو نویزگیر فعال و باتری ۳۵ ساعته دارد اما از ۳٫۳ میلیون شروع می‌شود.</span></div>
+      <div class="row" style="justify-content:space-between"><span class="sm b">فقط تفاوت‌ها</span><span class="toggle on"></span></div>
+      <table class="ctab"><tbody>${rows.map(r=>`<tr class="${r.differs?'d':''}"><th>${esc(r.key)}</th><td>${cell(r.values[0])}</td><td>${cell(r.values[1])}</td></tr>`).join('')}</tbody></table>
+      <span class="xs faint">داده‌های مشخصات از ترب؛ نام ویژگی‌ها در دو کالا یکسان ثبت نشده.</span></div>`,
+    cta:`<div class="sticky-cta"><div class="row"><button class="btn sec" style="flex:1">هایلو</button><button class="btn pri" style="flex:1.4">انتخاب انکر ${ic('fwd','s')}</button></div></div>`});
+  out.push(section('5','pcompare','Compare products','2–4 models side by side, AI summary on top, differing rows first.','product_compare.json (rows[].differs, null values)',[A]));
+}
+
+/* ---------- 7. Shop detail ---------- */
+{
+  const sd = D.sd, DAYS = [['sat','شنبه'],['sun','یکشنبه'],['mon','دوشنبه'],['tue','سه‌شنبه'],['wed','چهارشنبه'],['thu','پنجشنبه'],['fri','جمعه']];
+  const hours = (wh, sus=false) => !wh ? `<div class="warnbox unk">${ic('clock','s')}<span><b>ساعت کاری ثبت نشده.</b> قبل از رفتن بپرسید؛ در استعلام سؤال ساعت را اضافه کرده‌ایم.</span></div>` :
+    `<table class="hours"><tbody>${DAYS.map(([k,l])=>{ const d = wh[k]; const sh = (d.shifts||[]).filter(x=>!(x.start_time==='00:00:00'&&x.end_time==='00:00:00'));
+      let v; if (d.status==='closed') v='تعطیل'; else if (d.status==='unsupported') v='<span class="bad">نامعتبر</span>'; else v = sh.map(x=>`${hm(x.start_time)}–${hm(x.end_time)}`).join('، ');
+      const odd = sus && d.status==='declared' && sh.some(x=>x.start_time<'06:00:00');
+      return `<tr class="${k==='wed'?'today':''} ${k==='fri'?'fri':''}"><td>${l}${k==='wed'?' · امروز':''}</td><td>${odd?`<span class="bad">${v} ⚠</span>`:v}</td></tr>`; }).join('')}</tbody></table>`;
+  const head = (s) => `<div class="stack" style="gap:6px">${shopName(s)}${!s.name_is_verified?'<span class="xs faint">نام از داده‌ها نمایش داده می‌شود؛ ممکن است با تابلوی فروشگاه فرق کند.</span>':''}<div class="wrapr">${openChip(s.open)}</div><div class="wrapr">${instChips(s,true)}${fast(s.fast_delivery)}</div></div>`;
+  const noCall = `<div class="warnbox unk">${ic('lock','s')}<span>شمارهٔ تلفن در داده‌ها معتبر نیست؛ تماس فقط از راه استعلام.</span></div>`;
+  const offers = s => s.offers.length ? `<div class="stack" style="gap:8px"><div class="h4">کالاهای ثبت‌شده <span class="n">${fa(s.offer_count)}</span></div>${s.offers.slice(0,2).map(o=>`<div class="card" style="padding:10px 12px;display:flex;flex-direction:column;gap:6px"><div class="sm b" style="line-height:1.6">${bidi(o.title||o.seller_title)}</div>${priceBadge(o)}</div>`).join('')}</div>`
+    : `<div class="warnbox unk">${ic('store','s')}<span>این فروشگاه هنوز کالایی با قیمت ثبت نکرده است.</span></div>`;
+  const cats = s => s.categories.length ? `<div class="stack" style="gap:6px"><div class="h4">دسته‌ها</div><div class="wrapr">${s.categories.slice(0,5).map(c=>`<span class="tag" style="background:var(--sunk);color:var(--ink-2)">${esc(c)}</span>`).join('')}${s.categories.length>5?`<span class="tag" style="color:var(--accent-ink)">+${fa(s.categories.length-5)} دسته</span>`:''}</div></div>` : '';
+  const cta = `<div class="sticky-cta"><button class="btn pri block">${ic('send','s')}استعلام از این فروشگاه</button></div>`;
+  const page = (s, extra, srcTxt) => appbar('فروشگاه','',{end:`<button class="iconbtn" aria-label="نقشه">${ic('map')}</button>`}) + `<div class="pad stack" style="gap:14px;padding-bottom:110px">${head(s)}${mallLocator(s, s.floor!=null && s.floor>6?[-2,s.floor]:[-2,7])}${extra}${offers(s)}${cats(s)}${noCall}${srcNote(srcTxt)}</div>`;
+  const a = sd.shop_full_hours_in_mall, b = sd.shop_suspicious_hours, c = sd.shop_real_name_with_website, d = sd.shop_installment_channel_unknown, e = sd.shop_installment_in_person;
+  out.push(section('7','shop','Shop detail','Everything about one shop. Weekly hours with today highlighted; Friday visibly closed; suspicious hours flagged; missing data drawn as missing. No call button.','shop_full_hours_in_mall · shop_suspicious_hours · shop_real_name_with_website · shop_installment_channel_unknown · shop_installment_in_person',[
+    phone({cap:'A · Mall shop, full hours', sub:'Closes in 18 min, so the hours table leads. Saturday is closed for this shop, which the table shows plainly.', body: page(a, `<div class="stack" style="gap:6px"><div class="h4">ساعت کاری</div>${hours(a.weekly_hours)}</div>`, 'منبع: ترب · ساعت‌ها توسط فروشگاه اعلام شده'), cta}),
+    phone({cap:'B · Hours that look wrong', sub:'08:00–08:00 on five days and 02:00–08:00 on Thursday: shown, flagged, and not trusted for "open now".', body: page(b, `<div class="warnbox warn">${ic('alert','s')}<span><b>ساعت‌ها ممکن است دقیق نباشد.</b> ساعت ثبت‌شده برای چند روز نامعتبر است؛ قبل از رفتن بپرسید.</span></div><div class="stack" style="gap:6px"><div class="h4">ساعت کاری</div>${hours(b.weekly_hours,true)}</div>`, 'منبع: ترب · ساعت‌ها با الگوی معمول همخوانی ندارد'), cta}),
+    phone({cap:'C · Verified name, website, no hours', sub:'A real brand (name_is_verified) earns the green badge and a website link. Hours: none on record.', body: page(c, `<a href="${esc(c.website)}" target="_blank" rel="noopener" class="card row" style="padding:12px 14px;gap:10px;color:var(--accent-ink);text-decoration:none">${ic('link','s')}<bdi>takhtjamshidmobile.com</bdi></a><div class="stack" style="gap:6px"><div class="h4">ساعت کاری</div>${hours(null)}</div>`, 'منبع: ترب · نام فروشگاه تأییدشده')}),
+    phone({cap:'D · Closed now, installment unconfirmed', sub:'Closed state says when it reopens. Two providers declared, but in-store acceptance is unknown, and the chips say that.', body: page(d, `<div class="stack" style="gap:6px"><div class="h4">ساعت کاری</div>${hours(d.weekly_hours)}</div>`, 'منبع: ترب · قسط اعلام‌شده توسط فروشگاه'), cta}),
+    phone({cap:'E · Street shop, in-person installment', sub:'No mall: the locator shows the street address instead. Digipay confirmed in store gets the solid green chip. Open Friday afternoon.', body: page(e, `<div class="stack" style="gap:6px"><div class="h4">ساعت کاری</div>${hours(e.weekly_hours)}</div>`, 'منبع: ترب · پذیرش حضوری تأییدشده'), cta}),
+  ]));
+}
+
+/* ---------- 8. Compare shops ---------- */
+{
+  const ans = INQ.find(i=>i.status==='answered');
+  const cols = [L[0], L[2], L[1]];
+  const rowsDef = [
+    ['قیمت', s => s.shop_id===ans.shop.shop_id ? priceBadge(null,{confirmed:{price:ans.answer.price, ago:'۱۲ دقیقه پیش'}}).replace('تأیید شده توسط فروشنده · ','تأییدشده · ') : priceBadge(s.offer)],
+    ['فاصله', s => `${fa(s.walk_min)} دقیقه پیاده`],
+    ['وضعیت', s => openChip(s.open)],
+    ['محل', s => `${esc(s.mall)}<br>${s.floor_label?faT(s.floor_label):'<span class="cell-unk">طبقه نامشخص</span>'}`],
+    ['قسطی', s => s.installment ? 'دارد' : 'ندارد'],
+    ['گارانتی', s => s.offer.warranty ? esc(s.offer.warranty) : '<span class="cell-unk">نامشخص</span>'],
+    ['ارسال سریع', s => s.fast_delivery===true?'دارد':s.fast_delivery===false?'ندارد':'<span class="cell-unk">نامشخص</span>'],
+  ];
+  const A = phone({cap:'A · 3 shops side by side', sub:'Sort presets re-rank columns. The confirmed price wins over a cheaper listed one, and the reason is spelled out. Ties are explained.',
+    body: appbar('مقایسهٔ فروشگاه‌ها', bidi('انکر Life U2i')) + steps(2) + `<div class="pad stack" style="gap:12px;padding-bottom:110px">
+     <div class="seg"><div class="on">بهترین</div><div>قیمت</div><div>فاصله</div><div>تازگی قیمت</div></div>
+     <div style="overflow-x:auto;margin-inline:-16px;padding-inline:16px"><table class="ctab" style="min-width:330px"><thead><tr><th></th>${cols.map((s,i)=>`<td><div class="row" style="gap:4px"><span class="tag" style="background:${i===0?'var(--accent)':'var(--sunk)'};color:${i===0?'var(--on-accent)':'var(--ink-2)'}">${fa(i+1)}</span></div><div class="b sm" style="margin-top:4px">${esc(s.name)}</div></td>`).join('')}</tr></thead>
+      <tbody>${rowsDef.map(([k,f])=>`<tr><th>${k}</th>${cols.map(s=>`<td>${f(s)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+     <div class="warnbox info">${ic('spark','s')}<span><b>چرا نیکورا ویوان اول است؟</b> ارزان‌ترین قیمت ثبت‌شده (۱۲ روز پیش)، الان باز است و ۲ دقیقه فاصله دارد. مهرین رووان تنها قیمت تأییدشده را دارد اما ۳۶۰ هزار تومان گران‌تر است.</span></div>
+     <div class="warnbox unk">${ic('sort','s')}<span>هر سه ۲ دقیقه فاصله دارند؛ رتبه با قیمت و تازگی قیمت مشخص شد.</span></div></div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block">${ic('send','s')}استعلام از نیکورا ویوان</button></div>`});
+  out.push(section('8','scompare','Compare shops','2–4 shops in columns with a "why ranked" explanation and tie handling.','shops_for_product.json listed[] · inquiries_all_states.json (confirmed price)',[A]));
+}
+
+/* ---------- 9. Composer ---------- */
+{
+  const Q = [['stock','آیا الان موجود است؟',1],['price','قیمت نهایی امروز چقدر است؟',1],['hours','تا چه ساعتی باز هستید؟',0],['installment','قسط حضوری می‌پذیرید؟',1],['warranty','گارانتی دارد؟ چه نوع؟',0]];
+  const qList = Q.map(([k,t,on])=>`<label class="frow card" style="padding:0 12px;min-height:50px"><span class="sm">${t}</span><span class="sel ${on?'on':''}">${on?ic('check','s'):''}</span></label>`).join('');
+  const shopChip = s => `<span class="chip on" style="min-height:40px">${esc(s.name)} ${ic('x','s x')}</span>`;
+  const A = phone({cap:'A · Compose', sub:'Pick shops (max 5) and questions; the preview shows exactly what the seller will see.',
+    body: appbar('استعلام', bidi('هندزفری گردنی انکر مدل Life U2i')) + steps(3) + `<div class="pad stack" style="gap:14px;padding-bottom:120px">
+     <div class="stack" style="gap:8px"><div class="h4">فروشگاه‌ها <span class="n">۳ از ۵</span></div><div class="wrapr">${[L[0],L[1],L[2]].map(shopChip).join('')}<span class="chip">${ic('plus','s')}افزودن</span></div></div>
+     <div class="stack" style="gap:8px"><div class="h4">چه بپرسیم؟</div>${qList}</div>
+     <div class="stack" style="gap:6px"><div class="h4">یادداشت <span class="n">اختیاری</span></div><div class="field" style="min-height:56px"><span>رنگ مشکی می‌خواهم.</span></div></div>
+     <div class="stack" style="gap:6px"><div class="h4">مهلت پاسخ</div><div class="seg"><div>۲ دقیقه</div><div class="on">۵ دقیقه</div><div>۱۵ دقیقه</div></div><span class="xs faint">اگر کسی تا ۵ دقیقه جواب ندهد، جایگزین پیشنهاد می‌دهیم.</span></div>
+     <div class="card" style="padding:12px;background:var(--sunk);border-style:dashed"><div class="xs faint" style="margin-bottom:4px">پیش‌نمایش پیام برای فروشنده</div><div class="sm">سلام، مشتری‌ای نزدیک فروشگاه شماست و دربارهٔ «${bidi('هندزفری گردنی انکر مدل Life U2i')}» می‌پرسد: موجود است؟ قیمت نهایی امروز؟ قسط حضوری می‌پذیرید؟ «رنگ مشکی می‌خواهم.»</div></div></div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block">${ic('send','s')}ارسال به ۳ فروشگاه</button></div>`});
+  const five = [...L.slice(0,5)];
+  const B = phone({cap:'B · Max 5 reached, sending', sub:'At five the add chip turns into an explanation. The send button reports progress per shop.',
+    body: appbar('استعلام', bidi('هندزفری گردنی انکر مدل Life U2i')) + steps(3) + `<div class="pad stack" style="gap:14px;padding-bottom:120px">
+     <div class="stack" style="gap:8px"><div class="h4">فروشگاه‌ها <span class="n">۵ از ۵</span></div><div class="wrapr">${five.map(shopChip).join('')}</div>
+      <div class="warnbox unk">${ic('alert','s')}<span>حداکثر ۵ فروشگاه. برای افزودن، یکی را بردارید.</span></div></div>
+     <div class="stack" style="gap:8px"><div class="h4">چه بپرسیم؟</div>${qList}</div></div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block" disabled><span class="spin" style="border-top-color:var(--on-accent)"></span>در حال ارسال… ۳ از ۵</button></div>`});
+  out.push(section('9','composer','Inquiry composer','Choose questions, send to up to five shops at once.','GET /api/inquiry-questions (keys: stock, price, hours, installment, warranty) · shops_for_product.json',[A,B]));
+}
+
+/* ---------- 11. Alternatives ---------- */
+{
+  const un = INQ.find(i=>i.status==='unavailable');
+  const A = phone({cap:'A · Same product, other shops', sub:'Opens automatically when a shop says it is out of stock. Same model, so prices are compared like-for-like.',
+    body: trackerBody(inqAll),
+    over:`<div class="scrim"></div><div class="sheet"><div class="row" style="gap:8px"><span class="st unavailable">ناموجود</span><h3 style="flex:1">${esc(un.shop.name)} این کالا را ندارد</h3></div>
+     <p class="lede" style="margin-top:-6px">همین مدل در ${fa(un.alternatives.shops.length)} فروشگاه دیگر همین پاساژ ثبت شده است.</p>
+     <div class="warnbox ok">${ic('check','s')}<span>همان کالا: ${bidi(un.product.title)}</span></div>
+     ${un.alternatives.shops.map((s,i)=>shopCard(s,{sel:true, confirmed: s.shop_id===INQ[2].shop.shop_id?{price:INQ[2].answer.price, ago:'۸ دقیقه پیش'}:null})).join('')}
+     <button class="btn pri block">${ic('send','s')}استعلام از آذروش سرودیس</button><button class="btn ghost">بعداً</button></div>`});
+  const sp = NOREPLY.alternatives.product;
+  const B = phone({cap:'B · Similar product (different model)', sub:'When the alternative is a different product, the sheet shows what you asked for vs. what is offered, with the difference named.',
+    body: trackerBody(inqAll),
+    over:`<div class="scrim"></div><div class="sheet"><div class="row" style="gap:8px"><span class="st no_reply">بی‌پاسخ</span><h3 style="flex:1">${esc(NOREPLY.shop.name)} جواب نداد</h3></div>
+     <p class="lede" style="margin-top:-6px">در فروشگاه‌های اطراف، این مدل نزدیک‌ترین گزینه است.</p>
+     <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:10px">
+      <div class="row" style="gap:10px;opacity:.75">${thumb('neck','انکر').replace('class="thumb ','class="thumb " style="width:44px;height:44px"')}<div><div class="xs faint">شما خواستید</div><div class="sm b">${bidi('انکر Life U2i')} · گردنی</div></div></div>
+      <div class="row" style="gap:6px;color:var(--warn)">${ic('alert','s')}<span class="xs b">مدل متفاوت: توگوشی، نه گردنی · نویزگیر فعال دارد</span></div>
+      <div class="row" style="gap:10px">${thumb('hp','انکر').replace('class="thumb ','class="thumb " style="width:44px;height:44px"')}<div style="flex:1"><div class="xs faint">پیشنهاد</div><div class="sm b">${bidi(sp.title)}</div><div class="xs muted">از ${mil(sp.price_min)} تومان · ${fa(sp.shop_count)} فروشگاه</div></div></div></div>
+     <button class="btn pri block">دیدن فروشگاه‌های این مدل</button><button class="btn sec block">${ic('refresh','s')}صبر کن، دوباره از ${esc(NOREPLY.shop.name)} بپرس</button></div>`});
+  out.push(section('11','alts','Alternatives sheet','Appears on unavailable or no_reply. same_product and similar_product look different on purpose: a different model is never passed off as the same one.','inquiries_all_states.json alternatives (kind: same_product) · similar_products.json',[A,B]));
+}
+
+/* ---------- 12. Visit plan ---------- */
+{
+  const pl = D.plan, st = pl.stops[0], sd = D.sd.shop_full_hours_in_mall;
+  const stop = (n, name, where, arrive, closes, extra, warn='') => `<div style="display:grid;grid-template-columns:32px 1fr;gap:10px">
+    <div style="display:flex;flex-direction:column;align-items:center"><span style="width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:800">${fa(n)}</span><span style="flex:1;width:2px;background:var(--line);margin-top:4px"></span></div>
+    <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px"><div class="row" style="justify-content:space-between"><span class="b">${esc(name)}</span><span class="xs num muted">رسیدن ${arrive}</span></div><div class="crumb" style="font-size:13px">${where}</div><div class="xs muted">بسته می‌شود ${closes}</div>${extra}${warn}</div></div>`;
+  const A = phone({cap:'A · Visit plan', sub:'Ordered stops, mall → floor → unit, confirmed prices carried over. Stop 2 is flagged: you would arrive 5 minutes before closing.', time:'۱۷:۱۲',
+    body: appbar('برنامهٔ بازدید','امروز · ۲ توقف · حدود ۲۰ دقیقه پیاده') + steps(3) + `<div class="pad stack" style="gap:12px;padding-bottom:120px">
+     <div class="row sm muted" style="gap:8px">${ic('loc','s')}${esc(pl.start.label)} · حافظ × جمهوری</div>
+     <div>${stop(1, st.name, `${esc(st.mall)}<span class="ar">←</span>${faT(st.floor_label)}<span class="ar">←</span><span class="u">واحد نامشخص</span>`, hm(st.arrive_by), hm(st.closes_at), priceBadge(null,{confirmed:{price:st.confirmed_price, ago:'۲۴ دقیقه پیش'}}))}
+     ${stop(2, sd.name, `${esc(sd.mall)}<span class="ar">←</span>${faT(sd.floor_label)}<span class="ar">←</span>واحد ${fa(sd.unit)}`, '۱۸:۵۵', '۱۹:۰۰', priceBadge({price:2690000, age_days:9, freshness:'recent'}), `<div class="warnbox warn">${ic('clock','s')}<span>۵ دقیقه قبل از بسته شدن می‌رسید. اول اینجا بروید؟</span></div><button class="btn sec" style="min-height:40px">جابه‌جا کن: اول ${esc(sd.name)}</button>`)}</div>
+     <div class="warnbox info">${ic('layers','s')}<span>هر دو توقف در محدودهٔ شیخ هادی است؛ پاساژ علاالدین و علاالدین ۲ حدود ۶ دقیقه پیاده از هم فاصله دارند.</span></div>
+     <div class="warnbox warn">${ic('alert','s')}<span><b>طرح ترافیک:</b> ${esc(pl.transport.suggestion)}</span></div>
+     <div class="stack" style="gap:6px"><div class="h4">مسیریابی</div><div class="row" style="gap:8px">${[['نشان',pl.deep_links.neshan],['بلد',pl.deep_links.balad],['گوگل',pl.deep_links.google]].map(([n,u])=>`<a class="btn sec" style="flex:1;text-decoration:none" href="${esc(u)}" target="_blank" rel="noopener">${n}</a>`).join('')}</div></div>
+     <div class="stack" style="gap:6px"><div class="h4">داخل فروشگاه</div>${[...st.tips,'قیمت تأییدشده را نشان دهید: ۲٬۸۵۰٬۰۰۰ تومان','سلامت و اصالت را قبل از پرداخت امتحان کنید'].map((t,i)=>`<label class="frow card" style="padding:0 12px;min-height:46px"><span class="sm">${esc(t)}</span><span class="sel ${i===0?'on':''}">${i===0?ic('check','s'):''}</span></label>`).join('')}</div></div>`,
+    cta:`<div class="sticky-cta"><button class="btn pri block">${ic('route','s')}شروع مسیر</button></div>`});
+  out.push(section('12','plan','Visit plan','The end of the journey: where to go, in what order, before what time, and what to check at the counter.','visit_plan_SPEC_not_yet_implemented.json (+ shop_full_hours_in_mall for stop 2)',[A]));
+}
+
+/* ---------- 13. My shopping ---------- */
+{
+  const sess = (t, sub, pills, cls='') => `<div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px"><div class="row" style="justify-content:space-between"><span class="b sm">${t}</span>${ic('fwd','s')}</div><div class="xs muted">${sub}</div><div class="wrapr">${pills}</div></div>`;
+  const A = phone({cap:'A · Many sessions', sub:'Live counts per session; the one with a fresh answer floats to the top.', navOn:2,
+    body: appbar('خریدهای من','',{back:false}) + `<div class="pad stack" style="gap:10px"><div class="seg"><div class="on">فعال ۲</div><div>تمام‌شده ۱</div></div>
+     ${sess(bidi('هندزفری گردنی انکر مدل Life U2i'),'امروز ۱۸:۳۵ · ۵ استعلام',`<span class="st answered">۱ پاسخ</span><span class="st unavailable">۱ ناموجود</span><span class="st sent">۲ در انتظار</span><span class="st no_reply">۱ بی‌پاسخ</span>`)}
+     ${sess('گوشی ۱۰ تا ۱۵ میلیون، قسطی','دیروز ۱۶:۱۰ · ۲ استعلام',`<span class="st sent">۲ در انتظار</span><span class="tag" style="background:var(--warn-soft);color:var(--warn)">برنامه: فروشگاه ۱ فردا ۱۰:۰۰ باز می‌شود</span>`)}
+     <div class="xs faint" style="padding-top:6px">تمام‌شده</div>
+     ${sess('دوربین مداربسته ۴ کانال','۲۵ مهر · برنامهٔ بازدید انجام شد',`<span class="st answered">۳ پاسخ</span><span class="tag" style="background:var(--sunk);color:var(--ink-3)">بایگانی</span>`)}</div>`});
+  const B = phone({cap:'B · Empty', sub:'Explains what will appear here and offers the first step.', navOn:2,
+    body: appbar('خریدهای من','',{back:false}) + `<div class="empty" style="padding-top:90px"><div class="art-i">${ic('bag')}</div><h4>هنوز از فروشگاهی نپرسیده‌اید</h4><p>وقتی از فروشگاه‌ها استعلام بگیرید، پاسخ‌ها و برنامهٔ بازدید اینجا جمع می‌شود.</p><button class="btn pri" style="margin-top:8px">${ic('search','s')}شروع یک خرید</button></div>`});
+  out.push(section('13','mine','My shopping','All sessions, inquiries and plans with live status.','sessions + inquiries (GET /api/sessions/{id})',[A,B]));
+}
+
+/* ---------- 14. Seller inbox ---------- */
+{
+  const s = L[0], q = INQ[0];
+  const sb = (t) => `<div class="appbar" style="background:var(--ink);color:var(--paper);padding-block:10px"><span style="width:40px;height:40px;border-radius:12px;background:var(--paper);color:var(--ink);display:grid;place-items:center">${ic('inbox')}</span><h3 style="color:var(--paper)">${t}<span class="t2" style="color:var(--line-2)">صندوق استعلام · نسخهٔ فروشنده</span></h3></div>`;
+  const A = phone({cap:'A · Answer with big buttons', sub:'Seller-side page opened from a link (or the Bale bot). One-hand answers; the listed price is pre-filled to edit.', cls:'seller',
+    body: sb(esc(s.name)) + `<div class="pad stack" style="gap:14px;padding-block:14px 30px">
+     <div class="row xs muted" style="justify-content:space-between"><span>۱ استعلام جدید</span><span class="num">۲ دقیقه پیش · مهلت ۰۳:۰۰</span></div>
+     <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div class="b" style="line-height:1.6">${bidi(q.product.title)}</div>
+      <div class="qa">${q.questions.map(x=>esc(x.text)).join('<br>')}</div><div class="xs muted">مشتری حدود ۲ دقیقه با فروشگاه شما فاصله دارد.</div></div>
+     <div class="row" style="gap:10px"><button class="bigbtn ok" style="flex:1">${ic('check')}موجود است</button><button class="bigbtn no" style="flex:1">${ic('x')}ناموجود</button></div>
+     <div class="stack" style="gap:6px"><span class="b sm">قیمت امروز (تومان)</span><div class="field" style="font-size:20px;font-weight:800;min-height:58px"><span class="num" style="flex:1">${money(s.offer.price)}</span><span class="xs faint">تومان</span></div><span class="xs faint">قیمت ثبت‌شدهٔ شما (${ago(s.offer.age_days)}). اگر تغییر کرده، اصلاح کنید.</span></div>
+     <div class="stack" style="gap:6px"><span class="b sm">تا چه ساعتی باز هستید؟</span><div class="seg"><div>۱۹:۰۰</div><div class="on">۱۹:۴۵</div><div>۲۰:۳۰</div><div>۲۱:۰۰</div></div></div>
+     <button class="btn pri block" style="min-height:56px;font-size:17px">${ic('send','s')}ارسال پاسخ</button></div>`});
+  const B = phone({cap:'B · Answered / already answered (409)', sub:'After sending, the seller sees exactly what the buyer sees. A second tap on an old link explains instead of failing.', cls:'seller',
+    body: sb(esc(s.name)) + `<div class="empty" style="padding-top:40px"><div class="art-i" style="background:var(--ok-soft);color:var(--ok)">${ic('check')}</div><h4>پاسخ شما ارسال شد</h4><p>مشتری همین الان قیمت ۲٬۴۹۰٬۰۰۰ تومان را با برچسب «تأیید شده توسط فروشنده» می‌بیند.</p></div>
+     <div class="pad stack" style="gap:10px"><div class="warnbox info">${ic('alert','s')}<span><b>این استعلام قبلاً پاسخ داده شده.</b> اگر قیمت عوض شده، پاسخ تازه را از استعلام بعدی بفرستید.</span></div></div>`});
+  const Cc = phone({cap:'C · Invalid link (403)', sub:'Plain explanation, no technical code, and what to do next.', cls:'seller',
+    body: `<div class="empty" style="padding-top:140px"><div class="art-i" style="background:var(--bad-soft);color:var(--bad)">${ic('lock')}</div><h4>این لینک معتبر نیست</h4><p>لینک منقضی شده یا مال فروشگاه دیگری است. لینک تازه را از ربات بله بگیرید.</p><button class="btn sec" style="margin-top:8px">بازکردن ربات بله</button></div>`});
+  out.push(section('14','seller','Seller inbox','A separate, seller-side mobile page. Big buttons: موجود / ناموجود / قیمت / ساعت.','GET /api/seller/{shop}/{token}/inquiries · POST …/answer (409, 403)',[A,B,Cc]));
+}
+
+/* ---------- 15. Mall directory ---------- */
+{
+  const M = D.mall;
+  const floorRow = (f, open=false) => `<div class="card" style="overflow:hidden"><div class="frow" style="padding:0 14px"><span class="b sm">${faT(f.label)}</span><span class="row xs muted" style="gap:6px">${fa(f.count)} فروشگاه ${ic(open?'minus':'plus','s')}</span></div>
+    ${open?`<div style="border-top:1px solid var(--line)">${f.shops.map(s=>{ const hit = s.categories.includes('هدفون، هدست و هندزفری');
+      return `<div style="padding:10px 14px;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;${hit?'background:var(--accent-soft)':''}"><span class="tag num" style="background:var(--sunk);color:var(--ink-2);min-width:44px;justify-content:center">${s.unit?fa(s.unit):s.plaque?'پ '+fa(s.plaque):'—'}</span><div style="flex:1;min-width:0"><div class="sm b">${esc(s.name)}</div><div class="xs muted">${s.categories.length?esc(s.categories.slice(0,2).join('، ')):'<span style="color:var(--unk)">دسته ثبت نشده</span>'}</div></div><span class="xs ${s.offer_count?'':'faint'}">${s.offer_count?fa(s.offer_count)+' کالا':'بدون کالا'}</span></div>`; }).join('')}<div class="xs" style="padding:10px 14px;color:var(--accent-ink);font-weight:650">نمایش همهٔ ${fa(f.count)} فروشگاه</div></div>`:''}</div>`;
+  const fl = M.floors, unk = fl.find(f=>/نامشخص/.test(f.label));
+  const A = phone({cap:'A · Floor-by-floor, 263 shops', sub:'Search and a category filter on top; floors collapse. Shops in the active category are tinted. Unknown-floor shops get their own honest group.',
+    body: appbar(esc(M.mall), `${esc(M.area)} · ${fa(M.shop_count)} فروشگاه · ${fa(fl.length-1)} طبقه`) + `<div class="pad stack" style="gap:10px;padding-bottom:30px">
+     <div class="field" style="padding-inline:4px 12px"><span class="sbtn" style="width:40px;height:40px">${ic('search','s')}</span><span class="faint">جستجو در ${fa(M.shop_count)} فروشگاه…</span></div>
+     <div class="wrapr"><span class="chip on">هدفون، هدست و هندزفری ${ic('x','s x')}</span><span class="chip">گوشی موبایل</span></div>
+     <div style="display:flex;gap:4px;overflow-x:auto">${fl.filter(f=>f!==unk).map(f=>`<span class="tag" style="background:${f.floor===-2?'var(--accent)':'var(--sunk)'};color:${f.floor===-2?'var(--on-accent)':'var(--ink-2)'};min-height:32px">${f.floor===0?'همکف':fa(f.floor)}</span>`).join('')}<span class="tag" style="border:1px dashed var(--unk);color:var(--unk);min-height:32px">؟</span></div>
+     ${floorRow(fl[0], true)}${fl.slice(1,5).map(f=>floorRow(f)).join('')}
+     <div class="card" style="border:1.5px dashed var(--unk);background:transparent"><div class="frow" style="padding:0 14px"><span class="b sm" style="color:var(--ink-2)">${faT(unk.label)}</span><span class="xs muted">${fa(unk.count)} فروشگاه ${ic('plus','s')}</span></div><div class="xs faint" style="padding:0 14px 12px">در آدرس این فروشگاه‌ها طبقه نیامده؛ از تابلوی راهنمای پاساژ بپرسید.</div></div></div>`});
+  out.push(section('15','mall','Mall directory','Floor-by-floor shop list for big malls. Plaque numbers stand in for units where units are missing.','mall_directory.json (پاساژ علاالدین, 11 floor groups incl. «طبقه نامشخص») · malls.json',[A]));
+}
+
+/* ---------- microcopy board ---------- */
+{
+  const m = (lbl, html) => `<div class="m" lang="fa">${html}<div class="lbl">${lbl}</div></div>`;
+  const e = (icn, t, p, btn='', tone='') => `<div class="empty" style="padding:22px 18px"><div class="art-i" ${tone}>${ic(icn)}</div><h4>${t}</h4><p>${p}</p>${btn}</div>`;
+  out.push(`<section class="sec" id="copy"><div class="sec-h"><div class="sec-n">—</div><h2>Microcopy &amp; edge states</h2><p>Every message from the screens.md list, written as the component that carries it. Each one says what happened and what to do next.</p></div><div class="micro">
+   ${m('empty search', e('search','چیزی پیدا نکردیم','کلمهٔ کوتاه‌تری بنویسید یا بودجه را بردارید.','<button class="btn sec">پاک کردن فیلترها</button>'))}
+   ${m('no shops near you', e('pin','نزدیک شما فروشگاهی این کالا را ثبت نکرده','نزدیک‌ترین فروشگاه ۳٫۴ کیلومتر دورتر است.','<button class="btn sec">شعاع را ۵ کیلومتر کن</button>'))}
+   ${m('all shops closed now', e('clock','همهٔ فروشگاه‌ها الان بسته‌اند','بیشترشان فردا ساعت ۱۰:۰۰ باز می‌شوند. استعلام را حالا بفرستید تا صبح جواب بگیرید.','<button class="btn sec">استعلام برای فردا</button>','style="background:var(--unk-soft);color:var(--ink-3)"'))}
+   ${m('Friday', `<div style="padding:16px">${`<div class="warnbox unk">${ic('clock','s')}<span><b>جمعه است.</b> بیشتر پاساژهای جمهوری و لاله‌زار جمعه‌ها تعطیل‌اند؛ فقط فروشگاه‌هایی که ساعت جمعه ثبت کرده‌اند نشان داده می‌شوند.</span></div>`}</div>`)}
+   ${m('price very old', `<div style="padding:16px" class="stack">${priceBadge(D.edge.stale_over_90_days.offer)}<div class="warnbox bad">${ic('alert','s')}<span>این قیمت ۲۸۳ روز پیش ثبت شده و احتمالاً عوض شده است. قبل از رفتن بپرسید.</span></div></div>`)}
+   ${m('suspicious price', `<div style="padding:16px">${priceBadge(D.edge.suspicious_price.offer)}</div>`)}
+   ${m('seller silent (timeout)', `<div style="padding:16px">${inqCard(NOREPLY)}</div>`)}
+   ${m('out of stock → alternatives', `<div style="padding:16px">${inqCard(INQ[3])}</div>`)}
+   ${m('location permission ask', e('loc','فروشگاه‌های نزدیک شما را پیدا کنیم؟','موقعیت فقط برای حساب فاصله و زمان پیاده‌روی استفاده می‌شود و جایی ذخیره نمی‌شود.','<div class="row" style="gap:8px"><button class="btn sec">انتخاب دستی</button><button class="btn pri">اجازه می‌دهم</button></div>'))}
+   ${m('slow network', `<div class="banner unk">${ic('wifi','s')}<span>اینترنت کند است. نتایج کم‌کم می‌رسند؛ آنچه آمده قابل استفاده است.</span></div><div style="padding:14px" class="stack"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:14px;width:45%"></div></div>`)}
+   ${m('generic error', e('alert','مشکلی پیش آمد','نتوانستیم فروشگاه‌ها را بارگذاری کنیم. اتصال را بررسی کنید و دوباره امتحان کنید.','<button class="btn sec">'+ic('refresh','s')+'تلاش دوباره</button>','style="background:var(--bad-soft);color:var(--bad)"'))}
+   ${m('simulated-seller banner', `<div class="banner info">${ic('spark','s')}<span><b>پاسخ‌ها شبیه‌سازی‌شده‌اند — حالت نمایشی.</b> فروشنده‌های واقعی در این نسخه پاسخ نمی‌دهند.</span></div>`)}
+  </div></section>`);
+}
+
+out.push(`<p class="note">Built from docs/design-brief.md, docs/screens.md and docs/fixtures/*.json. Product photos from image.torob.com cannot load inside this page, so thumbnails use drawn placeholders; the real app should show the fixture <code>image</code> URLs and fall back to the "بدون تصویر" tile.</p>`);
+document.getElementById('app').innerHTML = out.join('');
+
+/* ---------- interactions ---------- */
+const root = document.documentElement;
+const tb = [...document.querySelectorAll('.themes button')];
+const setT = t => { if (t) root.setAttribute('data-theme', t); else root.removeAttribute('data-theme'); tb.forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.t===t))); try{localStorage.setItem('hk-theme', t)}catch(e){} };
+let saved=''; try{ saved = localStorage.getItem('hk-theme') || '' }catch(e){}
+setT(saved); tb.forEach(b=>b.addEventListener('click',()=>setT(b.dataset.t)));
+
+// Live installment filter on Shops A: re-rank in place, no reload
+let instOn = false;
+function renderShops() {
+  const list = document.querySelector('#shopsA #shopsList'); if (!list) return;
+  const data = instOn ? D.shopsInst : D.shops;
+  const head = `<div class="pad" style="padding-top:4px"><div class="h4">${ic('store','s')}این کالا را ثبت کرده‌اند <span class="n">${fa(data.listed.length)} از ${fa(data.counts.listed)}</span></div><p class="lede">${instOn?'فقط فروشگاه‌هایی که قسط اعلام کرده‌اند.':'قیمت ثبت‌شده توسط خود فروشگاه؛ تاریخ هر قیمت کنارش است.'}</p></div>`;
+  list.innerHTML = head + `<div class="pad stack" style="gap:10px;padding-bottom:110px">${data.listed.slice(0,6).map((s,i)=>shopCard(s,{sel:i<3})).join('').replace(/class="card shop /g,'class="card shop flash ')}</div>`;
+  const chip = document.querySelector('#shopsA [data-toggle="inst"]');
+  chip.classList.toggle('on', instOn); chip.innerHTML = (instOn?ic('check','s'):ic('card','s')) + 'قسطی';
+}
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-toggle="inst"], [data-act]'); if (!t) return;
+  if (t.matches('[data-toggle="inst"]') && t.closest('#shopsA')) { instOn = !instOn; renderShops(); }
+  if (t.dataset.act === 'inst') { instOn = !instOn; renderShops(); }
+  if (t.dataset.act === 'replay') replay();
+});
+// Replay the tracker: statuses arrive one by one
+let timers = [];
+function replay() {
+  timers.forEach(clearTimeout); timers = [];
+  const scr = document.getElementById('trk'); if (!scr) return;
+  const toast = scr.querySelector('#trkToast'); toast.hidden = true;
+  let cur = inqAll.map(q=>({...q, status:'sent', label:'ارسال شد'}));
+  const paint = (id) => { scr.querySelector('.tlist').innerHTML = cur.map(q=>inqCard(q,{flash:q.id===id})).join(''); scr.querySelector('.tsum').innerHTML = summary(cur); };
+  paint();
+  const seq = [['inq_demo1','delivered'],['inq_demo0','delivered'],['inq_demo3','delivered'],['inq_demo2','delivered'],['inq_demo3','final'],['inq_demo2','final'],['inq_demo1','delivered'],['inq_demo4','final']];
+  seq.forEach(([id,what],i) => timers.push(setTimeout(() => {
+    cur = cur.map(q => q.id!==id ? q : what==='final' ? inqAll.find(x=>x.id===id) : {...q, status:'delivered', label:'دیده شد'});
+    paint(id);
+    if (id==='inq_demo2' && what==='final') toast.hidden = false;
+  }, 900*(i+1))));
+}
+</script>

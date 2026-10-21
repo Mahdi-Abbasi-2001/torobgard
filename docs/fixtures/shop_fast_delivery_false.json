@@ -1,0 +1,476 @@
+{
+  "shop_id": "shop_d7a0f197326f476145f89387",
+  "name": "نینوش آذریار",
+  "name_is_verified": false,
+  "address": "خیابان جمهوری اسلامی، خیابان لاله زار، کوچه اتحادیه، پاساژ اتحادیه، طبقه اول، پلاک ۱۱",
+  "area": "فردوسی",
+  "lat": 35.69086851748049,
+  "lon": 51.42236096647691,
+  "mall": "پاساژ اتحادیه",
+  "mall_key": "اتحادیه",
+  "floor": 1,
+  "floor_label": "طبقه 1",
+  "unit": null,
+  "plaque": "11",
+  "distance_km": 0.99,
+  "walk_min": 13,
+  "open": {
+    "state": "closing_soon",
+    "label": "باز است · 18 دقیقه تا بسته شدن (19:00)",
+    "closes_at": "19:00",
+    "opens_at": null,
+    "quality": "ok"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": false,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۹۳۵۶۸۸۰۴۲۴",
+  "categories": [
+    "چراغ و پروژکتور خورشیدی",
+    "مبدل برق و اینورتر خودرو",
+    "چراغ اضطراری و شارژی",
+    "تجهیزات برق خورشیدی",
+    "پنل خورشیدی",
+    "درایو و اینورتر",
+    "چراغ دفنی",
+    "جاباتری و شارژر باتری",
+    "سایر لامپ و چراغ",
+    "ابزار کوهنوردی",
+    "چراغ حیاطی و پارکی",
+    "چراغ قوه و چراغ پیشانی",
+    "رادیو و گرامافون",
+    "سایر اسباب‌بازی و سرگرمی"
+  ],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "15:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:00:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 213,
+  "offers": [
+    {
+      "offer_id": "offer_08b765679919193c3285247f",
+      "product_id": "product_3514080581190bf81d3185cd",
+      "seller_title": "فانوس شارژی Deepking مدل DP-7419",
+      "title": "فانوس شارژی Deepking مدل DP-7419",
+      "price": 985000,
+      "changed_at": "2026-10-05T15:23:50.579884+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_97315e51a72c1c53ae37cd9a",
+      "product_id": "product_95da3fd2348e6dc575f16a41",
+      "seller_title": "چراغ اضطراری فانوسی شارژی مدل Dp7419",
+      "title": "چراغ اضطراری فانوسی شارژی مدل Dp7419",
+      "price": 985000,
+      "changed_at": "2026-10-05T15:23:42.316464+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_9fa2a63f6418b5642cedd27f",
+      "product_id": "product_fc86089eae1e4f08ba200c16",
+      "seller_title": "چراغ فانوسی دی پی مدل dp-7419",
+      "title": "چراغ فانوسی شارژی دی پی مدل DP-7419",
+      "price": 985000,
+      "changed_at": "2026-10-05T15:23:33.042617+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_0eeb9855c7da4928fcaa76d2",
+      "product_id": "product_50865c7ccda1203afa7d4e89",
+      "seller_title": "چراغ فانوسی دی پی مدل DP7419 رنگ مهتابی",
+      "title": "چراغ فانوسی دی پی مدل DP7419 رنگ مهتابی",
+      "price": 985000,
+      "changed_at": "2026-10-05T15:22:50.808249+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_4c48be4d4310d5b59edfcbcc",
+      "product_id": "product_a5b33ceeeba8de5c104f083c",
+      "seller_title": "چراغ اظطراری ولومی ویداسی مدل 838",
+      "title": "چراغ اظطراری ولومی ویداسی مدل 838",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:21:30.437302+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_7376ad76bbe0f3328f55fa98",
+      "product_id": "product_fe62936013181e5895c724f3",
+      "seller_title": "چراغ اضطراری ویداسی مدل WD-838T با نور مهتابی",
+      "title": "چراغ اضطراری ویداسی مدل WD-838T با نور مهتابی",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:21:04.351089+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a60adf3e68e3ec97ff35fabd",
+      "product_id": "product_37e3386e722b83161a531599",
+      "seller_title": "چراغ اظطرای ویداسی 838",
+      "title": "چراغ اظطرای ویداسی 838",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:20:30.428119+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_c23960ddccdcf7bdd6214d1b",
+      "product_id": "product_d0dab5e4ee35633a4e43acbd",
+      "seller_title": "چراغ اضطراری یا مهتابی شارژی ویداسی مدل 838 ، چراغ یا لامپ شارژی اضطراری پر نور ویداسی - قیمت نقدی:",
+      "title": "چراغ اضطراری یا مهتابی شارژی ویداسی مدل 838 ، چراغ یا لامپ شارژی اضطراری پر نور ویداسی - قیمت نقدی:",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:20:06.688412+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_8ca3729075cff7eb0c136612",
+      "product_id": "product_e327cf03ee000435ff07ff50",
+      "seller_title": "چراغ اضطراری ویداسی مدل WT-838T - سفید صدفی",
+      "title": "چراغ اضطراری ویداسی مدل WT-838T - سفید صدفی",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:19:51.932834+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_732b8086b4c2babcbff628dc",
+      "product_id": "product_5c1a5c5c97a1326d5962d564",
+      "seller_title": "چراغ اضطراری مدل WT-838T ویداسی",
+      "title": "چراغ اضطراری مدل WT-838T ویداسی",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:19:36.451377+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_499faddbe7d10b716b338265",
+      "product_id": "product_0f69ab8dae2e25c76f217ad6",
+      "seller_title": "چراغ اضطراری یا مهتابی شارژی ویداسی مدل 838 ، چراغ یا لامپ شارژی اضطراری پر نور ویداسی - قیمت قسطی:",
+      "title": "چراغ اضطراری یا مهتابی شارژی ویداسی مدل 838 ، چراغ یا لامپ شارژی اضطراری پر نور ویداسی - قیمت قسطی:",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:19:20.075629+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5f273c42620310a251cb05b1",
+      "product_id": "product_23710857768da86dc212449d",
+      "seller_title": "چراغ اضطراری شارژی برند ویداسی مدل WD-838T",
+      "title": "چراغ اضطراری شارژی برند ویداسی مدل WD-838T",
+      "price": 655000,
+      "changed_at": "2026-10-05T15:19:06.678307+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_1c808ffc1ea3dce740eb123b",
+      "product_id": "product_377c2f7fe259df642cc5f125",
+      "seller_title": "پرژکتور خورشیدی( خورشیدی) پنل سر خود خیابانی مدل W789A-4",
+      "title": "پرژکتور خورشیدی مدل W789A-4",
+      "price": 3550000,
+      "changed_at": "2026-10-04T14:40:32.389872+00:00",
+      "age_days": 17,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f755f1d7e12ac5775960572c",
+      "product_id": "product_911c6d9fea55614e075f4e10",
+      "seller_title": "چراغ خورشیدی شارژی ۱۲ ال ای دی",
+      "title": "چراغ خورشیدی شارژی ۱۲ ال ای دی",
+      "price": 1650000,
+      "changed_at": "2026-10-04T14:40:14.347857+00:00",
+      "age_days": 17,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_2636aa68fd685c74fdbd5000",
+      "product_id": "product_a605349f9a8602133a8786d5",
+      "seller_title": "چراغ خورشیدی پله ای بسته ۴ عددی LED",
+      "title": "چراغ خورشیدی پله ای بسته ۴ عددی LED",
+      "price": 1540000,
+      "changed_at": "2026-09-26T13:54:11.323001+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f620db04eb82e419c7088db7",
+      "product_id": "product_b8b3dcac9f08673d284fdf1f",
+      "seller_title": "لامپ خورشیدی LED لب پله ای و بالکن",
+      "title": "چراغ خورشیدی LED بالکن و پله ضدآب رنگ آفتابی",
+      "price": 385000,
+      "changed_at": "2026-09-26T13:53:47.194918+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_29b9e82e01b92b10a1da4ad4",
+      "product_id": "product_53a426cd0f389e71b0ef3000",
+      "seller_title": "چراغ سردری خورشیدی مدل MD7105A",
+      "title": "چراغ سردری مودی مدل IR-MD7105_A",
+      "price": 1750000,
+      "changed_at": "2026-09-26T13:53:39.803280+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_06e386e77ab48adcb7cece02",
+      "product_id": "product_e3c35a4be89b3eb9d5b959d1",
+      "seller_title": "اینورتر (مبدل 12VDC به 220VAC) سوئیچینگ 12V 1000W",
+      "title": "مبدل برق خودرو پاور اینورتر 12 به 220 ولت 1000وات مدل SSK-1000W",
+      "price": 4650000,
+      "changed_at": "2026-09-26T13:53:32.262398+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_0feba2f5b32b9eddbcbeab1f",
+      "product_id": "product_7369da491ade8684aeb1c36e",
+      "seller_title": "اینورتر مبدل برق خودرو 1500 وات تبدیل 12 ولت به 220 ولت مدل SOLAR TECH PWM ST 1500S",
+      "title": "مبدل برق خودرو سولار تک مدل ST-1500S ظرفیت ۱۵۰۰ وات",
+      "price": 6550000,
+      "changed_at": "2026-09-26T13:53:24.194220+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_3d759d70a96978ec6f2317b1",
+      "product_id": "product_2edf99215fe384ceb25ab52c",
+      "seller_title": "چراغ خورشیدی با سنسور حرکتی مدل sm404",
+      "title": "چراغ دیواری خورشیدی دارای سنسور حرکتی",
+      "price": 585000,
+      "changed_at": "2026-09-26T13:53:15.050333+00:00",
+      "age_days": 25,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6b9ac390d7c15afc5e1fb42a",
+      "product_id": "product_55f0dcc03b962a59ad2d7e81",
+      "seller_title": "چراغ دیواری خورشیدی سنسوردار مدل XF-8818",
+      "title": "چراغ دیواری خورشیدی سنسوردار مدل XF-8818",
+      "price": 585000,
+      "changed_at": "2026-09-19T09:03:45.730936+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_066e28ec0861b45020d14737",
+      "product_id": "product_e6562dd2cdb2b62d547271f7",
+      "seller_title": "چراغ دیواری خورشیدی طرح دوربین مدل CL-56A",
+      "title": "چراغ دیواری خورشیدی طرح دوربین مدل CL-56A",
+      "price": 755000,
+      "changed_at": "2026-09-19T09:03:41.014214+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_58c5460cd007d832e33f28cc",
+      "product_id": "product_ebeb2fc66e8293d679b4a1c4",
+      "seller_title": "اینورتر ۱۲ به ۲۲۰ ولت ۳۰۰۰ وات مدل FU-3000C با شارژر",
+      "title": "اینورتر ۱۲ به ۲۲۰ ولت ۳۰۰۰ وات مدل FU-3000C با شارژر",
+      "price": 16850000,
+      "changed_at": "2026-09-19T09:03:33.680918+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_4b99ebe0e9a831ce699ed5c0",
+      "product_id": "product_1d6845462cc582e6a0312599",
+      "seller_title": "چراغ خورشیدی باغچه مدل STAR چراغ خورشیدی باغچه STAR – روشنایی سبز و اقتصادی فضای باز",
+      "title": "چراغ خورشیدی باغچه مدل STAR",
+      "price": 485000,
+      "changed_at": "2026-09-19T09:03:28.193268+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5aae2af5986e99496c4954d5",
+      "product_id": "product_b8e73657e216a8d309a56fd9",
+      "seller_title": "اینورتر (مبدل 12VDC به 220VAC) سوئیچینگ 12V 500W",
+      "title": "اینورتر ۱۲ ولت سوئیچینگ ۵۰۰ وات",
+      "price": 3850000,
+      "changed_at": "2026-09-19T09:03:21.992083+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_06c5cb33cc9e884333076354",
+      "product_id": "product_1f11b1101628aa65275f9f80",
+      "seller_title": "چراغ شارژی اضطراری 60 لامپ کم مصرف",
+      "title": "چراغ اضطراری ۶۰ لامپ مدل HG720",
+      "price": 935000,
+      "changed_at": "2026-09-19T09:03:14.233388+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6c024306ecb4c82ec3c52a9a",
+      "product_id": "product_2dd44c18502a4e30fa97e59a",
+      "seller_title": "چراغ خورشیدی باغچه طرح شعله",
+      "title": "چراغ خورشیدی باغچه طرح شعله ۸۰ سانتی متر مدل XF6006",
+      "price": 955000,
+      "changed_at": "2026-09-19T09:03:05.524430+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5c94fbf217203cf6ce199f4b",
+      "product_id": "product_0f802b19849e687945eb319b",
+      "seller_title": "گجت کوهنوردی 7 کاره",
+      "title": "گجت همه کاره",
+      "price": 585000,
+      "changed_at": "2026-09-19T09:02:55.376474+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_e06dc49346949497a7974035",
+      "product_id": "product_c2a58dbb51d1ff78860beb23",
+      "seller_title": "تبدیل اینورتر 12ولت 1000 وات UKC",
+      "title": "مبدل برق خودرو یو کی س مدل 12 به 220 ولت 1000 وات مدل SSK-1000W",
+      "price": 4950000,
+      "changed_at": "2026-09-19T09:02:46.371545+00:00",
+      "age_days": 32,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f3213955c5779485d915d43c",
+      "product_id": "product_a903be0ee4b66a75731b8520",
+      "seller_title": "مبدل برق 1000 لیدر (اینورتر)",
+      "title": "مبدل برق خودرو لیدر مدل SAA-1000A ظرفیت ۱۰۰۰ وات",
+      "price": 4850000,
+      "changed_at": "2026-08-26T09:45:12.575542+00:00",
+      "age_days": 56,
+      "freshness": "stale",
+      "suspicious": false,
+      "verified_by_seller": false
+    }
+  ]
+}

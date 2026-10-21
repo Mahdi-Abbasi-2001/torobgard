@@ -1,0 +1,514 @@
+{
+  "shop_id": "shop_46d86ffd33a1fcf312304791",
+  "name": "مهرین مانورا",
+  "name_is_verified": false,
+  "address": "میدان فردوسی، خیابان شهید سروش الدین تقوی، خیابان فردوسی، مرکز تجارت جهانی فردوسی، پلاک 479.0، طبقه 2، واحد 233",
+  "area": "فردوسی",
+  "lat": 35.70054772579677,
+  "lon": 51.419452478836675,
+  "mall": "مرکز تجارت جهانی فردوسی",
+  "mall_key": "مرکز تجارت جهانی فردوسی",
+  "floor": 2,
+  "floor_label": "طبقه 2",
+  "unit": "233",
+  "plaque": "479",
+  "distance_km": 0.81,
+  "walk_min": 11,
+  "open": {
+    "state": "closed",
+    "label": "بسته است · فردا 10:00",
+    "closes_at": null,
+    "opens_at": "فردا 10:00",
+    "quality": "ok"
+  },
+  "payments": [
+    {
+      "provider": "اسنپ‌پی",
+      "channel": "unknown",
+      "confirmed_in_store": false
+    },
+    {
+      "provider": "ترب‌پی",
+      "channel": "unknown",
+      "confirmed_in_store": false
+    }
+  ],
+  "installment": true,
+  "fast_delivery": null,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۹۳۵۲۰۵۲۵۵۹",
+  "categories": [
+    "لوازم جانبی ساعت معمولی و هوشمند",
+    "گلس و محافظ ساعت",
+    "کاور و لوازم جانبی ایرپاد",
+    "هدفون، هدست و هندزفری",
+    "پاوربانک و شارژر همراه",
+    "ساعت و مچ بند هوشمند",
+    "شارژر گوشی",
+    "کابل و تبدیل Type C",
+    "آداپتور برق",
+    "آویز و بند موبایل",
+    "شارژر ساعت هوشمند",
+    "کیف پول و اقلام کوچک",
+    "تمیز کننده لوازم دیجیتالی"
+  ],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "13:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "10:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 125,
+  "offers": [
+    {
+      "offer_id": "offer_307e8e2c34ab6e69021428ed",
+      "product_id": "product_60bcba27dda2656a2514a63b",
+      "seller_title": "ایرپاد پرو 2 (+ANC) نسخه +++A با 18 ماه گارانتی شرکتی",
+      "title": "ایرپاد پرو 2 (+ANC) نسخه +++A با 18 ماه گارانتی شرکتی",
+      "price": 2290000,
+      "changed_at": "2026-10-11T07:52:58.208612+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_641259fd2bf131cca445cdf1",
+      "product_id": "product_af209141cc461444f2722387",
+      "seller_title": "ایرپاد پرو2 high quality (ورژن جدید) به همراه آداپتور مخصوص و 18 ماه گارانتی شرکتی",
+      "title": "ایرپاد پرو2 high quality (ورژن جدید) به همراه آداپتور مخصوص و 18 ماه گارانتی شرکتی",
+      "price": 2590000,
+      "changed_at": "2026-10-11T07:50:20.949701+00:00",
+      "age_days": 10,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5a37ec90fef608df06184f04",
+      "product_id": "product_7dc984662a7dabd490fa95c3",
+      "seller_title": "بند ساعت هوشمند مدل چرمی دو رنگ S500 مناسب برای سایز 42/44/45/49",
+      "title": "بند ساعت هوشمند مدل چرمی دو رنگ S500 مناسب برای سایز 42/44/45/49",
+      "price": 890000,
+      "changed_at": "2026-10-10T10:09:37.442258+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_ef199b46d06d5343b90fd3e5",
+      "product_id": "product_cc305c16d0f09ee7a829b28e",
+      "seller_title": "بند ساعت هوشمند iband مدل striped استیل مناسب برای سایز 42/44/45/49",
+      "title": "بند ساعت هوشمند iband مدل striped استیل مناسب برای سایز 42/44/45/49",
+      "price": 1660000,
+      "changed_at": "2026-10-10T10:09:37.404551+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_c9cb11917f2cf1f140062afa",
+      "product_id": "product_7214bf6509d1eb317ded5467",
+      "seller_title": "بند ساعت هوشمند مدل رولکسی استیل 5 پین",
+      "title": "بند ساعت هوشمند مدل رولکسی استیل 5 پین",
+      "price": 1290000,
+      "changed_at": "2026-10-10T10:09:37.395602+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_29a76e0450d470cef027ddf1",
+      "product_id": "product_735a3eebd0a1fc50938989ec",
+      "seller_title": "بند ساعت هوشمند مدل آلپاین لوپ پارچه ای مناسب برای سایز 42/44/45/49",
+      "title": "بند ساعت هوشمند مدل آلپاین لوپ پارچه ای مناسب برای سایز 42/44/45/49",
+      "price": 339000,
+      "changed_at": "2026-10-10T10:09:37.392630+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_0eaff61574bbe456c9f95d5e",
+      "product_id": "product_f226f7ad9b4317d481226ef4",
+      "seller_title": "بند ساعت هوشمند مدل مگنتی MS مناسب برای سایز 38/40/41",
+      "title": "بند ساعت هوشمند مدل مگنتی MS مناسب برای سایز 38/40/41",
+      "price": 499000,
+      "changed_at": "2026-10-10T10:09:37.368563+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_eeb26a3008e50f3896f9251e",
+      "product_id": "product_18bdaff9ab157447efe7eae9",
+      "seller_title": "بند ساعت هوشمند مدل سیلیکونی طرح دار new مناسب برای سایز 42/44/45/49",
+      "title": "بند ساعت هوشمند مدل سیلیکونی طرح دار new مناسب برای سایز 42/44/45/49",
+      "price": 249000,
+      "changed_at": "2026-10-10T10:09:37.360753+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_478913ffd230e63355a169a8",
+      "product_id": "product_7126599581e7d7d6e459e599",
+      "seller_title": "بند ساعت هوشمند استیل رولکسی 7پین باریک مناسب برای سایز 42/44/45/46/49",
+      "title": "بند ساعت هوشمند استیل رولکسی 7پین باریک مناسب برای سایز 42/44/45/46/49",
+      "price": 1190000,
+      "changed_at": "2026-10-10T10:09:37.355921+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a84909df44fa26b82ade6313",
+      "product_id": "product_07a0b4cba29709283094749f",
+      "seller_title": "بند و کاور اپل واچ برند URBAN سایز 49 اولترا",
+      "title": "بند و کاور اپل واچ برند URBAN سایز 49 اولترا",
+      "price": 4990000,
+      "changed_at": "2026-10-10T10:09:37.351647+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a04157518e53a4901d4ef4ef",
+      "product_id": "product_1ab3ed3b4d0b8ff10fe7a01b",
+      "seller_title": "کاور اپل واچ سایز 42 (سری قدیم) نگین دار",
+      "title": "کاور اپل واچ سایز 42 (سری قدیم) نگین دار",
+      "price": 225000,
+      "changed_at": "2026-10-10T10:09:37.340181+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f067f0c232bb8338a9ffbf1f",
+      "product_id": "product_a960ff8efc3d250f7948ab59",
+      "seller_title": "بند و کاور اپل واچ maestro مدل استیل مناسب برای سایز 45MM",
+      "title": "بند و کاور اپل واچ maestro مدل استیل مناسب برای سایز 45MM",
+      "price": 17500000,
+      "changed_at": "2026-10-10T10:09:37.337833+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_17ea6aaaf7b126a8bbb89946",
+      "product_id": "product_595b2f6f1fd20fb227bae250",
+      "seller_title": "بند و کاور ساعت هوشمند great case سایز 49 اولترا",
+      "title": "بند و کاور ساعت هوشمند great case سایز 49 اولترا",
+      "price": 898000,
+      "changed_at": "2026-10-10T10:09:37.326413+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_e5c2ac21a5297c430ae171a5",
+      "product_id": "product_e844c7064a2b7f2ea133a6ff",
+      "seller_title": "بند ساعت هوشمند مدل مگنتی MS مناسب برای سایز 42/44/45/46/49",
+      "title": "بند ساعت هوشمند مدل مگنتی MS مناسب برای سایز 42/44/45/46/49",
+      "price": 499000,
+      "changed_at": "2026-10-10T10:09:37.307915+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_937f13701fd582a9244ad0ee",
+      "product_id": "product_5c857bb6568eaeda08e52eed",
+      "seller_title": "کاور اپل واچ سایز 45 میلی متری ساده",
+      "title": "کاور اپل واچ سایز 45 میلی متری ساده",
+      "price": 188000,
+      "changed_at": "2026-10-10T10:09:37.302846+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_62e6019abd7f5da75b2a6091",
+      "product_id": "product_a83c8eb582050a17169e0339",
+      "seller_title": "کاور اپل واچ گلس دار مناسب برای سایز 45",
+      "title": "کاور اپل واچ گلس دار مناسب برای سایز 45",
+      "price": 188000,
+      "changed_at": "2026-10-10T10:09:37.296591+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_8d7b9550079fe96639303dab",
+      "product_id": "product_2f48c1236c0e1c842f65d5a3",
+      "seller_title": "بند و کاور اپل واچ برند jeraland سایز 45",
+      "title": "بند و کاور اپل واچ برند jeraland سایز 45",
+      "price": 7900000,
+      "changed_at": "2026-10-10T10:09:37.288008+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_ae94c35ce5b2a8550f0b5105",
+      "product_id": "product_f44013bf368201b69d773d24",
+      "seller_title": "کاور اپل واچ گلس دار مناسب برای سایز 41",
+      "title": "کاور اپل واچ گلس دار مناسب برای سایز 41",
+      "price": 188000,
+      "changed_at": "2026-10-10T10:09:37.278142+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_326c3b7bce71a983af81d2a4",
+      "product_id": "product_a56ecc99b99119b7f7599570",
+      "seller_title": "بند ساعت هوشمند مدل اوشن (ocean) مناسب برای سایز 42/44/45/46/49",
+      "title": "بند ساعت هوشمند مدل اوشن (ocean) مناسب برای سایز 42/44/45/46/49",
+      "price": 198000,
+      "changed_at": "2026-10-10T10:09:37.276366+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_b0b70efed7efd5c41ffd2149",
+      "product_id": "product_d8fb039af7e1a42d57cef0a2",
+      "seller_title": "کاور اپل واچ ساده مناسب برای سایز 41",
+      "title": "کاور اپل واچ ساده مناسب برای سایز 41",
+      "price": 188000,
+      "changed_at": "2026-10-10T10:09:37.257121+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5aebfe9529010071d2f03d2c",
+      "product_id": "product_49e004572fd1397d7be0a4b8",
+      "seller_title": "بند ساعت هوشمند مدل سیلیکونی مناسب برای سایز 38/40/41",
+      "title": "بند ساعت هوشمند مدل سیلیکونی مناسب برای سایز 38/40/41",
+      "price": 229000,
+      "changed_at": "2026-10-10T10:09:37.245526+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_a16a3a245394430583f62b21",
+      "product_id": "product_378f20b113cf631d21e25284",
+      "seller_title": "گلس ساعت هوشمند مناسب برای هایلو LS05s",
+      "title": "گلس ساعت هوشمند مناسب برای هایلو LS05s",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.242999+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6ca5e3afb161f55b421f0de5",
+      "product_id": "product_d758ffa994ee739f7a3981f9",
+      "seller_title": "گلس ساعت هوشمند مناسب برای سامسونگ سایز 40 Active",
+      "title": "گلس ساعت هوشمند مناسب برای سامسونگ سایز 40 Active",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.216100+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_9637afd999e54b1459b708ac",
+      "product_id": "product_e58cac927c6a9ef79444da6b",
+      "seller_title": "گلس ساعت هوشمند مناسب برای xiaomi band 5",
+      "title": "گلس ساعت هوشمند مناسب برای xiaomi band 5",
+      "price": 79000,
+      "changed_at": "2026-10-10T10:09:37.209764+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_844534e60f3e08333b1e295c",
+      "product_id": "product_992389792f911ef4c3c05c1c",
+      "seller_title": "گلس ساعت هوشمند مناسب برای هایلو LS02",
+      "title": "گلس ساعت هوشمند مناسب برای هایلو LS02",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.203484+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_83194eb798510d21c2fdd00d",
+      "product_id": "product_99914b126096e18b3ec8215d",
+      "seller_title": "گلس ساعت هوشمند مناسب برای Xiaomi mi watch lite",
+      "title": "گلس ساعت هوشمند مناسب برای Xiaomi mi watch lite",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.198797+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5143b3f06ac2b7deb6d30dcf",
+      "product_id": "product_dfea599bf1dc1389b1d2c862",
+      "seller_title": "گلس ساعت هوشمند مدل هایلو GST",
+      "title": "گلس ساعت هوشمند مدل هایلو GST",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.192818+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_412e6324c1cbc141158e805f",
+      "product_id": "product_de3a3e4bc1be1e6f87c97e1d",
+      "seller_title": "گلس ساعت هوشمند مناسب برای امیزیفیت GTR2",
+      "title": "گلس ساعت هوشمند مناسب برای امیزیفیت GTR2",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.191158+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_c1511e77add0240e482e08f0",
+      "product_id": "product_5ae54cfb40b734acc1e6888b",
+      "seller_title": "گلس اپل واچ مدل 9D مات مناسب برای سایز 44",
+      "title": "گلس اپل واچ مدل 9D مات مناسب برای سایز 44",
+      "price": 95000,
+      "changed_at": "2026-10-10T10:09:37.185148+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5b17090a6a5ee25be7c934c2",
+      "product_id": "product_0a81b298c1ec795c36d7d579",
+      "seller_title": "گلس ساعت هوشمند مناسب برای xiaomi watch 2 lite",
+      "title": "گلس ساعت هوشمند مناسب برای xiaomi watch 2 lite",
+      "price": 99000,
+      "changed_at": "2026-10-10T10:09:37.185006+00:00",
+      "age_days": 11,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    }
+  ]
+}

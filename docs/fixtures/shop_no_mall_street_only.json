@@ -1,0 +1,528 @@
+{
+  "shop_id": "shop_4064b2d56d60ac3b330385e7",
+  "name": "رویس آذروش",
+  "name_is_verified": false,
+  "address": "خیابان مطهری، خیابان مهرداد، پلاک۳۰",
+  "area": "سهروردی",
+  "lat": 35.72396212838249,
+  "lon": 51.42892755917274,
+  "mall": null,
+  "mall_key": null,
+  "floor": null,
+  "floor_label": null,
+  "unit": null,
+  "plaque": "30",
+  "distance_km": 3.48,
+  "walk_min": 46,
+  "open": {
+    "state": "closing_soon",
+    "label": "باز است · 48 دقیقه تا بسته شدن (19:30)",
+    "closes_at": "19:30",
+    "opens_at": null,
+    "quality": "ok"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": true,
+  "in_traffic_zone": false,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۹۱۹۵۶۹۵۹۵۳",
+  "categories": [
+    "لنت ترمز خودرو",
+    "دیسک ترمز خودرو",
+    "کاسه چرخ خودرو",
+    "روغن موتور سیکلت",
+    "تسمه دینام و پروانه خودرو",
+    "مکمل سوخت و روغن",
+    "زنجیر و تسمه تایم خودرو",
+    "توپی و بلبرینگ چرخ خودرو",
+    "پمپ بنزین خودرو",
+    "واکس و اسپری تمیزکننده خودرو",
+    "روغن گیربکس خودرو",
+    "ضدیخ",
+    "کیت کلاچ خودرو",
+    "برف پاک کن خودرو",
+    "سیم و کابل کلاچ خودرو",
+    "طبق خودرو",
+    "موتور فن بخاری و کولر خودرو",
+    "روغن موتور خودرو",
+    "روغن ترمز خودرو",
+    "روغن هیدرولیک خودرو",
+    "لیور تعویض دنده خودرو",
+    "روغن صنعتی",
+    "اسپری‌ صنعتی",
+    "قطعات و لوازم جانبی پولیش",
+    "ابرویی چراغ خودرو",
+    "واتر پمپ خودرو",
+    "پولی خودرو",
+    "سنسور اکسیژن خودرو",
+    "قطعات دیفرانسیل خودرو",
+    "بوش طبق خودرو",
+    "وایر شمع خودرو",
+    "شیر فرمان خودرو",
+    "فیلتر روغن موتور سیکلت",
+    "رادیاتور کولر خودرو",
+    "گریس",
+    "سایر عایق خودرو",
+    "شمع خودرو",
+    "فیلتر روغن خودرو"
+  ],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "19:30:00",
+          "start_time": "09:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 124,
+  "offers": [
+    {
+      "offer_id": "offer_f6481e40fd20f41265de72c6",
+      "product_id": "product_72d5c8358c16e67f9e7f6c94",
+      "seller_title": "لنت ترمز پارس عقب کفشکی مناسب خودرو پژو 405 / سمند معمولی / پارس",
+      "title": "لنت ترمز عقب پژو ۴۰۵ صادراتی",
+      "price": 2350000,
+      "changed_at": "2026-10-07T06:50:54.228005+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_8277a8a742550242450f00ba",
+      "product_id": "product_bc44f7ce852fc046bfdf517f",
+      "seller_title": "لنت ترمز عقب کفشکی سمند LX،SE , سورن XU7 پارس آبی صادراتی کد a_66689",
+      "title": "لنت ترمز عقب کفشکی سمند سورن XU7 لنت پارس کد A_66689",
+      "price": 2350000,
+      "changed_at": "2026-10-07T06:50:54.211380+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5261a4fe83c9ed0a2cd4a8ca",
+      "product_id": "product_86a68b278ec5232679e44e96",
+      "seller_title": "لنت ترمز کفشکی عقب ال 90 (L90) - پژو 206 تیپ 3 پارس لنت آبی",
+      "title": "لنت ترمز کفشکی عقب ال 90 (L90) - پژو 206 تیپ 3 پارس لنت آبی",
+      "price": 2350000,
+      "changed_at": "2026-10-07T06:50:54.191670+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_35be6588ba3d1db73bd5c0c7",
+      "product_id": "product_8e32db7423e04c0a255405d4",
+      "seller_title": "لنت عقب 206 تیپ2 پارس آبی",
+      "title": "لنت عقب 206 تیپ2 پارس آبی",
+      "price": 2100000,
+      "changed_at": "2026-10-07T06:50:54.173332+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_8af9dfc1216ecbc6f02160ff",
+      "product_id": "product_1d3c404273fdcc644dcb7086",
+      "seller_title": "لنت ترمز عقب پارس مدل PL71059 صادراتی مناسب ساینا",
+      "title": "لنت ترمز عقب پارس مدل کفشکی مناسب ساینا",
+      "price": 2350000,
+      "changed_at": "2026-10-07T06:50:54.152807+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_4ccc6a118d4c7db573506b10",
+      "product_id": "product_0613dadf2bafdc0b0ac71f04",
+      "seller_title": "وایر شمع پژو ۴۰۵ برند ایساکویی",
+      "title": "وایر شمع پژو ۴۰۵ برند ایساکویی",
+      "price": 1050000,
+      "changed_at": "2026-10-07T06:49:43.338855+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_52880b17277f99fecf5aa725",
+      "product_id": "product_4ca3101d7097af665e4f42af",
+      "seller_title": "لنت ترمز جلو ال 90 و ساندرو پارس آبی صادراتی",
+      "title": "لنت ترمز جلو ال 90 و ساندرو پارس آبی صادراتی",
+      "price": 2200000,
+      "changed_at": "2026-10-07T06:37:27.063997+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_75409ce92b35dd8512f2fab9",
+      "product_id": "product_1f1a67261b5667d8259212b7",
+      "seller_title": "لنت ترمز جلو سمند ef7 پارس آبی",
+      "title": "لنت ترمز جلو پارس لنت مناسب سمند ملی کد ۲۵۱۶۹",
+      "price": 2350000,
+      "changed_at": "2026-10-07T06:35:59.017545+00:00",
+      "age_days": 14,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_98ff090504c260ea3d845142",
+      "product_id": "product_e38b7d5fc5805a1da92beb10",
+      "seller_title": "تیغه برف پاک کن 2 عددی اتومکس سایز 24-18 مناسب برای سمند",
+      "title": "تیغه برف پاک کن 2 عددی اتومکس سایز 24-18 مناسب برای سمند",
+      "price": 650000,
+      "changed_at": "2026-10-06T10:15:37.181351+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_da75ddac4308c259d1e3eda4",
+      "product_id": "product_27fa4116eeb5421ad52b50e7",
+      "seller_title": "تیغه برف پاک کن پراید 18-18",
+      "title": "تیغه برف پاک کن فابریک پراید سایز ۱۸-۱۸",
+      "price": 480000,
+      "changed_at": "2026-10-06T10:15:37.161279+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_9e8bffc735ef27c57f9bd137",
+      "product_id": "product_f599b0724a32a77c55736cb9",
+      "seller_title": "ابرویی چراغ جلو پژو پارس سمت چپ سفید",
+      "title": "ابرویی چراغ جلو پژو پارس سمت چپ سفید",
+      "price": 150000,
+      "changed_at": "2026-10-06T07:00:39.453943+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_2be250dd39083eb5f95ffbe5",
+      "product_id": "product_a1132ad9a6f21db28706c5da",
+      "seller_title": "نمدبالای پدال زیر داشبورد(حرارت گیر)ال۹۰،ساندرو",
+      "title": "نمدبالای پدال زیر داشبورد(حرارت گیر)ال۹۰،ساندرو",
+      "price": 600000,
+      "changed_at": "2026-10-06T06:59:35.614278+00:00",
+      "age_days": 15,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_f3646e71b533c78dc4eb53fd",
+      "product_id": "product_4713f4b8dc92b38752e5099d",
+      "seller_title": "بلبرینگ چرخ عقب پیکان 411280 MWH",
+      "title": "بلبرینگ چرخ عقب پیکان 411280 MWH",
+      "price": 900000,
+      "changed_at": "2026-10-05T06:15:50.714204+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6eaf4fdd8c1361730cffac8d",
+      "product_id": "product_5ed179bb39c5e1b96fd1a59e",
+      "seller_title": "بلبرینگ کوچک چرخ جلو پیکان و چرخ عقب پراید جدید برند MWH",
+      "title": "بلبرینگ کوچک چرخ جلو پیکان و چرخ عقب پراید جدید برند MWH",
+      "price": 900000,
+      "changed_at": "2026-10-05T06:15:50.677243+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_d3df4cebe1168c3ce655c2b1",
+      "product_id": "product_46c3239f1846db8adf8d6c65",
+      "seller_title": "کاسه چرخ عقب پراید abs",
+      "title": "کاسه چرخ عقب ABS مناسب پراید مدل 100107",
+      "price": 2700000,
+      "changed_at": "2026-10-05T06:15:20.373816+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_15f42cd99b7a44455542ff82",
+      "product_id": "product_3dbf6554d2c53efd18f45ed0",
+      "seller_title": "کاسه چرخ عقب پراید جدید",
+      "title": "کاسه چرخ عقب پراید جدید",
+      "price": 2700000,
+      "changed_at": "2026-10-05T06:15:20.349840+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6e0be9c063c87199183590bd",
+      "product_id": "product_e758cfaab8a9b41bf86b5e18",
+      "seller_title": "کاسه چرخ عقب پراید -قدیم",
+      "title": "کاسه چرخ عقب پراید قدیم",
+      "price": 2700000,
+      "changed_at": "2026-10-05T06:15:03.504107+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_7934c5d521fccdf4fdd10ccc",
+      "product_id": "product_ea3dddcd2dc2ae187ab92b4a",
+      "seller_title": "دیسک ترمز چرخ تیبا",
+      "title": "دیسک ترمز چرخ جلو تیبا S81",
+      "price": 3400000,
+      "changed_at": "2026-10-05T06:14:52.411721+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_e198861dafc1f105b514ce9b",
+      "product_id": "product_7e7910b859f33d603c0bf2fb",
+      "seller_title": "دیسک ترمز جلو پژو 206 تیپ 2",
+      "title": "دیسک ترمز جلو پژو ۲۰۶ تیپ ۲ اسپرت",
+      "price": 3200000,
+      "changed_at": "2026-10-05T06:14:29.524407+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_36904a7a0dd046db43d9657b",
+      "product_id": "product_0cc28357184f563d5b0ef700",
+      "seller_title": "کاسه چرخ عقب تیپ2",
+      "title": "کاسه چرخ عقب مناسب پژو ۲۰۶ تیپ ۲",
+      "price": 3900000,
+      "changed_at": "2026-10-05T06:13:45.030440+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_3cfb3f63a033491adf46655a",
+      "product_id": "product_5b7fd3a75238310b881b613c",
+      "seller_title": "کاسه چرخ عقب تیبا وساینا",
+      "title": "کاسه چرخ عقب تیبا با دنده ای بی اس",
+      "price": 3700000,
+      "changed_at": "2026-10-05T06:13:23.195423+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_6e7004db87b39ae428cdc723",
+      "product_id": "product_f9e477a77185e0ea3f24b8c0",
+      "seller_title": "دیسک چرخ عقب ef7فولاد آذین",
+      "title": "دیسک چرخ عقب ef7فولاد آذین",
+      "price": 2700000,
+      "changed_at": "2026-10-05T06:04:34.281679+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_794df7e692389c1082af4799",
+      "product_id": "product_6f1b899d42ab8846058593fe",
+      "seller_title": "کاسه چرخ وانت پراید فولاد آذین",
+      "title": "کاسه چرخ وانت پراید فولاد آذین",
+      "price": 4600000,
+      "changed_at": "2026-10-05T06:04:18.981679+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_cf22b50cc50f6f98ea310558",
+      "product_id": "product_7e13a5f7908a4a9e274600ad",
+      "seller_title": "دیسک چرخ عقب دنا پنج پیچ - شرکتی",
+      "title": "دیسک چرخ عقب دنا پنج پیچ - شرکتی",
+      "price": 3700000,
+      "changed_at": "2026-10-05T06:01:32.540262+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_174faf26e75ceac3946045c6",
+      "product_id": "product_30e839aa5e5d036e6622609f",
+      "seller_title": "کاسه ترمز چرخ عقب پژو 405",
+      "title": "کاسه چرخ عقب پژو ۴۰۵",
+      "price": 4600000,
+      "changed_at": "2026-10-05T06:00:16.958755+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_bdaad438fd078e8bbdd4a145",
+      "product_id": "product_0f335a5d8cd6c9b54f8cbf70",
+      "seller_title": "دیسک چرخ جلو ال۹۰ شرکت فولاد آذین بسته بندی ۱ عددی",
+      "title": "دیسک چرخ جلو ال۹۰ شرکت فولاد آذین بسته بندی ۱ عددی",
+      "price": 4100000,
+      "changed_at": "2026-10-05T05:59:59.052725+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_c007c2bddc19240eea2a0da4",
+      "product_id": "product_bac8f4f2b4cea12e7018c9ca",
+      "seller_title": "ضدیخ،ضدجوش،ضدخوردگی ایساکو",
+      "title": "ضدیخ،ضدجوش،ضدخوردگی ایساکو",
+      "price": 380000,
+      "changed_at": "2026-10-05T05:59:14.634266+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_4e13d80e2a4077fcfcfd27b3",
+      "product_id": "product_6f275cb34601808244b20240",
+      "seller_title": "ضدیخ ،ضدجوش و ضدخوردگی بهران بهمن",
+      "title": "ضدیخ ،ضدجوش و ضدخوردگی بهران بهمن",
+      "price": 450000,
+      "changed_at": "2026-10-05T05:59:06.138209+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_5be6ec022475f3e59dd630c4",
+      "product_id": "product_78c3bc89f2a808fb6748d8a6",
+      "seller_title": "لنت ترمز جلو پارس لنت ( ابی ) مناسب تیبا.کوییک.ساینا.ریو همراه تلفن پارک خودرو",
+      "title": "لنت ترمز جلو لنت پارس مناسب تیبا، کوییک، ساینا و ریو",
+      "price": 2200000,
+      "changed_at": "2026-10-04T15:47:56.561484+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_54587d1f6848e3840542a229",
+      "product_id": "product_6352006e37a20b4c5eb5f44d",
+      "seller_title": "دیسک چرخ جلو پژو فولاد آذین",
+      "title": "دیسک چرخ جلو پژو فولاد آذین",
+      "price": 3600000,
+      "changed_at": "2026-10-03T13:24:36.129510+00:00",
+      "age_days": 18,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    }
+  ]
+}

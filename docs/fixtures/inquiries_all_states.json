@@ -1,0 +1,257 @@
+{
+  "_note": "sent/delivered/answered/unavailable/no_reply states. unavailable & no_reply carry `alternatives`.",
+  "items": [
+    {
+      "id": "inq_demo0",
+      "status": "sent",
+      "label": "ارسال شد",
+      "answer": null,
+      "shop": {
+        "shop_id": "shop_c060bc5ea37b78e00ece4bdb",
+        "name": "نیکورا ویوان",
+        "mall": "پاساژ علاالدین",
+        "floor_label": "همکف",
+        "unit": null,
+        "area": "شیخ هادی",
+        "address": "خیابان جمهوری، پاساژ علاالدین، طبقه زیر همکف، پلاک ۴۴",
+        "lat": 35.69492793026274,
+        "lon": 51.41168374724266
+      },
+      "product": {
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "title": "هندزفری گردنی انکر مدل Life U2i",
+        "image": "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg"
+      },
+      "created_at": "2026-10-21T15:05:00+00:00",
+      "deadline_at": "2026-10-21T15:10:00+00:00",
+      "questions": [
+        {
+          "key": "stock",
+          "text": "آیا الان موجود است؟"
+        },
+        {
+          "key": "price",
+          "text": "قیمت نهایی امروز چقدر است؟"
+        }
+      ]
+    },
+    {
+      "id": "inq_demo1",
+      "status": "delivered",
+      "label": "دیده شد",
+      "answer": null,
+      "shop": {
+        "shop_id": "shop_82243504d8e596222320b430",
+        "name": "آذروش سرودیس",
+        "mall": "پاساژ علاالدین",
+        "floor_label": null,
+        "unit": null,
+        "area": "شیخ هادی",
+        "address": "خیابان حافظ، بین خیابان هاتف و جمهوری اسلامی، پاساژ علاالدین، جنب آبمیوه، پلاک ۲۳۸",
+        "lat": 35.694850580985424,
+        "lon": 51.41149878501893
+      },
+      "product": {
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "title": "هندزفری گردنی انکر مدل Life U2i",
+        "image": "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg"
+      },
+      "created_at": "2026-10-21T15:05:00+00:00",
+      "deadline_at": "2026-10-21T15:10:00+00:00",
+      "questions": [
+        {
+          "key": "stock",
+          "text": "آیا الان موجود است؟"
+        },
+        {
+          "key": "price",
+          "text": "قیمت نهایی امروز چقدر است؟"
+        }
+      ]
+    },
+    {
+      "id": "inq_demo2",
+      "status": "answered",
+      "label": "پاسخ داد",
+      "answer": {
+        "available": true,
+        "price": 2850000,
+        "message": "موجوده، تشریف بیارید.",
+        "closes_at": "19:00",
+        "installment": true,
+        "simulated": false
+      },
+      "shop": {
+        "shop_id": "shop_8b57f928b2207bc45262b2ed",
+        "name": "مهرین رووان",
+        "mall": "پاساژ علاءالدین",
+        "floor_label": "طبقه منفی 1",
+        "unit": null,
+        "area": "شیخ هادی",
+        "address": "خیابان جمهوری اسامی، زیر پل حافظ، پاساژ علاءالدین، طبقه منفی ۱، پلاک ۴۳",
+        "lat": 35.69465036907061,
+        "lon": 51.411563158035285
+      },
+      "product": {
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "title": "هندزفری گردنی انکر مدل Life U2i",
+        "image": "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg"
+      },
+      "created_at": "2026-10-21T15:05:00+00:00",
+      "deadline_at": "2026-10-21T15:10:00+00:00",
+      "questions": [
+        {
+          "key": "stock",
+          "text": "آیا الان موجود است؟"
+        },
+        {
+          "key": "price",
+          "text": "قیمت نهایی امروز چقدر است؟"
+        }
+      ]
+    },
+    {
+      "id": "inq_demo3",
+      "status": "unavailable",
+      "label": "ناموجود است",
+      "answer": {
+        "available": false,
+        "message": "تموم شده",
+        "price": null,
+        "simulated": false
+      },
+      "shop": {
+        "shop_id": "shop_49b9854ac58b71ef66bd529b",
+        "name": "دیسینا نیکیس",
+        "mall": "پاساژ علاالدین",
+        "floor_label": "طبقه منفی 2",
+        "unit": null,
+        "area": "شیخ هادی",
+        "address": "خیابان جمهوری، جنب پل حافظ، پاساژ علاالدین، طبقه منفی۲، پلاک ۱۳۸",
+        "lat": 35.69480352931369,
+        "lon": 51.41135179999766
+      },
+      "product": {
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "title": "هندزفری گردنی انکر مدل Life U2i",
+        "image": "https://image.torob.com/base/images/JA/qX/JAqXm4ht4s6nueFW.jpg"
+      },
+      "created_at": "2026-10-21T15:05:00+00:00",
+      "deadline_at": "2026-10-21T15:10:00+00:00",
+      "questions": [
+        {
+          "key": "stock",
+          "text": "آیا الان موجود است؟"
+        },
+        {
+          "key": "price",
+          "text": "قیمت نهایی امروز چقدر است؟"
+        }
+      ],
+      "alternatives": {
+        "kind": "same_product",
+        "shops": [
+          {
+            "shop_id": "shop_82243504d8e596222320b430",
+            "name": "آذروش سرودیس",
+            "name_is_verified": false,
+            "address": "خیابان حافظ، بین خیابان هاتف و جمهوری اسلامی، پاساژ علاالدین، جنب آبمیوه، پلاک ۲۳۸",
+            "area": "شیخ هادی",
+            "lat": 35.694850580985424,
+            "lon": 51.41149878501893,
+            "mall": "پاساژ علاالدین",
+            "mall_key": "علالدین",
+            "floor": null,
+            "floor_label": null,
+            "unit": null,
+            "plaque": "238",
+            "distance_km": 0.15,
+            "walk_min": 2,
+            "open": {
+              "state": "open",
+              "label": "باز است · تا 20:30",
+              "closes_at": "20:30",
+              "opens_at": null,
+              "quality": "ok"
+            },
+            "payments": [],
+            "installment": false,
+            "fast_delivery": true,
+            "in_traffic_zone": true,
+            "instagram": null,
+            "website": null,
+            "phone_is_placeholder": true,
+            "phone": "۰۲۱۳۰۹۸۹۵۳۱",
+            "tier": "listed",
+            "offer": {
+              "offer_id": "offer_2ed779d360e3e22638b4a95d",
+              "product_id": "product_24e20485148d72cb2f46305d",
+              "seller_title": "هدفون بلوتوثی گردنی انکر مدل SoundCore Life U2i بدون قابلیت نویز کنسلینگ، درگاه شارژ USB Type-C، مقاوم در برابر رطوبت...",
+              "description": null,
+              "warranty": null,
+              "warranty_months": null,
+              "price": 2820000,
+              "changed_at": "2026-09-28T13:56:58.662379+00:00",
+              "age_days": 23,
+              "freshness": "recent",
+              "suspicious": false,
+              "verified_by_seller": false
+            },
+            "why": "قیمت ثبت‌شده · الان باز است · نزدیک شماست",
+            "score": 0.1001
+          },
+          {
+            "shop_id": "shop_8b57f928b2207bc45262b2ed",
+            "name": "مهرین رووان",
+            "name_is_verified": false,
+            "address": "خیابان جمهوری اسامی، زیر پل حافظ، پاساژ علاءالدین، طبقه منفی ۱، پلاک ۴۳",
+            "area": "شیخ هادی",
+            "lat": 35.69465036907061,
+            "lon": 51.411563158035285,
+            "mall": "پاساژ علاءالدین",
+            "mall_key": "علالدین",
+            "floor": -1,
+            "floor_label": "طبقه منفی 1",
+            "unit": null,
+            "plaque": "43",
+            "distance_km": 0.16,
+            "walk_min": 2,
+            "open": {
+              "state": "open",
+              "label": "باز است · تا 20:30",
+              "closes_at": "20:30",
+              "opens_at": null,
+              "quality": "ok"
+            },
+            "payments": [],
+            "installment": false,
+            "fast_delivery": true,
+            "in_traffic_zone": true,
+            "instagram": null,
+            "website": null,
+            "phone_is_placeholder": true,
+            "phone": "۰۹۳۸۳۰۱۵۶۷۵",
+            "tier": "listed",
+            "offer": {
+              "offer_id": "offer_223da84bd594787c348496a4",
+              "product_id": "product_24e20485148d72cb2f46305d",
+              "seller_title": "هندزفری گردنی انکر مدل U2i _ A3213",
+              "description": "با گارانتی و بدون گارانتی موجود",
+              "warranty": null,
+              "warranty_months": null,
+              "price": 2500000,
+              "changed_at": "2026-09-14T13:10:54.282917+00:00",
+              "age_days": 37,
+              "freshness": "stale",
+              "suspicious": false,
+              "verified_by_seller": false
+            },
+            "why": "قیمت ثبت‌شده · ولی 37 روز پیش به‌روز شده · الان باز است · نزدیک شماست",
+            "score": 0.1311
+          }
+        ],
+        "products": []
+      }
+    }
+  ]
+}

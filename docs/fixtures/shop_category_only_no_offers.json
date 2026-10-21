@@ -1,0 +1,100 @@
+{
+  "shop_id": "shop_2e9f13329fe004a88a8bdf58",
+  "name": "نیورا نیکین",
+  "name_is_verified": false,
+  "address": "جمهوری اسلامی، شیخ هادی، پاساژ علاالدین ۲، طبقه ۴، واحد ۴۲۶",
+  "area": "شیخ هادی",
+  "lat": 35.69487672080215,
+  "lon": 51.40719652175904,
+  "mall": "پاساژ علاالدین 2",
+  "mall_key": "علالدین 2",
+  "floor": 4,
+  "floor_label": "طبقه 4",
+  "unit": "426",
+  "plaque": null,
+  "distance_km": 0.53,
+  "walk_min": 7,
+  "open": {
+    "state": "closing_soon",
+    "label": "باز است · 18 دقیقه تا بسته شدن (19:00)",
+    "closes_at": "19:00",
+    "opens_at": null,
+    "quality": "ok"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": null,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۲۱۸۳۴۶۴۹۸۳",
+  "categories": [],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:30:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:30:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:30:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:30:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "19:00:00",
+          "start_time": "10:30:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 0,
+  "offers": []
+}

@@ -1,0 +1,269 @@
+{
+  "shop_id": "shop_b27a7e52c1289e75c3810b34",
+  "name": "رامین پاکوش",
+  "name_is_verified": false,
+  "address": "خیابان ستاری، خیابان پیامبر مرکزی هجرت، خیابان خجسته پور، پلاک 234",
+  "area": "باغ فیض",
+  "lat": 35.742676347393044,
+  "lon": 51.31570210185056,
+  "mall": null,
+  "mall_key": null,
+  "floor": null,
+  "floor_label": null,
+  "unit": null,
+  "plaque": "234",
+  "distance_km": 10.23,
+  "walk_min": 136,
+  "open": {
+    "state": "open",
+    "label": "باز است · تا 21:00",
+    "closes_at": "21:00",
+    "opens_at": null,
+    "quality": "ok"
+  },
+  "payments": [
+    {
+      "provider": "دیجی پی",
+      "channel": "in_person",
+      "confirmed_in_store": true
+    }
+  ],
+  "installment": true,
+  "fast_delivery": true,
+  "in_traffic_zone": false,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۹۳۸۵۹۸۹۱۶۴",
+  "categories": [
+    "لپ تاپ و نوت بوک"
+  ],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "18:00:00",
+          "start_time": "12:00:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "21:00:00",
+          "start_time": "10:30:00"
+        },
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "declared"
+    }
+  },
+  "offer_count": 11,
+  "offers": [
+    {
+      "offer_id": "offer_06b072870f33d311ebf1c1fc",
+      "product_id": "product_2976802b6fb24eaa4f7e68b7",
+      "seller_title": "لپ تاپ اپن باکس Dell Precision 7550-i5 10400H 16GB 256GB 4GB Nvidia Quadro T1000",
+      "title": "لپ تاپ دل Precision 7550 پردازنده i5 ۱۶ گیگابایت حافظه ۲۵۶ گیگابایت SSD گرافیک ۴ گیگابایت",
+      "price": 109900000,
+      "changed_at": "2026-10-04T22:04:18.608089+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_428e1f43cefde17a50314746",
+      "product_id": "product_0f9e37af221c5846d33d208f",
+      "seller_title": "HP zBook 14U G6 stock – i5 16G 256GB 14.1inch",
+      "title": "HP zBook 14U G6 stock – i5 16G 256GB 14.1inch",
+      "price": 63700000,
+      "changed_at": "2026-10-04T22:04:07.389837+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_7fea5817d58c0fcbc6252e38",
+      "product_id": "product_fedeee53ab92bc88645a7a9e",
+      "seller_title": "لپ تاپ مایکروسافت سرفیس بوک SW5-00001 2-in-1 Notebook PC مدل Microsoft Surface Book / پردازندهIntel Core i7-6600U / رم 8 GB/ هارد 256 GB/ کارت گرافیکIntel HD Graphics 520, NVIDIA GeForce graphics ‎ صفحه نمایش لمسی 13.5 اینچی - (تجدید شده) /",
+      "title": "لپ تاپ مایکروسافت سرفیس بوک SW5-00001 2-in-1 Notebook PC مدل Microsoft Surface Book / پردازندهIntel Core i7-6600U / رم 8 GB/ هارد 256 GB/ کارت گرافیکIntel HD Graphics 520, NVIDIA GeForce graphics ‎ صفحه نمایش لمسی 13.5 اینچی - (تجدید شده) /",
+      "price": 63900000,
+      "changed_at": "2026-10-04T22:03:36.637017+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_65cd41c638ff51e6766d4afb",
+      "product_id": "product_944b328308284a2adeeeb6d1",
+      "seller_title": "لپ تاپ استوک  13.5 اینچی مایکروسافت مدل Surface Book 1 Core i7 6600U 16-512GB",
+      "title": "لپ تاپ استوک  13.5 اینچی مایکروسافت مدل Surface Book 1 Core i7 6600U 16-512GB",
+      "price": 101900000,
+      "changed_at": "2026-10-04T22:03:20.212771+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_073762962350a0a336ea2997",
+      "product_id": "product_3293da0c048aaa4f551ba626",
+      "seller_title": "لپ تاپ مایکروسافت سرفیس استوک 13.5 اینچ Surface Laptop 4 Ryzen 7 لمسی 2K",
+      "title": "لپ تاپ مایکروسافت سرفیس استوک 13.5 اینچ Surface Laptop 4 Ryzen 7 لمسی 2K",
+      "price": 103800000,
+      "changed_at": "2026-10-04T22:03:13.729634+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_7a2d82d433518f31d35b702a",
+      "product_id": "product_89b7096848b091bf54e2f943",
+      "seller_title": "لپ تاپ ان ای سی مدل NEC VK23TG x360 touch",
+      "title": "لپ تاپ ان ای سی مدل VK23TG سایز ۱۳ اینچ با پردازنده Core i5 و ۴ گیگابایت رم",
+      "price": 31900000,
+      "changed_at": "2026-10-04T22:03:00.195389+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_dcd3e0c681c93d2bef15e34e",
+      "product_id": "product_ba20a2836e0902a8a85726c3",
+      "seller_title": "لپ تاپ استوک اچ پی مدل ProBook 470 G7 | پردازنده Core i7-10510U | رم 16| هارد 512 | گرافیک 2 گیگابایت | 17 اینچ | | همراه شارژر اورجینال",
+      "title": "لپ تاپ استوک اچ پی مدل ProBook 470 G7 | پردازنده Core i7-10510U | رم 16| هارد 512 | گرافیک 2 گیگابایت | 17 اینچ | | همراه شارژر اورجینال",
+      "price": 79900000,
+      "changed_at": "2026-10-04T22:02:49.110903+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_78c61762b2198b7fd472d0d4",
+      "product_id": "product_457a1ad4f04876a5e7c4387a",
+      "seller_title": "لپ تاپ سامسونگ مدل i7-6700HQ با حافظه ۱۶ گیگابایت و SSD ۲۵۶ گیگابایت",
+      "title": "لپ تاپ سامسونگ مدل I7-6700HQ با حافظه ۱۶ گیگابایت و SSD ۲۵۶ گیگابایت",
+      "price": 65900000,
+      "changed_at": "2026-10-04T22:02:04.279342+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_630b3e3445cc1dc247c246ef",
+      "product_id": "product_3503baabce466c54b9fbd71f",
+      "seller_title": "لپ تاپ استوک HP ZBook 15u G3 | 15.6\" | Core i7-6500U | 16GB RAM | 256GB SSD | AMD FirePro W4190M 2GB",
+      "title": "لپ تاپ استوک HP ZBook 15u G3 | 15.6\" | Core i7-6500U | 16GB RAM | 256GB SSD | AMD FirePro W4190M 2GB",
+      "price": 61900000,
+      "changed_at": "2026-10-04T22:01:41.336865+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_ad0415633db144cb17c32ce4",
+      "product_id": "product_344eec9b70e49b40068fdedc",
+      "seller_title": "لپ تاپ استوک Dell Vostro 5581 Core i5-8250U, 8GB RAM, 256GB SSD, FHD",
+      "title": "لپ تاپ استوک Dell Vostro 5581 Core i5-8250U, 8GB RAM, 256GB SSD, FHD",
+      "price": 63900000,
+      "changed_at": "2026-10-04T22:01:10.058932+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    },
+    {
+      "offer_id": "offer_958d86dc199a715c1513fbd4",
+      "product_id": "product_f76cd2c5f17063efae11bdc7",
+      "seller_title": "لپ تاپ دل استوک  | 16GB RAM | 512GB SSD | Core i7 9750h | VGA GTX1650",
+      "title": "لپ تاپ دل استوک  | 16GB RAM | 512GB SSD | Core i7 9750h | VGA GTX1650",
+      "price": 115700000,
+      "changed_at": "2026-10-04T22:00:57.186817+00:00",
+      "age_days": 16,
+      "freshness": "recent",
+      "suspicious": false,
+      "verified_by_seller": false
+    }
+  ]
+}

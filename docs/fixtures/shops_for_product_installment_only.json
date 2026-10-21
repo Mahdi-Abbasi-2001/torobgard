@@ -1,0 +1,403 @@
+{
+  "origin": [
+    35.6955,
+    51.413
+  ],
+  "listed": [
+    {
+      "shop_id": "shop_613e5d143b4b2b5ac73add40",
+      "name": "آذروش نویرا",
+      "name_is_verified": false,
+      "address": "میدان فردوسی، مرکز تجارت جهانی، طبقه دوم، واحد 234",
+      "area": "فردوسی",
+      "lat": 35.70075224406031,
+      "lon": 51.41963124275208,
+      "mall": "مرکز تجارت جهانی",
+      "mall_key": "مرکز تجارت جهانی",
+      "floor": 2,
+      "floor_label": "طبقه 2",
+      "unit": "234",
+      "plaque": null,
+      "distance_km": 0.84,
+      "walk_min": 11,
+      "open": {
+        "state": "closed",
+        "label": "بسته است · فردا 11:00",
+        "closes_at": null,
+        "opens_at": "فردا 11:00",
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "اسنپ‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۱۹۵۱۱۷۶۲۶",
+      "tier": "listed",
+      "offer": {
+        "offer_id": "offer_c23c58930aace5b9fb4f962f",
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "seller_title": "هندزفری گردنی بی‌سیم انکر مدل Soundcore Life U2i",
+        "description": null,
+        "warranty": "6 ماه گارانتی تعویض 12 ماه خدمات",
+        "warranty_months": 6,
+        "price": 3790000,
+        "changed_at": "2026-10-05T12:39:28.297940+00:00",
+        "age_days": 16,
+        "freshness": "recent",
+        "suspicious": false,
+        "verified_by_seller": false
+      },
+      "why": "قیمت ثبت‌شده · نزدیک شماست",
+      "score": 0.2404
+    },
+    {
+      "shop_id": "shop_8319b014ce567117efcda5e9",
+      "name": "مهریلا ویین",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری اسلامی، خیابان کلانتری، پاساژ خانه موبایل، طبقه ۳، واحد ۳۱۴",
+      "area": "شیخ هادی",
+      "lat": 35.69539951533738,
+      "lon": 51.41058951616288,
+      "mall": "پاساژ خانه موبایل",
+      "mall_key": "خانه موبایل",
+      "floor": 3,
+      "floor_label": "طبقه 3",
+      "unit": "314",
+      "plaque": null,
+      "distance_km": 0.22,
+      "walk_min": 3,
+      "open": {
+        "state": "open",
+        "label": "باز است · تا 21:00",
+        "closes_at": "21:00",
+        "opens_at": null,
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "اسنپ‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        },
+        {
+          "provider": "ترب‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۲۱۷۳۸۸۸۱۴۲",
+      "tier": "listed",
+      "offer": {
+        "offer_id": "offer_5553ee27726b1edd49214a3c",
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "seller_title": "هندزفری گردنی انکر (Anker Soundcore Life U2i A3213)",
+        "description": null,
+        "warranty": null,
+        "warranty_months": null,
+        "price": 3898808,
+        "changed_at": "2026-09-30T23:06:57.359995+00:00",
+        "age_days": 20,
+        "freshness": "recent",
+        "suspicious": false,
+        "verified_by_seller": false
+      },
+      "why": "قیمت ثبت‌شده · الان باز است · نزدیک شماست",
+      "score": 0.2772
+    },
+    {
+      "shop_id": "shop_3646403544371c1f8f53196c",
+      "name": "نیسا آریرا",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری، خیابان حافظ، مجتمع علاالدین ۳، طبقه منفی ۱، انتهای راهرو، پلاک ۲۳",
+      "area": "شیخ هادی",
+      "lat": 35.69355524559776,
+      "lon": 51.4113357619088,
+      "mall": "مجتمع علاالدین 3",
+      "mall_key": "علالدین 3",
+      "floor": -1,
+      "floor_label": "طبقه منفی 1",
+      "unit": null,
+      "plaque": "23",
+      "distance_km": 0.26,
+      "walk_min": 4,
+      "open": {
+        "state": "closed",
+        "label": "بسته است · فردا 10:00",
+        "closes_at": null,
+        "opens_at": "فردا 10:00",
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "ترب‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۳۵۲۷۳۰۲۲۲",
+      "tier": "listed",
+      "offer": {
+        "offer_id": "offer_2cf9dbdc386d873ed5a3b380",
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "seller_title": "هندزفری بلوتوثی گردنی انکر مدل Anker Soundcore life U2i",
+        "description": null,
+        "warranty": null,
+        "warranty_months": null,
+        "price": 3840000,
+        "changed_at": "2026-09-09T12:13:08.325577+00:00",
+        "age_days": 42,
+        "freshness": "stale",
+        "suspicious": false,
+        "verified_by_seller": false
+      },
+      "why": "قیمت ثبت‌شده · ولی 42 روز پیش به‌روز شده · نزدیک شماست",
+      "score": 0.3885
+    },
+    {
+      "shop_id": "shop_81c53acd00d779578fff4a40",
+      "name": "آذرنوش دیسیس",
+      "name_is_verified": false,
+      "address": "خیابان حافظ، رو‌به‌روی پاساژ چهارسو، پاساژ علاالدین، طبقه ۲، واحد ۲۱۶",
+      "area": "شیخ هادی",
+      "lat": 35.69489992608684,
+      "lon": 51.41146731325833,
+      "mall": "پاساژ چهارسو",
+      "mall_key": "چهارسو",
+      "floor": 2,
+      "floor_label": "طبقه 2",
+      "unit": "216",
+      "plaque": null,
+      "distance_km": 0.15,
+      "walk_min": 2,
+      "open": {
+        "state": "closed",
+        "label": "بسته است · فردا 10:30",
+        "closes_at": null,
+        "opens_at": "فردا 10:30",
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "ترب‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۱۲۹۳۷۶۶۲۶",
+      "tier": "listed",
+      "offer": {
+        "offer_id": "offer_896fe6da2c9a0d1fe5676849",
+        "product_id": "product_24e20485148d72cb2f46305d",
+        "seller_title": "هدفون بی‌سیم انکر مدل A3213 LIFE U2iUP",
+        "description": null,
+        "warranty": null,
+        "warranty_months": null,
+        "price": 3960000,
+        "changed_at": "2026-10-07T10:56:22.993409+00:00",
+        "age_days": 14,
+        "freshness": "recent",
+        "suspicious": false,
+        "verified_by_seller": false
+      },
+      "why": "قیمت ثبت‌شده · نزدیک شماست",
+      "score": 0.549
+    }
+  ],
+  "category_only": [
+    {
+      "shop_id": "shop_9f2dc82937bde15452981294",
+      "name": "نیین ماهیس",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری، پاساژ چارسو، طبقه 2، واحد D6",
+      "area": "فردوسی",
+      "lat": 35.69490125131055,
+      "lon": 51.412465512668646,
+      "mall": "پاساژ چارسو",
+      "mall_key": "چارسو",
+      "floor": 2,
+      "floor_label": "طبقه 2",
+      "unit": "D6",
+      "plaque": null,
+      "distance_km": 0.08,
+      "walk_min": 1,
+      "open": {
+        "state": "open",
+        "label": "باز است · تا 20:00",
+        "closes_at": "20:00",
+        "opens_at": null,
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "اسنپ‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۳۸۵۶۵۶۱۳۶",
+      "tier": "category_only",
+      "offer": null,
+      "why": "در دسته‌ی این محصول فعالیت دارد؛ موجودی و قیمت را باید بپرسید."
+    },
+    {
+      "shop_id": "shop_f2f0c0e031d9fd99f4f5b0b4",
+      "name": "نووش وینوش",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری اسلامی، بین خیابان حافظ و خیابان جمهوری، پاساژ چهارسو، طبقه چهارم، پلاک f42",
+      "area": "فردوسی",
+      "lat": 35.69493610449127,
+      "lon": 51.412438068323986,
+      "mall": "پاساژ چهارسو",
+      "mall_key": "چهارسو",
+      "floor": 4,
+      "floor_label": "طبقه 4",
+      "unit": null,
+      "plaque": null,
+      "distance_km": 0.08,
+      "walk_min": 1,
+      "open": {
+        "state": "closing_soon",
+        "label": "باز است · 18 دقیقه تا بسته شدن (19:00)",
+        "closes_at": "19:00",
+        "opens_at": null,
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "دیجی پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۳۹۹۲۵۳۵۹۲",
+      "tier": "category_only",
+      "offer": null,
+      "why": "در دسته‌ی این محصول فعالیت دارد؛ موجودی و قیمت را باید بپرسید."
+    },
+    {
+      "shop_id": "shop_ab54ab7b0a439f0222d9242b",
+      "name": "فرورا فردیس",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری، بازار چارسو، طبقه ۲، واحد D48-D49",
+      "area": "فردوسی",
+      "lat": 35.69479383722526,
+      "lon": 51.41252897244092,
+      "mall": "بازار چارسو",
+      "mall_key": "چارسو",
+      "floor": 2,
+      "floor_label": "طبقه 2",
+      "unit": "D48",
+      "plaque": null,
+      "distance_km": 0.09,
+      "walk_min": 1,
+      "open": {
+        "state": "open",
+        "label": "باز است · تا 20:00",
+        "closes_at": "20:00",
+        "opens_at": null,
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "ترب‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۲۱۸۴۴۴۸۳۹۰",
+      "tier": "category_only",
+      "offer": null,
+      "why": "در دسته‌ی این محصول فعالیت دارد؛ موجودی و قیمت را باید بپرسید."
+    },
+    {
+      "shop_id": "shop_eb2687f4154e629a1872d850",
+      "name": "نوین ویدیس",
+      "name_is_verified": false,
+      "address": "خیابان جمهوری اسلامی، تقاطع خیابان حافظ، پاساژ چارسو، طبقه ۳، واحد E31",
+      "area": "فردوسی",
+      "lat": 35.694853508100756,
+      "lon": 51.41224448337939,
+      "mall": "پاساژ چارسو",
+      "mall_key": "چارسو",
+      "floor": 3,
+      "floor_label": "طبقه 3",
+      "unit": "E31",
+      "plaque": null,
+      "distance_km": 0.1,
+      "walk_min": 1,
+      "open": {
+        "state": "closing_soon",
+        "label": "باز است · 18 دقیقه تا بسته شدن (19:00)",
+        "closes_at": "19:00",
+        "opens_at": null,
+        "quality": "ok"
+      },
+      "payments": [
+        {
+          "provider": "ترب‌پی",
+          "channel": "unknown",
+          "confirmed_in_store": false
+        }
+      ],
+      "installment": true,
+      "fast_delivery": null,
+      "in_traffic_zone": true,
+      "instagram": null,
+      "website": null,
+      "phone_is_placeholder": true,
+      "phone": "۰۹۳۵۶۴۳۷۷۷۹",
+      "tier": "category_only",
+      "offer": null,
+      "why": "در دسته‌ی این محصول فعالیت دارد؛ موجودی و قیمت را باید بپرسید."
+    }
+  ],
+  "counts": {
+    "listed": 4,
+    "category_only": 42
+  }
+}

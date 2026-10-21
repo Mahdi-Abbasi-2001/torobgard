@@ -1,0 +1,100 @@
+{
+  "shop_id": "shop_9900a46f54a879ce260839bb",
+  "name": "نیکورا نیکان",
+  "name_is_verified": false,
+  "address": "خیابان فردوسی، کوچه اکبر طاهری، ساختمان صمصام",
+  "area": "فردوسی",
+  "lat": 35.695769,
+  "lon": 51.4204544,
+  "mall": "ساختمان صمصام",
+  "mall_key": "صمصام",
+  "floor": null,
+  "floor_label": null,
+  "unit": null,
+  "plaque": null,
+  "distance_km": 0.67,
+  "walk_min": 9,
+  "open": {
+    "state": "unknown",
+    "label": "ساعت کاری این روز نامشخص است",
+    "closes_at": null,
+    "opens_at": null,
+    "quality": "suspicious"
+  },
+  "payments": [],
+  "installment": false,
+  "fast_delivery": null,
+  "in_traffic_zone": true,
+  "instagram": null,
+  "website": null,
+  "phone_is_placeholder": true,
+  "phone": "۰۹۳۹۶۹۲۵۵۲۳",
+  "categories": [],
+  "weekly_hours": {
+    "fri": {
+      "shifts": [
+        {
+          "end_time": "00:00:00",
+          "start_time": "00:00:00"
+        }
+      ],
+      "status": "closed"
+    },
+    "mon": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "08:00:00"
+        }
+      ],
+      "status": "unsupported"
+    },
+    "sat": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "08:00:00"
+        }
+      ],
+      "status": "unsupported"
+    },
+    "sun": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "08:00:00"
+        }
+      ],
+      "status": "unsupported"
+    },
+    "thu": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "02:00:00"
+        }
+      ],
+      "status": "declared"
+    },
+    "tue": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "08:00:00"
+        }
+      ],
+      "status": "unsupported"
+    },
+    "wed": {
+      "shifts": [
+        {
+          "end_time": "08:00:00",
+          "start_time": "08:00:00"
+        }
+      ],
+      "status": "unsupported"
+    }
+  },
+  "offer_count": 0,
+  "offers": []
+}

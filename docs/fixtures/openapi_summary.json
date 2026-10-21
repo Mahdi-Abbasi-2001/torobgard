@@ -1,0 +1,23 @@
+{
+  "paths": [
+    "/api/categories/top",
+    "/api/demo/seller-link/{shop_id}",
+    "/api/inquiries",
+    "/api/inquiry-questions",
+    "/api/malls",
+    "/api/malls/{mall_key}",
+    "/api/products/compare",
+    "/api/products/{product_id}",
+    "/api/products/{product_id}/shops",
+    "/api/products/{product_id}/similar",
+    "/api/search/products",
+    "/api/seller/{shop_id}/{token}/inquiries",
+    "/api/seller/{shop_id}/{token}/inquiries/{inquiry_id}/answer",
+    "/api/sessions/{session_id}",
+    "/api/sessions/{session_id}/events",
+    "/api/sessions/{session_id}/inquiries",
+    "/api/shops/{shop_id}",
+    "/healthz",
+    "/readyz"
+  ]
+}
