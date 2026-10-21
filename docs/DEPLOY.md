@@ -6,16 +6,22 @@ One container runs both servers: the Next.js app on the public port 3000 and Fas
 reachable through Next's `/api` proxy). `deploy/start.sh` starts both and exits if either dies, so Liara restarts the
 whole container instead of serving a half-dead app.
 
-Verified locally (no Docker on the dev machine): the start script with production env, the read-only catalog + separate
+Deployed and verified on Liara (first success: 2026-10-21): build, start, health, search, shops, chat fallback, `/data` disk
+mount and `state.db` surviving redeploys. Also verified locally (no Docker on the dev machine): the start script with production env, the read-only catalog + separate
 state file (state survives restart), the standalone Next server and its runtime `/api` proxy incl. SSE chat streaming,
-and the "one process dies -> container exits" behaviour. **Not verified locally: the Docker build itself.**
+and the "one process dies -> container exits" behaviour.
+Builds can hit Liara's 20-minute limit when the builder is slow (seen once); just retry, cached layers make it fast.
 
 ## Facts that shape the setup
 - Liara only offers **Iran-region** apps and **OpenAI blocks Iranian IPs**, so the deployed chat can't use OpenAI. Use
   **BoxAPI** (OpenAI-compatible): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`. Until set, chat runs the rule-based
   fallback (tested; UI shows the «جستجوی ساده» banner).
-- Memory measured locally: backend ≈ 83 MB, Next standalone ≈ 137 MB. `small-g2` is 0.5 GB, so it should fit but with
-  little headroom: if search feels slow or the app restarts, raise the plan to `medium-g2` (disk and data are kept).
+- Measured on the live `small-g2` container (limit 512 MB): total memory use ~100 MB (backend ~83 MB, Next ~137 MB locally),
+  so **RAM is not the bottleneck**. The weakness was cold disk reads: right after a deploy, a new search term could take
+  3-10 s. Fixed by moving the large specs text into its own table (hot data ~270 MB instead of ~430 MB) and pre-warming
+  the catalog at startup. After warm-up (~1 min): typical search 0.2-0.6 s, broad queries (30k matches) 1-2 s, measured
+  from a laptop. Expect the first minute after any deploy/restart to be slower: **don't redeploy right before judging**.
+- Upgrade only if timings regress: `medium-g2` (1 GB, 825 000 تومان/month) is an in-place plan change that keeps the disk.
 - The catalog (~460 MB SQLite + FTS) is **built into the image** from `backend/dataset/dataset.zip` (~30-90 s);
   sessions and inquiries live in `/data/state.db` on a Liara **disk** named `state` (1 GB is plenty).
 - One uvicorn worker on purpose (live-update bus and simulated sellers are in-process).
@@ -39,8 +45,8 @@ packages from inside Iran, add `--build-location germany`.
 
 ## Smoke test
 ```bash
-curl https://torobgard.iran.liara.run/api/readyz         # {"ok":true,"products":225903,...}
-curl https://torobgard.iran.liara.run/api/chat-status    # llm_configured true once BoxAPI vars are set
+curl https://torobgard.liara.run/api/readyz         # {"ok":true,"products":225903,...}
+curl https://torobgard.liara.run/api/chat-status    # llm_configured true once BoxAPI vars are set
 ```
 Then on a phone: search -> shops -> ask 3 shops -> watch answers arrive -> visit plan.
 
