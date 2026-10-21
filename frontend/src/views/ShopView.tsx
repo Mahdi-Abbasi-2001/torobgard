@@ -68,6 +68,7 @@ export default function ShopView({ id, product }: { id: string; product?: string
           <a className="btn sec grow" href={mapsUrl} target="_blank" rel="noopener">گوگل</a>
         </div>
         {s.website && <a href={s.website} target="_blank" rel="noopener" className="card row" style={{ padding: "12px 14px", gap: 10, color: "var(--accent-ink)" }}><Icon n="link" s /><bdi>{s.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</bdi></a>}
+        {s.instagram && <a href={s.instagram.profile_url} target="_blank" rel="noopener" className="card row" style={{ padding: "12px 14px", gap: 10, color: "var(--accent-ink)" }}><Icon n="link" s />اینستاگرام{s.instagram.handle && <> · <bdi dir="ltr">@{s.instagram.handle}</bdi></>}</a>}
 
         <div className="stack" style={{ gap: 6 }}>
           <div className="h4">ساعت کاری</div>

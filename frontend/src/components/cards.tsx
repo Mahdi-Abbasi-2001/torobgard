@@ -24,8 +24,16 @@ export function ShopCard({ s, selected, onSelect, confirmed, href, flash }: {
         </Link>
       </div>
       <div>{cat ? <span className="unknown"><Icon n="q" s />موجودی و قیمت نامشخص — بپرسید</span> : <PriceBadge offer={s.offer} confirmed={confirmed} />}</div>
+      {!cat && s.offer?.seller_title && <div className="xs muted" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}><span className="faint">عنوان فروشنده: </span><Bidi text={s.offer.seller_title} /></div>}
+      {!cat && s.offer?.description && <div className="xs faint" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}><Bidi text={s.offer.description} /></div>}
       <div className="wrapr"><OpenChip open={s.open} /></div>
       <div className="wrapr"><InstallmentChips shop={s} /><FastChip v={s.fast_delivery} /></div>
+      {(s.instagram || s.website) && (
+        <div className="wrapr">
+          {s.instagram && <a className="chip" href={s.instagram.profile_url} target="_blank" rel="noopener"><Icon n="link" s />اینستاگرام</a>}
+          {s.website && <a className="chip" href={s.website} target="_blank" rel="noopener"><Icon n="link" s />وب‌سایت</a>}
+        </div>
+      )}
       <div className="why"><b>چرا اینجا؟</b><span>{cat ? "در این دسته فعالیت دارد؛ موجودی را بپرسید" : fa(s.why ?? "")}</span></div>
     </div>
   );

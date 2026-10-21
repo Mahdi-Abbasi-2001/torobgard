@@ -26,7 +26,7 @@ export interface ShopCard {
   lat: number; lon: number; mall: string | null; mall_key: string | null; floor: number | null; floor_label: string | null;
   unit: string | null; plaque: string | null; distance_km: number | null; walk_min: number | null; open: OpenInfo;
   payments: Payment[]; installment: boolean; fast_delivery: boolean | null; in_traffic_zone: boolean;
-  instagram: string | null; website: string | null; phone_is_placeholder: boolean;
+  instagram: { handle: string | null; profile_url: string } | null; website: string | null; phone_is_placeholder: boolean;
   tier?: "listed" | "category_only"; offer?: Offer | null; why?: string; score?: number;
 }
 export interface Shift { start_time: string; end_time: string }

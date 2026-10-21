@@ -218,6 +218,21 @@ def _shop_payments(con, shop_ids: list[str]) -> dict[str, list[dict]]:
     return out
 
 
+def _instagram(raw: str | None) -> dict | None:
+    """The dataset stores Instagram as a JSON string {"handle","profile_url"}; hand clients a real object."""
+    if not raw:
+        return None
+    try:
+        d = json.loads(raw)
+        if isinstance(d, dict) and d.get("profile_url"):
+            return {"handle": d.get("handle"), "profile_url": d["profile_url"]}
+    except (ValueError, TypeError):
+        pass
+    if raw.startswith("http"):
+        return {"handle": raw.rstrip("/").rsplit("/", 1)[-1], "profile_url": raw}
+    return None
+
+
 def shop_card(r: sqlite3.Row, pay: list[dict], origin: tuple[float, float], at: datetime | None = None) -> dict:
     hrs = parse_hours_json(r["hours"])
     st = open_state(hrs, at)
@@ -238,7 +253,7 @@ def shop_card(r: sqlite3.Row, pay: list[dict], origin: tuple[float, float], at: 
         "open": {"state": st.state, "label": st.label, "closes_at": st.closes_at, "opens_at": st.opens_at, "quality": st.quality},
         "payments": pay, "installment": bool(pay),
         "fast_delivery": None if r["fast_delivery"] is None else bool(r["fast_delivery"]),
-        "in_traffic_zone": bool(r["in_traffic_zone"]), "instagram": r["instagram"], "website": r["website"],
+        "in_traffic_zone": bool(r["in_traffic_zone"]), "instagram": _instagram(r["instagram"]), "website": r["website"],
         "phone_is_placeholder": True, "phone": phone,
     }
 

@@ -63,7 +63,7 @@ def _s(s: dict) -> dict:
             "installment": [p["provider"] + ("" if p["confirmed_in_store"] else " (نوع پذیرش نامشخص)") for p in s["payments"]],
             "fast_delivery": s["fast_delivery"], "warranty": o.get("warranty"),
             # fields the mentor said must not be ignored when present: shop links, the seller's own listing text
-            "instagram": s.get("instagram"), "website": s.get("website"),
+            "instagram": (s.get("instagram") or {}).get("profile_url"), "website": s.get("website"),
             "seller_listing_title": (o.get("seller_title") or "")[:90] or None,
             "seller_note": (o.get("description") or "")[:140] or None}
 
