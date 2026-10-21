@@ -1,5 +1,7 @@
 # Deploying to Liara
 
+Product name: **ترب‌گرد** · Liara app name: **`torob-gard`** (fallback `torob-gard-sc` if taken).
+
 Two Docker apps: **backend** (FastAPI + SQLite) and **frontend** (Next.js). Verified locally: the production image layout
 (read-only catalog + state on a separate disk file, state survives restart), the standalone frontend and the runtime
 `/api` proxy (incl. SSE streaming). Not verified locally: the Docker builds themselves (no Docker on the dev machine).

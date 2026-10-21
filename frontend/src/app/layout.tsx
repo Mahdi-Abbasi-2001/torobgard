@@ -4,7 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "همراه خرید",
+  title: "ترب‌گرد",
   description: "از «کدام را بخرم» تا «جلوی واحد درست»: خرید حضوری در بازارهای تهران با قیمت تأییدشده توسط فروشنده.",
   manifest: "/manifest.webmanifest",
 };

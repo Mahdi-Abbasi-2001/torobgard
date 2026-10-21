@@ -1,4 +1,4 @@
-# همراه خرید — frontend
+# ترب‌گرد — frontend
 
 Next.js 16 (App Router) + TypeScript + TanStack Query. Mobile-first Persian RTL UI built from the design canvas
 (`design/canvas.src.html`, published as an artifact). Styles are plain CSS with the design's tokens in

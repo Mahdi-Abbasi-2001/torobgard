@@ -1,4 +1,4 @@
-# Design Brief for Claude Design: «همراه خرید» (working name)
+# Design Brief for Claude Design: «ترب‌گرد»
 
 > Give Claude Design this file + `screens.md` + the JSON files in `fixtures/`. All sample data is REAL data from Torob's Tehran dataset (shop names are fake in the dataset; locations and prices are real).
 

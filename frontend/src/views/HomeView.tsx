@@ -38,7 +38,7 @@ export default function HomeView() {
       <OfflineBanner />
       <div className="pad stack" style={{ paddingTop: 12, gap: 14 }}>
         <div className="row between">
-          <span className="row" style={{ gap: 8 }}><Radish /><span style={{ fontWeight: 900, fontSize: 20, lineHeight: 1 }}>همراه خرید</span></span>
+          <span className="row" style={{ gap: 8 }}><Radish /><span style={{ fontWeight: 900, fontSize: 20, lineHeight: 1 }}>ترب‌گرد</span></span>
           <button className="chip" style={{ minHeight: 40 }} onClick={() => setLocOpen(true)} aria-label={`محدوده: ${state.place.label}. تغییر`}>
             <Icon n="pin" s />{state.place.label}<Icon n="fwd" s />
           </button>

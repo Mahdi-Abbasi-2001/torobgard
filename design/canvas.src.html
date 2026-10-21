@@ -1,4 +1,4 @@
-<title>همراه خرید Screens</title>
+<title>ترب‌گرد Screens</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300..900&display=swap">
@@ -476,7 +476,7 @@ const S = D.shops, L = S.listed, C = S.category_only, PD = D.detail, INQ = D.inq
 const out = [];
 
 /* ---------- masthead ---------- */
-out.push(`<header class="mast"><div><h1>همراه خرید<small>Mobile UI · Persian RTL · in-person shopping in Tehran bazaars</small></h1>
+out.push(`<header class="mast"><div><h1>ترب‌گرد<small>Mobile UI · Persian RTL · in-person shopping in Tehran bazaars</small></h1>
 <p>15 screens, every state drawn from the real fixtures in <code>docs/fixtures/</code>. The core demo path comes first: Home → Product results → Shops for a product → Inquiry tracker. Phones scroll inside; each row scrolls sideways. Scenario clock: Wednesday 29 Mehr, 18:42, standing at Hafez × Jomhouri.</p>
 <nav class="toc" aria-label="Screens">${[['sys','0','Honesty system'],['home','1','Home'],['results','3','Results'],['shops','6','Shops'],['tracker','10','Tracker'],['chat','2','Chat'],['detail','4','Product'],['pcompare','5','Compare'],['shop','7','Shop detail'],['scompare','8','Compare shops'],['composer','9','Composer'],['alts','11','Alternatives'],['plan','12','Visit plan'],['mine','13','My shopping'],['seller','14','Seller inbox'],['mall','15','Mall directory'],['copy','—','Microcopy']].map(([id,n,t])=>`<a href="#${id}"><b>${n}</b>${t}</a>`).join('')}</nav></div>
 <div class="themes" role="group" aria-label="Theme"><button data-t="">System</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div></header>`);
@@ -537,7 +537,7 @@ out.push(`<header class="mast"><div><h1>همراه خرید<small>Mobile UI · P
      <div class="row" style="justify-content:space-between;width:100%"><button class="iconbtn soft" aria-label="گفتن با صدا">${ic('mic')}</button><button class="btn brand" style="min-height:44px">${ic('search','s')}پیدا کن</button></div></div>`;
   const locChip = (txt, state='') => `<button class="chip ${state}" style="min-height:40px">${ic('pin','s')}${txt}${ic('fwd','s')}</button>`;
   const head = loc => `<div class="pad stack" style="padding-top:6px;gap:14px">
-     <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 9c-4.6 0-8 3.3-8 7.6 0 5 4.4 9.3 8 12.4 3.6-3.1 8-7.4 8-12.4C24 12.3 20.6 9 16 9z" fill="var(--brand)"/><path d="M13.5 13.5c-1.3.8-2.1 2.1-2.3 3.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/><path d="M16 9.5c-.4-3 .8-5.6 3.6-6.8.6 2.8-.8 5.5-3.6 6.8zM15.6 9.6C13.4 8.7 11.6 6.6 11.5 4c2.4.4 4 2.6 4.1 5.6z" fill="var(--leaf)"/></svg><span style="font-weight:900;font-size:20px;line-height:1">همراه خرید</span></span>${loc}</div>`;
+     <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 9c-4.6 0-8 3.3-8 7.6 0 5 4.4 9.3 8 12.4 3.6-3.1 8-7.4 8-12.4C24 12.3 20.6 9 16 9z" fill="var(--brand)"/><path d="M13.5 13.5c-1.3.8-2.1 2.1-2.3 3.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/><path d="M16 9.5c-.4-3 .8-5.6 3.6-6.8.6 2.8-.8 5.5-3.6 6.8zM15.6 9.6C13.4 8.7 11.6 6.6 11.5 4c2.4.4 4 2.6 4.1 5.6z" fill="var(--leaf)"/></svg><span style="font-weight:900;font-size:20px;line-height:1">ترب‌گرد</span></span>${loc}</div>`;
   const how = `<div class="card" style="padding:12px 14px"><div class="xs faint" style="margin-bottom:8px">از «نمی‌دانم کدام» تا «جلوی واحد درست»</div>
      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">${[['spark','کالا را انتخاب کن'],['map','فروشگاه نزدیک'],['compare','مقایسه'],['send','استعلام و برو']].map(([i,t],k)=>`<div class="xs" style="display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-2)"><span style="width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center">${ic(i,'s')}</span>${fa(k+1)}. ${t}</div>`).join('')}</div></div>`;
   const ex = `<div class="stack" style="gap:8px"><span class="xs faint">نمونه‌ها را امتحان کنید</span><div class="wrapr">
