@@ -30,6 +30,7 @@ export default function SellerView({ shop, token }: { shop: string; token: strin
         <div className="grow"><div className="b">{q.data.shop.name}</div><div className="xs" style={{ opacity: .75 }}>صندوق استعلام · نسخهٔ فروشنده</div></div>
       </header>
       <div className="pad stack" style={{ gap: 14, paddingTop: 14 }}>
+        {q.data.bale?.enabled && <BaleConnect b={q.data.bale} />}
         <div className="xs muted">{pending.length ? `${fa(pending.length)} استعلام منتظر پاسخ شماست` : "استعلام تازه‌ای ندارید. این صفحه خودکار به‌روز می‌شود."}</div>
         {sent && <div className="card"><Empty icon="check" tone="ok" title="پاسخ شما ارسال شد">{sent}</Empty></div>}
         {pending.map((i) => <Answerable key={i.id} i={i} shop={shop} token={token} onSent={setSent} />)}
@@ -110,5 +111,20 @@ function Answerable({ i, shop, token, onSent }: { i: Inquiry; shop: string; toke
         {m.isPending ? <span className="spin" /> : <Icon n="send" s />}ارسال پاسخ
       </button>
     </form>
+  );
+}
+
+
+/** Optional second channel: answer inquiries from Bale instead of this page. Shown only when the bot is configured. */
+function BaleConnect({ b }: { b: { bot_username?: string | null; linked?: boolean; command?: string } }) {
+  const [copied, setCopied] = useState(false);
+  if (b.linked) return <div className="note ok"><Icon n="check" s /><span>بله متصل است؛ استعلام‌ها در بله هم می‌آید.</span></div>;
+  return (
+    <section className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+      <div className="h4">جواب دادن از «بله»</div>
+      <div className="xs muted">{b.bot_username ? <>ربات <bdi dir="ltr">@{b.bot_username}</bdi> را در بله باز کنید و</> : "ربات را در بله باز کنید و"} این دستور را بفرستید؛ بعد استعلام‌ها با دکمه در بله می‌آید.</div>
+      <code dir="ltr" style={{ fontSize: 12, wordBreak: "break-all", padding: 8, borderRadius: 8, background: "var(--bg-2, rgba(127,127,127,.12))" }}>{b.command}</code>
+      <button type="button" className="btn sec" onClick={() => { navigator.clipboard?.writeText(b.command ?? "").then(() => setCopied(true)).catch(() => {}); }}>{copied ? "کپی شد" : "کپی دستور"}</button>
+    </section>
   );
 }

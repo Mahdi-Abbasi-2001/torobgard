@@ -127,7 +127,7 @@ export const api = {
     req<{ items: Inquiry[] }>(`/inquiries`, { method: "POST", body: JSON.stringify(b) }),
   inquiries: (sid: string) => req<{ items: Inquiry[] }>(`/sessions/${sid}/inquiries`),
   sellerInbox: (shop: string, token: string) =>
-    req<{ shop: { shop_id: string; name: string; mall: string | null; unit: string | null }; items: Inquiry[] }>(`/seller/${shop}/${token}/inquiries`),
+    req<{ shop: { shop_id: string; name: string; mall: string | null; unit: string | null }; bale?: { enabled: boolean; bot_username?: string | null; linked?: boolean; command?: string }; items: Inquiry[] }>(`/seller/${shop}/${token}/inquiries`),
   sellerAnswer: (shop: string, token: string, id: string, a: Partial<Answer>) =>
     req<Inquiry>(`/seller/${shop}/${token}/inquiries/${id}/answer`, { method: "POST", body: JSON.stringify(a) }),
   eventsUrl: (sid: string) => `${process.env.NEXT_PUBLIC_EVENTS_BASE ?? ""}/api/sessions/${sid}/events`,

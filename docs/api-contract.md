@@ -33,5 +33,14 @@ Search is now forgiving: filler words are dropped, an empty exact match relaxes 
 
 LLM config (`backend/.env`, gitignored; see `.env.example`): `OPENAI_API_KEY` (or `LLM_API_KEY`), `LLM_BASE_URL` (default OpenAI; set to BoxAPI's OpenAI-compatible URL later), `LLM_MODEL` (default `gpt-4o-mini`).
 
+## Added in v0.3 (mentor guidance)
+| Method & path | Notes |
+|---|---|
+| `GET /api/where-to-look?q=&category=&lat=&lon=&hint=` | Malls/areas where shops of that category concentrate (dataset shop locations), `confidence` high/medium/low/none, map links; `hint` adds a Google Maps search link |
+| `GET /api/products/{id}/review` | Grounded short review: pros/cons each cite a real spec (`spec_key`/`spec_value`), in-shop tips, optional `reputation` (general knowledge, `verified:false`). Cached per product; daily cap `TOROB_REVIEW_DAILY_CAP` |
+| chat blocks | new `location_widget` and `review`; agent tools `where_to_look`, `product_review` |
+| shop cards | `instagram` is now `{handle, profile_url}`; offers expose `seller_title` and `description` |
+| Bale channel | optional, see `docs/BALE.md` |
+
 ## Not built yet
 Bale bot webhook · frontend `PlanView` still computes the plan client-side (swap to `/api/visit-plan`).

@@ -89,7 +89,11 @@ def create(con, session_id: str, shop_ids: list[str], product_id: str | None, qu
     con.commit()
     for o in out:
         publish(session_id, {"type": "inquiry", "inquiry": view(con, o["id"])})
-        if SIMULATE and o["shop_id"] not in LIVE_SHOPS:
+        from . import bale
+        if bale.enabled() and bale.is_linked(con, o["shop_id"]):  # a real person answers via Bale: never simulate this shop
+            if LOOP is not None and LOOP.is_running():
+                asyncio.run_coroutine_threadsafe(bale.notify_inquiry(o["id"]), LOOP)
+        elif SIMULATE and o["shop_id"] not in LIVE_SHOPS:
             if LOOP is not None and LOOP.is_running():
                 asyncio.run_coroutine_threadsafe(_simulate(o["id"]), LOOP)
     return out

@@ -38,9 +38,13 @@ async def lifespan(app: FastAPI):
     inq.LOOP = asyncio.get_running_loop()
     task = asyncio.create_task(inq.timeout_loop())
     warm = asyncio.create_task(_warm_loop())
+    from .services import bale
+    bale_task = asyncio.create_task(bale.poll_loop()) if bale.enabled() else None
     yield
     task.cancel()
     warm.cancel()
+    if bale_task:
+        bale_task.cancel()
 
 
 app = FastAPI(title="Torob In-Person Shopping Assistant API", version="0.1.0", lifespan=lifespan)
@@ -263,7 +267,10 @@ class AnswerIn(BaseModel):
 def seller_list(shop_id: str, token: str, con: Con):
     _check(shop_id, token)
     shop = catalog.get_shop(con, shop_id)
+    from .services import bale
     return {"shop": {"shop_id": shop_id, "name": shop["name"], "mall": shop["mall"], "unit": shop["unit"]},
+            "bale": {"enabled": bale.enabled(), "bot_username": bale.BOT_USERNAME or None,
+                     "linked": bale.is_linked(con, shop_id), "command": bale.link_command(shop_id)} if bale.enabled() else {"enabled": False},
             "items": inq.seller_inbox(con, shop_id)}
 
 
