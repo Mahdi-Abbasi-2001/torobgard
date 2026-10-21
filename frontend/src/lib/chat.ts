@@ -1,5 +1,5 @@
 // Chat agent client: POST /api/chat/{sid}, parse the SSE stream into typed events (docs/api-contract.md).
-import type { CompareResult, Inquiry, Product, ShopCard } from "./api";
+import type { CompareResult, Inquiry, Product, ShopCard, WherePlace } from "./api";
 
 export type Block =
   | { type: "product_cards"; query: string; total: number; items: Product[]; applied: { price_min?: number | null; price_max?: number | null }; title?: string }
@@ -7,7 +7,8 @@ export type Block =
   | { type: "shop_list"; product: { product_id: string; title: string; image: string | null } | null; listed: ShopCard[]; category_only: ShopCard[]; counts: { listed: number; category_only: number } }
   | { type: "chips"; question: string; options: string[] }
   | { type: "inquiry_proposal"; product: { product_id: string; title: string; image: string | null } | null; shops: { shop_id: string; name: string; mall: string | null; floor_label: string | null; unit: string | null; area: string | null }[]; questions: { key: string; text: string }[] }
-  | { type: "inquiry_status"; items: Inquiry[] };
+  | { type: "inquiry_status"; items: Inquiry[] }
+  | { type: "location_widget"; query: string; confidence: "high" | "medium" | "low" | "none"; matched_categories: { name: string; shops: number }[]; places: WherePlace[]; dataset_shops: number; knowledge_hint: string | null; search_link: string | null };
 
 export type ChatEvent =
   | { type: "text"; delta: string }

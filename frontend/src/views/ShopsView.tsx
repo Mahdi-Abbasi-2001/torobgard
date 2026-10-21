@@ -9,6 +9,7 @@ import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductMini, ShopCard } from "@/components/cards";
 import { ShopMap } from "@/components/ShopMap";
+import { WhereToLook } from "@/components/WhereToLook";
 import { AppBar, Empty, ErrorState, Note, OfflineBanner, Seg, Sheet, SkeletonCards, Steps } from "@/components/ui";
 
 const RADII: [number | null, string][] = [[0.5, "۵۰۰ متر"], [1, "۱ کیلومتر"], [3, "۳ کیلومتر"], [null, "همه"]];
@@ -127,6 +128,7 @@ export default function ShopsView({ id }: { id: string }) {
 
 function ZeroListed({ id, f, setF, catCount }: { id: string; f: ShopFilters; setF: (p: Partial<ShopFilters>) => void; catCount: number }) {
   const { state } = useSession();
+  const prod = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
   const relax: { label: string; patch: Partial<ShopFilters> }[] = [];
   if (f.radius_km != null) relax.push({ label: f.radius_km < 3 ? "شعاع را ۳ کیلومتر کن" : "محدودیت فاصله را بردار", patch: { radius_km: f.radius_km < 3 ? 3 : null } });
   if (f.fast_delivery) relax.push({ label: "«ارسال سریع» را بردار", patch: { fast_delivery: false } });
@@ -142,6 +144,7 @@ function ZeroListed({ id, f, setF, catCount }: { id: string; f: ShopFilters; set
       <Empty icon="store" title={relax.length ? "هیچ فروشگاهی همهٔ این شرایط را ندارد" : "نزدیک شما فروشگاهی این کالا را ثبت نکرده"}>
         {relax.length ? "یکی از شرط‌ها را بردارید؛ تعداد نتیجهٔ هر کدام کنارش است." : "فروشگاه‌های این دسته را می‌توانید بپرسید."}
       </Empty>
+      {!relax.length && prod.data?.category && <WhereToLook q={prod.data.category} category={prod.data.category} />}
       <div className="pad stack" style={{ gap: 8 }}>
         {relax.map((r, i) => (
           <button key={r.label} className="card row between" style={{ padding: "12px 14px" }} onClick={() => setF(r.patch)}>

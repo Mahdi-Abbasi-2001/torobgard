@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+from collections import Counter
 from datetime import datetime, timezone
 
 from .address import floor_display
@@ -397,3 +398,111 @@ def list_malls(con, limit: int = 30) -> list[dict]:
     top = sorted(agg.items(), key=lambda kv: -kv[1]["n"])[:limit]
     return [{"mall_key": k, "mall": v["names"].most_common(1)[0][0], "area": v["area"].most_common(1)[0][0],
              "shop_count": v["n"]} for k, v in top]
+
+
+# ---------------------------------------------------------------- where to look (product not found / "where do I buy X")
+_CAT_INDEX: dict | None = None
+
+
+def _category_index(con) -> list[tuple[str, str, int]]:
+    """[(name, normalized-no-space, shop_count)] for every category any shop declares. Built once per process."""
+    global _CAT_INDEX
+    if _CAT_INDEX is None:
+        rows = con.execute("SELECT category, COUNT(DISTINCT shop_id) FROM shop_categories GROUP BY category").fetchall()
+        _CAT_INDEX = {"rows": [(r[0], normalize_fa(r[0]).replace(" ", ""), normalize_fa(r[0]), r[1]) for r in rows]}
+    return _CAT_INDEX["rows"]
+
+
+def match_categories(con, query: str, limit: int = 3) -> tuple[list[dict], str]:
+    """Match a free-text product phrase to shop categories. Whole-phrase matches beat partial token overlap
+    (so «کفش کتونی» never silently becomes «کفی و زیره کفش»). Returns (categories, confidence)."""
+    q = normalize_fa(query)
+    toks = [t for t in q.split() if t not in STOPWORDS and len(t) > 1]
+    if not toks:
+        return [], "none"
+    qns = "".join(toks)
+    scored = []
+    for name, ns, norm, n in _category_index(con):
+        starts, pos = set(), 0                           # offsets where each word of the category begins (no-space string)
+        for w in norm.split():
+            starts.add(pos); pos += len(w)
+        i = ns.find(qns)
+        while i != -1 and i not in starts:               # «لباس» must not match inside «کالباس»
+            i = ns.find(qns, i + 1)
+        if i != -1:                                      # whole phrase at a word boundary of the category name
+            s = 3.0 + len(qns) / max(len(ns), 1)
+        else:
+            hit = sum(1 for t in toks if t in norm.split() or t in ns)
+            cov = hit / len(toks)
+            if len(toks) > 1 and cov < 1:                # multi-word query: partial overlap is weak evidence
+                s = cov * 0.9
+            elif cov == 1:
+                s = 2.0 + len(qns) / max(len(ns), 1)
+            else:
+                s = 0.0
+        if s > 0:
+            scored.append((s + min(n, 300) / 3000, name, n, s))
+    scored.sort(reverse=True)
+    top = scored[:limit]
+    if not top:
+        return [], "none"
+    best = top[0][3]
+    conf = "high" if best >= 3 else "medium" if best >= 2 else "low"
+    cats = [{"name": nm, "shops": n} for _, nm, n, sc in top if sc >= (best - 1.0 if conf != "low" else 0)]
+    return cats, conf
+
+
+def _map_links(lat: float, lon: float) -> dict:
+    return {"neshan": f"https://nshn.ir/?lat={lat}&lng={lon}",
+            "balad": f"https://balad.ir/location?latitude={lat}&longitude={lon}",
+            "google": f"https://maps.google.com/?q={lat},{lon}"}
+
+
+def where_to_look(con, query: str, category: str | None = None, origin: tuple[float, float] | None = None,
+                  limit: int = 3) -> dict:
+    """Malls/areas where shops of the matching category concentrate, from the dataset's own shop locations."""
+    origin = origin or DEFAULT_LOC
+    if category:
+        cats, conf = [{"name": category, "shops": 0}], "high"
+    else:
+        cats, conf = match_categories(con, query)
+    out = {"query": query, "confidence": conf, "matched_categories": cats, "places": [], "dataset_shops": 0}
+    if not cats:
+        return out
+    ph = ",".join("?" * len(cats))
+    rows = con.execute(
+        f"SELECT COALESCE(s.mall_key, '~' || s.location_label) k, s.shop_id, s.mall, s.location_label, s.lat, s.lon, "
+        f"s.floor, s.offer_count FROM shop_categories c JOIN shops s USING(shop_id) WHERE c.category IN ({ph}) "
+        f"AND s.lat IS NOT NULL", [c["name"] for c in cats]).fetchall()
+    groups: dict[str, dict] = {}
+    for r in rows:
+        g = groups.setdefault(r["k"], {"kind": "mall" if not r["k"].startswith("~") else "area", "names": Counter(),
+                                       "area": Counter(), "lat": [], "lon": [], "floors": Counter(), "ids": set(), "listed": 0})
+        if r["shop_id"] in g["ids"]:
+            continue
+        g["ids"].add(r["shop_id"]); g["lat"].append(r["lat"]); g["lon"].append(r["lon"]); g["area"][r["location_label"]] += 1
+        if r["mall"]:
+            g["names"][r["mall"]] += 1
+        if r["floor"] is not None:
+            g["floors"][r["floor"]] += 1
+        g["listed"] += 1 if r["offer_count"] else 0
+    out["dataset_shops"] = len({i for g in groups.values() for i in g["ids"]})
+    # malls first when they hold a meaningful cluster; areas fill the rest
+    ranked = sorted(groups.values(), key=lambda g: (-(len(g["ids"]) >= 3 and g["kind"] == "mall"), -len(g["ids"])))
+    for g in ranked[:limit]:
+        lat, lon = sum(g["lat"]) / len(g["lat"]), sum(g["lon"]) / len(g["lon"])
+        area = g["area"].most_common(1)[0][0]
+        d = haversine_km(origin[0], origin[1], lat, lon)
+        out["places"].append({
+            "kind": g["kind"], "name": g["names"].most_common(1)[0][0] if g["names"] else f"محدودهٔ {area}", "area": area,
+            "shop_count": len(g["ids"]), "shops_with_listed_prices": g["listed"],
+            "common_floors": [floor_display(f, None) for f, _ in sorted(g["floors"].items(), key=lambda x: -x[1])[:3]],
+            "lat": round(lat, 5), "lon": round(lon, 5), "distance_km": round(d, 2), "walk_min": round(d * 1.3 / 4.5 * 60),
+            "links": _map_links(round(lat, 5), round(lon, 5))})
+    return out
+
+
+def maps_search_link(text: str) -> str:
+    """Google Maps text search (works for anything, e.g. a market area the model knows about but our data doesn't)."""
+    from urllib.parse import quote
+    return "https://www.google.com/maps/search/?api=1&query=" + quote(text)

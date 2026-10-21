@@ -55,6 +55,15 @@ export interface Inquiry {
   alternatives?: { kind: "same_product" | "similar_product"; shops: ShopCard[]; products: Product[] };
 }
 
+export interface WherePlace {
+  kind: "mall" | "area"; name: string; area: string; shop_count: number; shops_with_listed_prices: number; common_floors: (string | null)[];
+  lat: number; lon: number; distance_km: number; walk_min: number; links: { neshan: string; balad: string; google: string };
+}
+export interface WhereToLook {
+  query: string; confidence: "high" | "medium" | "low" | "none"; matched_categories: { name: string; shops: number }[];
+  places: WherePlace[]; dataset_shops: number; search_link?: string | null;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
@@ -100,6 +109,8 @@ export const api = {
   shop: (id: string, loc: Loc) => req<ShopDetail>(`/shops/${encodeURIComponent(id)}${qs(at(loc))}`),
   malls: (limit = 12) => req<{ items: Mall[] }>(`/malls${qs({ limit })}`),
   mall: (key: string) => req<MallDirectory>(`/malls/${encodeURIComponent(key)}`),
+  whereToLook: (p: { q: string; category?: string | null; hint?: string | null }, loc: Loc) =>
+    req<WhereToLook>(`/where-to-look${qs({ q: p.q, category: p.category, hint: p.hint, ...at(loc) })}`),
   topCategories: (limit = 8) => req<{ items: { name: string; multi_shop_products: number }[] }>(`/categories/top${qs({ limit })}`),
   getSession: (id: string) => req<Record<string, unknown>>(`/sessions/${id}`),
   putSession: (id: string, state: Record<string, unknown>) => req(`/sessions/${id}`, { method: "PUT", body: JSON.stringify({ state }) }),

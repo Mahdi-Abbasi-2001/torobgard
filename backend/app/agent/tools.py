@@ -29,6 +29,10 @@ TOOLS = [
         "description": "Alternatives to a product (same category, similar price). Use when the user wants other options or when few shops have the product.",
         "parameters": {"type": "object", "properties": {"product_id": {"type": "string"}}, "required": ["product_id"]}}},
     {"type": "function", "function": {
+        "name": "where_to_look",
+        "description": "When the product is not found, no shop lists it, or the user asks where to buy something: returns the malls/areas where shops of that category concentrate (from the dataset's real shop locations) with map links, and renders a location widget. Put your own general knowledge of Tehran's market clusters (a short place phrase, e.g. «بازار بزرگ تهران، راسته کفاش‌ها») in knowledge_hint; it is shown as unverified.",
+        "parameters": {"type": "object", "properties": {"query": {"type": "string", "description": "product phrase, e.g. «کفش کتونی»"}, "knowledge_hint": {"type": "string"}}, "required": ["query"]}}},
+    {"type": "function", "function": {
         "name": "ask_user",
         "description": "Ask the user ONE short clarifying question with 2-5 tappable answers. Use only when the need is genuinely ambiguous (use-case, budget, brand). Never ask more than one question per turn.",
         "parameters": {"type": "object", "properties": {"question": {"type": "string"}, "options": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 5}}, "required": ["question", "options"]}}},
@@ -57,7 +61,11 @@ def _s(s: dict) -> dict:
             "open": s["open"]["label"], "listed_price": o.get("price"), "price_age_days": o.get("age_days"),
             "price_freshness": o.get("freshness"), "price_suspicious": o.get("suspicious"),
             "installment": [p["provider"] + ("" if p["confirmed_in_store"] else " (نوع پذیرش نامشخص)") for p in s["payments"]],
-            "fast_delivery": s["fast_delivery"], "warranty": o.get("warranty")}
+            "fast_delivery": s["fast_delivery"], "warranty": o.get("warranty"),
+            # fields the mentor said must not be ignored when present: shop links, the seller's own listing text
+            "instagram": s.get("instagram"), "website": s.get("website"),
+            "seller_listing_title": (o.get("seller_title") or "")[:90] or None,
+            "seller_note": (o.get("description") or "")[:140] or None}
 
 
 def _remember(ctx, items):
@@ -115,6 +123,18 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
         items = catalog.similar_products(con, a["product_id"], 5)
         _remember(ctx, items)
         return {"products": [_p(p) for p in items]}, ({"type": "product_cards", "query": "", "total": len(items), "items": items[:4], "applied": {}, "title": "گزینه‌های مشابه"} if items else None)
+    if name == "where_to_look":
+        r = catalog.where_to_look(con, a.get("query", ""), None, ctx.origin)
+        hint = (a.get("knowledge_hint") or "").strip()[:120] or None
+        out = {"confidence": r["confidence"], "matched_categories": [c["name"] for c in r["matched_categories"]],
+               "dataset_shops_in_category": r["dataset_shops"],
+               "places": [{"name": p["name"], "area": p["area"], "shops": p["shop_count"], "floors": p["common_floors"],
+                           "km": p["distance_km"]} for p in r["places"]],
+               "note": "confidence low/none = the dataset barely covers this category; say so and rely on knowledge_hint (label it unverified)"}
+        block = {"type": "location_widget", "query": a.get("query", ""), "confidence": r["confidence"],
+                 "matched_categories": r["matched_categories"], "places": r["places"], "dataset_shops": r["dataset_shops"],
+                 "knowledge_hint": hint, "search_link": catalog.maps_search_link(hint) if hint else None}
+        return out, block
     if name == "ask_user":
         return {"shown_to_user": True, "note": "Stop and wait for the user's tap."}, {"type": "chips", "question": a["question"], "options": a["options"][:5]}
     if name == "propose_inquiry":

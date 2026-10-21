@@ -147,6 +147,17 @@ def mall(mall_key: str, con: Con):
     return m
 
 
+@app.get("/api/where-to-look", tags=["shops"])
+def where_to_look(con: Con, q: str, category: str | None = None, lat: float | None = None, lon: float | None = None,
+                  hint: str | None = Query(None, max_length=120, description="free-text place for a map search link")):
+    """For a product nobody lists: the malls/areas where shops of that kind concentrate (from the dataset's shop locations)."""
+    _, q = split_budget(q)  # «کفش زیر ۲ میلیون» -> «کفش»
+    r = catalog.where_to_look(con, q, category, _origin(lat, lon))
+    if hint:
+        r["search_link"] = catalog.maps_search_link(hint)
+    return r
+
+
 @app.get("/api/categories/top", tags=["products"])
 def top_categories(con: Con, limit: int = 24):
     rows = con.execute("SELECT category, COUNT(*) n FROM products WHERE shop_count>=2 AND category IS NOT NULL "

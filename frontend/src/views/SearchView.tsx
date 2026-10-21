@@ -8,6 +8,7 @@ import { fa, mil, money } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductCard } from "@/components/cards";
+import { WhereToLook } from "@/components/WhereToLook";
 import { AppBar, Empty, ErrorState, OfflineBanner, Sheet, SkeletonCards, Steps } from "@/components/ui";
 
 const NO_CAP = 999_999_999_999; // explicit "no budget" so the API ignores a budget phrase inside q
@@ -155,6 +156,7 @@ function NoResults({ sp, cap, set }: { sp: SearchParams; cap: number | null; set
       <Empty icon="search" title={cap ? "با این بودجه چیزی پیدا نکردیم" : "چیزی پیدا نکردیم"}>
         {cap ? `با این کلمه‌ها و تا ${mil(cap)} تومان کالایی در فروشگاه‌ها ثبت نشده است.` : "کلمهٔ کوتاه‌تری بنویسید یا املای نام مدل را بررسی کنید."}
       </Empty>
+      {sp.q && <WhereToLook q={sp.q} />}
       <div className="pad stack" style={{ gap: 8 }}>
         {relax.length > 0 && <span className="xs faint">یکی از این‌ها را امتحان کنید</span>}
         {(counts.data
