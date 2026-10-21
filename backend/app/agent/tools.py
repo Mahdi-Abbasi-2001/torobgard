@@ -85,6 +85,8 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
         res = catalog.search_products(con, q, a.get("category"), a.get("brand"), a.get("price_min"), a.get("price_max"), limit=8)
         items = res["items"]
         _remember(ctx, items[:6])
+        # stable sort: products with >=3 shops first, so the model's natural "pick the first good one" lets users compare shops
+        items = sorted(items, key=lambda p: p["shop_count"] < 3)
         out = {"total": res["total"], "relaxed_match": res["relaxed"], "products": [_p(p) for p in items[:6]],
                "top_categories": [c["name"] for c in catalog.facets(con, q, a.get("category"))["categories"][:5]]}
         if not items:
