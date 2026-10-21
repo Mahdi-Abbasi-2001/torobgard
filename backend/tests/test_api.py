@@ -76,3 +76,10 @@ def test_phone_query_prefers_phones_over_batteries():
     with client() as c:
         items = c.get("/api/search/products", params={"q": "گوشی سامسونگ زیر ۱۵ میلیون", "limit": 8}).json()["items"]
         assert items and sum(1 for p in items if p["category"] == "گوشی موبایل") >= 5, [p["category"] for p in items]
+
+
+def test_health_is_reachable_under_api_prefix():
+    """Single-container deploy only exposes /api/* (Next proxy), so health must live there too."""
+    with client() as c:
+        assert c.get("/api/healthz").json() == {"ok": True}
+        assert c.get("/api/readyz").json()["ok"] is True

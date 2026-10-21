@@ -46,11 +46,13 @@ def _origin(lat: float | None, lon: float | None):
 
 # ------------------------------------------------------------------ ops
 @app.get("/healthz")
+@app.get("/api/healthz")  # reachable through the public Next proxy in the single-container deploy
 def healthz():
     return {"ok": True}
 
 
 @app.get("/readyz")
+@app.get("/api/readyz")
 def readyz(con: Con):
     n = con.execute("SELECT COUNT(*) FROM products").fetchone()[0]
     return {"ok": n > 0, "products": n, "tehran_time": now_tehran().isoformat()}

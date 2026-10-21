@@ -1,49 +1,54 @@
-# Deploying to Liara
+# Deploying to Liara (single app)
 
-Product name: **ترب‌گرد** · Liara app name: **`torob-gard`** (fallback `torob-gard-sc` if taken).
+Product: **ترب‌گرد** · Liara app: **`torobgard`** (team `6a86b17a129b5d10d46e4dae`, plan `small-g2`, Docker).
 
-Two Docker apps: **backend** (FastAPI + SQLite) and **frontend** (Next.js). Verified locally: the production image layout
-(read-only catalog + state on a separate disk file, state survives restart), the standalone frontend and the runtime
-`/api` proxy (incl. SSE streaming). Not verified locally: the Docker builds themselves (no Docker on the dev machine).
+One container runs both servers: the Next.js app on the public port 3000 and FastAPI on `127.0.0.1:8000` (private, only
+reachable through Next's `/api` proxy). `deploy/start.sh` starts both and exits if either dies, so Liara restarts the
+whole container instead of serving a half-dead app.
+
+Verified locally (no Docker on the dev machine): the start script with production env, the read-only catalog + separate
+state file (state survives restart), the standalone Next server and its runtime `/api` proxy incl. SSE chat streaming,
+and the "one process dies -> container exits" behaviour. **Not verified locally: the Docker build itself.**
 
 ## Facts that shape the setup
-- The Liara CLI only offers **Iran-region** plans for new apps. **OpenAI blocks Iranian IPs**, so the deployed chat
-  can't use OpenAI directly. Use **BoxAPI** (OpenAI-compatible): set `LLM_BASE_URL` + `LLM_API_KEY` + `LLM_MODEL`.
-  Until then the deployed chat runs the rule-based fallback (tested; the UI shows the «جستجوی ساده» banner).
-- Backend must run **one worker** (live-update bus and simulated sellers are in-process).
-- The catalog (~460 MB SQLite+FTS) is **built into the image** from the dataset zip (~30-90 s at build); sessions and
-  inquiries are stored in `/data/state.db` on a Liara **disk**, so they survive restarts and redeploys.
-- Region/prices (Liara `plan ls`): backend ≥ `medium-g2` (1 GB RAM, 825 000 تومان/month); frontend `small-g2`
-  (0.5 GB, 475 000 تومان/month) is enough for the standalone Next server.
+- Liara only offers **Iran-region** apps and **OpenAI blocks Iranian IPs**, so the deployed chat can't use OpenAI. Use
+  **BoxAPI** (OpenAI-compatible): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`. Until set, chat runs the rule-based
+  fallback (tested; UI shows the «جستجوی ساده» banner).
+- Memory measured locally: backend ≈ 83 MB, Next standalone ≈ 137 MB. `small-g2` is 0.5 GB, so it should fit but with
+  little headroom: if search feels slow or the app restarts, raise the plan to `medium-g2` (disk and data are kept).
+- The catalog (~460 MB SQLite + FTS) is **built into the image** from `backend/dataset/dataset.zip` (~30-90 s);
+  sessions and inquiries live in `/data/state.db` on a Liara **disk** named `state` (1 GB is plenty).
+- One uvicorn worker on purpose (live-update bus and simulated sellers are in-process).
 
 ## One-time setup
 ```bash
-liara app create --app <BACKEND_APP> --platform docker --plan medium-g2
-liara disk create --app <BACKEND_APP> --name state --size 1
-liara app create --app <FRONTEND_APP> --platform docker --plan small-g2
-
-# secrets: set them yourself, never commit them
-liara env set --app <BACKEND_APP> TOROB_SECRET=<long-random> LLM_BASE_URL=<boxapi-openai-compatible-url> LLM_API_KEY=<key> LLM_MODEL=<model>
-liara env set --app <FRONTEND_APP> API_URL=https://<BACKEND_APP>.iran.liara.run
+T=6a86b17a129b5d10d46e4dae
+liara disk create --app torobgard --name state --size 1 --team-id $T        # if not created yet
+liara env set --app torobgard --team-id $T TOROB_SECRET=<long-random> TOROB_INQUIRY_TIMEOUT_S=300
+# when BoxAPI arrives (set these yourself, never commit them):
+liara env set --app torobgard --team-id $T LLM_BASE_URL=<url> LLM_API_KEY=<key> LLM_MODEL=<model>
 ```
 
-## Deploy (repeat for each release)
+## Deploy (repeat per release, from the repo root)
 ```bash
 cp starcoach-dataset-v16-cap300-csv.zip backend/dataset/dataset.zip   # once; gitignored
-cd backend  && liara deploy --app <BACKEND_APP>  --platform docker --port 8000
-cd ../frontend && liara deploy --app <FRONTEND_APP> --platform docker --port 3000
+liara deploy --app torobgard --team-id $T --platform docker --port 3000
 ```
-`backend/.liaraignore` / `frontend/.liaraignore` keep `.env`, `node_modules` and `.venv` out of the upload.
-If a build fails to fetch pip/npm packages from inside Iran, add `--build-location germany`.
+`.liaraignore` files keep `.env`, `node_modules`, `.venv`, `.git` out of the upload. If the build can't fetch pip/npm
+packages from inside Iran, add `--build-location germany`.
 
 ## Smoke test
 ```bash
-curl https://<BACKEND_APP>.iran.liara.run/readyz          # {"ok":true,"products":225903,...}
-curl https://<BACKEND_APP>.iran.liara.run/api/chat-status # llm_configured true once BoxAPI vars are set
+curl https://torobgard.iran.liara.run/api/readyz         # {"ok":true,"products":225903,...}
+curl https://torobgard.iran.liara.run/api/chat-status    # llm_configured true once BoxAPI vars are set
 ```
-Then on a phone: search → shops → ask 3 shops → watch answers arrive → visit plan.
+Then on a phone: search -> shops -> ask 3 shops -> watch answers arrive -> visit plan.
 
 ## Before judging
-Freeze a release 2 days early; don't redeploy during judging. `TOROB_SIMULATE_SELLERS=1` (default) keeps the demo
-working without a human seller; the tracker shows a «simulated» banner (`NEXT_PUBLIC_DEMO_MODE`, build arg).
-Env knobs: `TOROB_INQUIRY_TIMEOUT_S` (default 300), `TOROB_LIVE_SHOPS` (shop ids answered by real people).
+Freeze a release 2 days early; don't redeploy during judging. `TOROB_SIMULATE_SELLERS=1` (default) keeps the demo working
+without a human seller; the tracker shows a «simulated» banner (`NEXT_PUBLIC_DEMO_MODE` build arg).
+Knobs: `TOROB_INQUIRY_TIMEOUT_S` (default 300), `TOROB_LIVE_SHOPS` (shop ids answered by real people).
+
+## Alternative: two apps
+`backend/Dockerfile` + `frontend/Dockerfile` (+ their `liara.json`) still work for a two-app split; set the frontend's
+`API_URL` to the backend's public URL.
