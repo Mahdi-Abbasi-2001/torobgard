@@ -2,6 +2,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { SessionProvider } from "@/lib/session";
+import { CompareProvider } from "@/components/Compare";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [qc] = useState(() => new QueryClient({
@@ -9,7 +10,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }));
   return (
     <QueryClientProvider client={qc}>
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider><CompareProvider>{children}</CompareProvider></SessionProvider>
     </QueryClientProvider>
   );
 }

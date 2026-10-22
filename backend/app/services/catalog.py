@@ -195,12 +195,19 @@ def similar_products(con, product_id: str, limit: int = 8) -> list[dict]:
         args += [int(ref * 0.5), int(ref * 1.6)]
     rows = con.execute(f"SELECT * FROM products WHERE category=? AND product_id!=? AND shop_count>=1 {band} "
                        f"ORDER BY shop_count DESC LIMIT 600", args).fetchall()
+    in_band = {r["product_id"] for r in rows}
+    if band and len(rows) < limit:
+        # small or sparsely priced category: fall back to the whole category, ranked after the price-band matches
+        rows += [r for r in con.execute("SELECT * FROM products WHERE category=? AND product_id!=? AND shop_count>=1 "
+                                        "ORDER BY shop_count DESC LIMIT 200", [base["category"], product_id]).fetchall()
+                 if r["product_id"] not in in_band]
     bt = set(base["title_norm"].split())
     scored = []
     for r in rows:
         tt = set(r["title_norm"].split())
         j = len(bt & tt) / max(1, len(bt | tt))
         s = j + (0.25 if base["brand"] and r["brand"] == base["brand"] else 0) + min(r["shop_count"], 5) * 0.03
+        s -= 0 if (not band or r["product_id"] in in_band) else 0.5
         scored.append((s, r))
     scored.sort(key=lambda x: -x[0])
     return [_product_row(r) for _, r in scored[:limit]]

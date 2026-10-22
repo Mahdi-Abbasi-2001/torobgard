@@ -83,3 +83,11 @@ def test_health_is_reachable_under_api_prefix():
     with client() as c:
         assert c.get("/api/healthz").json() == {"ok": True}
         assert c.get("/api/readyz").json()["ok"] is True
+
+
+def test_similar_falls_back_to_whole_category():
+    """A small, sparsely priced category (pens) still gets alternatives for «compare with…», price-band ones first."""
+    from app import db
+    from app.services import catalog
+    items = catalog.similar_products(db.connect(), "product_49e5ab68b7835cd42c283ab5", 6)
+    assert len(items) >= 3 and all(p["category"] == "خودنویس و روان نویس" for p in items)

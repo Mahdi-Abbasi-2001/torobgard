@@ -7,6 +7,7 @@ import { fa, mil, money, walk } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductCard } from "@/components/cards";
+import { compareHref, pickAlternatives, useCompare } from "@/components/Compare";
 import { PriceBadge, SourceNote } from "@/components/honesty";
 import { ProductReview } from "@/components/ReviewCard";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards, Steps, Thumb } from "@/components/ui";
@@ -14,12 +15,13 @@ import { AppBar, Bidi, ErrorState, Note, SkeletonCards, Steps, Thumb } from "@/c
 const KEY_SPECS = ["نوع اتصال", "مناسب برای", "قابلیت های مقاومتی", "عمر باتری هدفون در حالت استندبای", "نسخه بلوتوث", "وزن", "حافظه داخلی", "مقدار RAM", "تعداد کانال", "رزولوشن"];
 
 export default function ProductView({ id }: { id: string }) {
-  const { state, toggleCompare } = useSession();
+  const { state } = useSession();
+  const { openCompare } = useCompare();
   const [all, setAll] = useState(false);
   const p = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
   const shops = useQuery({ queryKey: ["pshops", id, state.place.lat, state.place.lon], queryFn: () => api.productShops(id, state.place, { sort: "best" }, 40), enabled: !!p.data });
   const single = (p.data?.shop_count ?? 0) <= 1;
-  const sim = useQuery({ queryKey: ["similar", id], queryFn: () => api.similar(id, 4), enabled: !!p.data && single });
+  const sim = useQuery({ queryKey: ["similar", id, 8], queryFn: () => api.similar(id, 8), enabled: !!p.data }); // shared with the compare picker
 
   if (p.isLoading) return <main className="main"><AppBar /><SkeletonCards n={3} /></main>;
   if (p.isError || !p.data) return <main className="main"><AppBar /><ErrorState error={p.error} retry={() => p.refetch()} /></main>;
@@ -29,19 +31,19 @@ export default function ProductView({ id }: { id: string }) {
   const specs = (KEY_SPECS.map((k) => d.specs.find((s) => s.key === k)).filter(Boolean) as typeof d.specs);
   const shown = specs.length >= 3 ? specs : d.specs.slice(0, 6);
   const pos = (v: number) => (d.price_max! > d.price_min! ? ((v - d.price_min!) / (d.price_max! - d.price_min!)) * 100 : 50);
-  const inCmp = state.compare.includes(id);
+  const alts = pickAlternatives(d, sim.data?.items ?? []);
   const nearest = [...(shops.data?.listed ?? [])].sort((a, b) => (a.walk_min ?? 99) - (b.walk_min ?? 99))[0];
 
   return (
     <main className="main has-cta">
       <div className="lay lay-head">
-      <AppBar end={<button className="iconbtn" aria-pressed={inCmp} aria-label="افزودن به مقایسه" onClick={() => toggleCompare(id)} style={{ color: inCmp ? "var(--accent)" : undefined }}><Icon n="compare" /></button>} />
+      <AppBar end={<button className="iconbtn" aria-label="مقایسه با کالای دیگر" onClick={() => openCompare(id)}><Icon n="compare" /></button>} />
       <Steps at={0} />
       </div>
       <div className="tabs" style={{ marginBottom: 12 }}>
         <span className="on" style={{ whiteSpace: "nowrap" }}><Icon n="pin" s />خرید حضوری <span className="cnt">{fa(d.shop_count)}</span></span>
         <a href="#specs">مشخصات</a>
-        <Link href={`/compare?ids=${[...new Set([id, ...state.compare])].slice(0, 4).join(",")}`}>مقایسه</Link>
+        <button type="button" onClick={() => openCompare(id)}>مقایسهٔ کالا</button>
       </div>
       <div className="pad stack lay-product" style={{ gap: 14 }}>
         <div className="lay pd-main">
@@ -79,6 +81,16 @@ export default function ProductView({ id }: { id: string }) {
         {!single && near > 0 && (
           <Note tone="info" icon="spark"><b>چرا این؟ </b>{fa(near)} فروشگاه تا ۱۵ دقیقه پیاده از «{state.place.label}» این کالا را ثبت کرده‌اند{d.price_min ? ` و ارزان‌ترینش ${mil(d.price_min)} تومان است` : ""}.</Note>
         )}
+        {alts.length > 0 && (
+          <Link className="card row cmp-quick" href={compareHref([id, ...alts.map((a) => a.product_id)])}>
+            <span className="cmp-thumbs" aria-hidden="true">{alts.map((a) => <Thumb key={a.product_id} src={a.image} alt="" size={40} brand={a.brand} />)}</span>
+            <span className="grow" style={{ minWidth: 0 }}>
+              <span className="sm b" style={{ display: "block" }}>مقایسه با {fa(alts.length)} کالای مشابه</span>
+              <span className="xs faint cmp-clamp" style={{ WebkitLineClamp: 1 }}><Bidi text={alts.map((a) => a.title).join(" · ")} /></span>
+            </span>
+            <Icon n="fwd" s />
+          </Link>
+        )}
         {single && (
           <>
             <Note tone="warn" icon="alert"><b>فقط ۱ فروشگاه این کالا را دارد.</b> اگر ناموجود باشد گزینهٔ دیگری نمی‌ماند؛ جایگزین‌ها را ببینید.</Note>
@@ -101,7 +113,7 @@ export default function ProductView({ id }: { id: string }) {
             </>}
           </div>
           <div className="row">
-            <button className="btn sec" onClick={() => toggleCompare(id)} aria-pressed={inCmp}><Icon n={inCmp ? "check" : "compare"} s />{inCmp ? "در مقایسه" : "مقایسه"}</button>
+            <button className="btn sec" onClick={() => openCompare(id)}><Icon n="compare" s />مقایسه با کالای دیگر</button>
             <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />فروشگاه‌های نزدیک</Link>
           </div>
         </div>

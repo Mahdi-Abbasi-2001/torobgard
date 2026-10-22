@@ -27,7 +27,7 @@ export function AppBar({ title, sub, back = true, end }: { title?: ReactNode; su
   );
 }
 
-const STEPS = ["انتخاب کالا", "فروشگاه‌ها", "مقایسه", "استعلام و بازدید"];
+const STEPS = ["انتخاب کالا", "فروشگاه‌ها", "مقایسهٔ فروشگاه‌ها", "استعلام و بازدید"];
 export function Steps({ at }: { at: 0 | 1 | 2 | 3 }) {
   return (
     <ol className="steps" aria-label={`مرحله ${fa(at + 1)} از ۴`} style={{ listStyle: "none", margin: 0 }}>

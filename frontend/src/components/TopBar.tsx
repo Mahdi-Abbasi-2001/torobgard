@@ -7,6 +7,7 @@ import { fa } from "@/lib/fa";
 import { useIsDesktop } from "@/lib/media";
 import { useSession } from "@/lib/session";
 import { useInquiries } from "@/lib/useInquiries";
+import { CompareChip } from "./Compare";
 import { Icon, Radish } from "./Icon";
 import { LocationSheet } from "./LocationSheet";
 import { SnapButton } from "./SnapButton";
@@ -65,6 +66,7 @@ export function TopBar() {
       <button type="button" className="chip" style={{ minHeight: 40 }} onClick={() => setLocOpen(true)} aria-label={`محدوده: ${state.place.label}. تغییر`}>
         <Icon n="pin" s />{state.place.label}<Icon n="fwd" s />
       </button>
+      <CompareChip />
       <nav className="tb-links" aria-label="ناوبری اصلی">
         <Link href="/chat" className={path.startsWith("/chat") ? "on" : ""} aria-current={path.startsWith("/chat") ? "page" : undefined}><Icon n="chat" s />گفتگو</Link>
         <Link href="/mine" className={path.startsWith("/mine") || path.startsWith("/track") ? "on" : ""} aria-current={path.startsWith("/mine") ? "page" : undefined}>

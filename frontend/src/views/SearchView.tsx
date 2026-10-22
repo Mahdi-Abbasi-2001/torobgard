@@ -53,7 +53,7 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
   const nFilters = (cap ? 1 : 0) + (sp.brand ? 1 : 0) + (sp.category ? 1 : 0);
 
   return (
-    <main className={`main ${state.compare.length ? "has-cta" : ""}`}>
+    <main className="main">
       <div className="lay lay-head">
       <AppBar title="نتایج" back="/" end={<Link href={`/chat?q=${encodeURIComponent(sp.q ?? "")}`} className="iconbtn" aria-label="پرسیدن از دستیار"><Icon n="chat" /></Link>} />
       <OfflineBanner />
@@ -102,14 +102,6 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
         </>
       )}
 
-      {state.compare.length > 0 && (
-        <div className="sticky-cta">
-          <div className="row">
-            <div className="sm grow"><b>{fa(state.compare.length)} کالا</b> برای مقایسه<div className="xs faint">تا ۴ کالا را کنار هم ببینید</div></div>
-            <button className="btn pri" disabled={state.compare.length < 2} onClick={() => router.push(`/compare?ids=${state.compare.join(",")}`)}><Icon n="compare" s />مقایسه کن</button>
-          </div>
-        </div>
-      )}
       </div></div>
 
       <Sheet open={open} onClose={() => setOpen(false)} label="فیلترها">
