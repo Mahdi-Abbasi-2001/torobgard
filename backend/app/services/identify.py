@@ -143,7 +143,9 @@ def candidates(con, r: dict, k: int = 4) -> tuple[list[dict], str | None, str]:
     exact (this model, right kind of product) · related (only accessories/parts of this model) · type_only (no model read) · none."""
     toks = _model_tokens(r.get("model"))
     qs = _queries(r)
-    brands = [normalize_fa(b) for b in (r.get("brand"), r.get("brand_fa")) if b]
+    # brand words, not the whole name: «دکتر پنتر» / «Dr. Panter» should still find «خودکار پنتر»
+    brands = sorted({w for b in (r.get("brand"), r.get("brand_fa")) if b for w in re.split(r"[\s.\-_/]+", normalize_fa(b))
+                     if len(w) > 2 and w not in ("دکتر", "شرکت", "company", "group", "the")})
     ptype = normalize_fa(r.get("product_type") or "")
     type_words = [w for w in ptype.split() if len(w) > 2]
     accessory_photo = any(w in ptype for w in ACCESSORY)
