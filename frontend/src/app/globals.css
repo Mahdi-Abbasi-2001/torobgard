@@ -213,6 +213,9 @@ button.card.row, a.card.row { display: flex; } /* link/button cards laid out as 
 .sk { background: linear-gradient(90deg, var(--sunk), var(--line), var(--sunk)); background-size: 200% 100%; animation: sk 1.4s linear infinite; border-radius: 8px; }
 @keyframes sk { to { background-position: -200% 0; } }
 
+#specs { scroll-margin-top: calc(var(--tb, 56px) + 16px); border-radius: 16px; transition: box-shadow .3s ease; }
+#specs.flash { box-shadow: 0 0 0 3px var(--accent-soft), 0 0 0 1px var(--accent); }
+
 /* ---------- compare: bar on every page (phones) + picker ---------- */
 .cmp-bar {
   position: fixed; inset-inline: 0; margin-inline: auto; width: calc(min(100vw, var(--frame)) - 24px); z-index: 16;
@@ -315,8 +318,47 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; }
 
 /* ---------- map ---------- */
 .map { position: relative; background: var(--map-bg); overflow: hidden; }
-.map svg { display: block; width: 100%; height: 100%; }
+.map > svg { display: block; width: 100%; height: 100%; } /* drawn maps only; Leaflet sizes its own overlay svg */
 .pin-lbl { font: 700 11px var(--f-body); }
+/* street map (LeafletMap) */
+.lmap { isolation: isolate; }
+.lm-dark .lm-tiles { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9) saturate(.6); }
+.lm-canvas { position: absolute; inset: 0; background: var(--map-bg); font-family: var(--f-body); }
+.lmap .maplegend { z-index: 500; pointer-events: none; }
+@media (max-width: 959px) {
+  .lmap .maplegend { top: auto; bottom: 22px; inset-inline-end: 8px; flex-direction: row; flex-wrap: wrap; gap: 4px 10px; max-width: calc(100% - 16px); padding: 4px 8px; font-size: 10.5px; }
+}
+.lm-ring { stroke: var(--info); stroke-width: 1.5; stroke-dasharray: 6 6; fill: var(--info); fill-opacity: .035; }
+.lm-ring-lbl span { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; font: 600 10.5px var(--f-body); color: var(--info-ink, var(--info)); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0 6px; opacity: .92; }
+.lm-pin-wrap { cursor: pointer; }
+.lm-pin {
+  position: absolute; left: 0; top: 0; transform: translate(-50%, calc(-100% - 9px)); white-space: nowrap;
+  font: 750 12.5px var(--f-body); line-height: 1; padding: 7px 10px; border-radius: 999px;
+  background: var(--card); color: var(--accent-ink); border: 1.5px solid var(--accent); box-shadow: 0 2px 6px rgba(0,0,0,.18);
+  transition: transform .12s ease, background .12s ease;
+}
+.lm-pin::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 9px; height: 9px; margin-left: -4.5px; background: inherit; border: inherit; border-top: 0; border-left: 0; transform: rotate(45deg); border-radius: 0 0 2px 0; }
+.lm-pin::before { content: ""; position: absolute; left: 50%; bottom: -14px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--accent); }
+.lm-grp { background: var(--accent-soft); }
+.lm-grp b { font-weight: 850; }
+.lm-pin-wrap.on .lm-pin { background: var(--accent); color: var(--on-accent); }
+.lm-pin-wrap.h .lm-pin { transform: translate(-50%, calc(-100% - 9px)) scale(1.12); box-shadow: 0 0 0 4px var(--accent-soft), 0 4px 10px rgba(0,0,0,.25); }
+.lm-cat i { display: block; width: 14px; height: 14px; border-radius: 50%; background: var(--card); border: 2px dashed var(--ink-3); box-sizing: border-box; }
+.lm-cat.h i { border-color: var(--accent); border-style: solid; }
+.lm-me i { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--info); border: 3px solid #fff; box-shadow: 0 0 0 6px color-mix(in srgb, var(--info) 25%, transparent); box-sizing: border-box; }
+.leaflet-tooltip.lm-tip, .lm-pop .leaflet-popup-content-wrapper { background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); font: 500 12.5px/1.6 var(--f-body); }
+.leaflet-tooltip.lm-tip { padding: 6px 10px; }
+.leaflet-tooltip-top.lm-tip::before { border-top-color: var(--line); }
+.lm-pop .leaflet-popup-tip { background: var(--card); }
+.lm-pop .leaflet-popup-content { margin: 8px; }
+.lm-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
+.lm-list button { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: start; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; cursor: pointer; }
+.lm-list button.on { border-color: var(--accent); background: var(--accent-soft); }
+.lm-p { font-weight: 750; color: var(--accent-ink); white-space: nowrap; }
+.lmap .faint { color: var(--ink-3); }
+.lmap .leaflet-control-zoom a { background: var(--card); color: var(--ink); border-color: var(--line); }
+.lmap .leaflet-control-attribution { background: color-mix(in srgb, var(--card) 80%, transparent); color: var(--ink-3); font-size: 10px; }
+.lmap .leaflet-control-attribution a { color: var(--ink-2); }
 .maplegend { position: absolute; inset-inline-end: 10px; top: 10px; background: var(--card); border-radius: 10px; padding: 6px 9px; font-size: 11px; display: flex; flex-direction: column; gap: 3px; border: 1px solid var(--line); line-height: 1.4; }
 .lg { display: flex; align-items: center; gap: 6px; }
 .lg i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
@@ -495,9 +537,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; }
   /* ---------- Product ---------- */
   .lay-product { display: grid !important; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px !important; align-items: start; }
   .pd-main, .pd-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .pd-side { position: sticky; top: calc(var(--tb) + 16px); } /* the buy card stays in view while the specs scroll in the main column */
   .pd-main > .thumb { height: 320px !important; }
   .pd-side .sticky-cta { position: sticky; top: calc(var(--tb) + 16px); bottom: auto; margin: 0; box-shadow: none; display: flex; flex-direction: column; gap: 12px; }
-  .pd-side #specs { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+  .lay-product #specs { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
 
   /* ---------- Shops for a product: list + large map ---------- */
   .lay-shops {

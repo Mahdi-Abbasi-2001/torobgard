@@ -26,7 +26,7 @@ Production: `npm run build && npm start`.
 | `/search?q=` | Results + filter sheet (budget, brand, category); budget parsed from text is a removable chip; empty state suggests relaxations with counts |
 | `/p/[id]` | Product detail: price range to scale, why-this, specs, single-shop warning + similar |
 | `/compare?ids=` | Compare 2–4 products, differing rows first, «نامشخص» for missing cells |
-| `/p/[id]/shops` | Shops for product: schematic map + list, listed vs category-only, filters (installment, open now, radius, fast delivery, sort), zero-result relax suggestions, pick ≤5 |
+| `/p/[id]/shops` | Shops for product: street map + list, listed vs category-only, filters (installment, open now, radius, fast delivery, sort), zero-result relax suggestions, pick ≤5 |
 | `/p/[id]/shops/compare?ids=` | Compare shops, sort presets, why-ranked, tie note |
 | `/p/[id]/ask` | Inquiry composer (questions from `/api/inquiry-questions`, note, deadline, preview) |
 | `/track?product=` | Live tracker (SSE): confirmed price vs listed diff + toast, alternatives sheet opens on unavailable / no reply |
@@ -53,5 +53,5 @@ Production: `npm run build && npm start`.
 ## Not wired yet (backend pieces missing)
 - `/api/visit-plan` now exists; `src/views/PlanView.tsx` still computes the plan client-side. Swap when convenient.
 - `src/app/api/chat/[id]/route.ts` streams the chat SSE through untouched (same gzip/buffering reason as the events route); keep it.
-- Map tiles: `src/components/ShopMap.tsx` draws a schematic map (no tile server). Neshan/Leaflet can replace the background.
+- Map: `src/components/LeafletMap.tsx` (loaded client-side by `ShopMap.tsx`): Leaflet with OpenStreetMap's standard tiles (no key; attribution shown; darkened by a CSS filter in dark mode). Price pins group when they overlap; walking-time rings around the user. CARTO basemaps now need an API key, so they aren't used.
 - Demo banner on the tracker shows unless `NEXT_PUBLIC_DEMO_MODE=0`.

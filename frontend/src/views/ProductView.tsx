@@ -18,6 +18,15 @@ export default function ProductView({ id }: { id: string }) {
   const { state } = useSession();
   const { openCompare } = useCompare();
   const [all, setAll] = useState(false);
+  const [tab, setTab] = useState<"buy" | "specs">("buy");
+  const [flash, setFlash] = useState(false);
+  // «مشخصات»: open the full list, scroll to it (clear of the top bar) and flash it, so the click visibly does something
+  const showSpecs = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setAll(true); setTab("specs"); setFlash(true);
+    requestAnimationFrame(() => document.getElementById("specs")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    setTimeout(() => setFlash(false), 1400);
+  };
   const p = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
   const shops = useQuery({ queryKey: ["pshops", id, state.place.lat, state.place.lon], queryFn: () => api.productShops(id, state.place, { sort: "best" }, 40), enabled: !!p.data });
   const single = (p.data?.shop_count ?? 0) <= 1;
@@ -41,8 +50,8 @@ export default function ProductView({ id }: { id: string }) {
       <Steps at={0} />
       </div>
       <div className="tabs" style={{ marginBottom: 12 }}>
-        <span className="on" style={{ whiteSpace: "nowrap" }}><Icon n="pin" s />خرید حضوری <span className="cnt">{fa(d.shop_count)}</span></span>
-        <a href="#specs">مشخصات</a>
+        <span className={tab === "buy" ? "on" : undefined} style={{ whiteSpace: "nowrap" }}><Icon n="pin" s />خرید حضوری <span className="cnt">{fa(d.shop_count)}</span></span>
+        <a href="#specs" className={tab === "specs" ? "on" : undefined} onClick={showSpecs}>مشخصات</a>
         <button type="button" onClick={() => openCompare(id)}>مقایسهٔ کالا</button>
       </div>
       <div className="pad stack lay-product" style={{ gap: 14 }}>
@@ -102,6 +111,17 @@ export default function ProductView({ id }: { id: string }) {
         )}
 
         <ProductReview id={d.product_id} />
+        <div id="specs" className={flash ? "flash" : undefined}>
+          <div className="h4" style={{ marginBottom: 6 }}>مشخصات کلیدی</div>
+          {d.specs.length === 0
+            ? <Note tone="unk" icon="q">مشخصات فنی برای این کالا ثبت نشده. از فروشنده دربارهٔ اصالت و گارانتی بپرسید.</Note>
+            : (
+              <>
+                <table className="ctab"><tbody>{(all ? d.specs : shown).map((s, i) => <tr key={s.key + i}><th>{s.key}</th><td>{fa(s.value)}</td></tr>)}</tbody></table>
+                {!all && d.specs.length > shown.length && <button className="btn ghost" style={{ paddingInline: 0 }} onClick={() => setAll(true)}>همهٔ {fa(d.specs.length)} مشخصه <Icon n="fwd" s /></button>}
+              </>
+            )}
+        </div>
         </div>
         <div className="lay pd-side">
         <div className="sticky-cta">
@@ -116,17 +136,6 @@ export default function ProductView({ id }: { id: string }) {
             <button className="btn sec" onClick={() => openCompare(id)}><Icon n="compare" s />مقایسه با کالای دیگر</button>
             <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />فروشگاه‌های نزدیک</Link>
           </div>
-        </div>
-        <div id="specs">
-          <div className="h4" style={{ marginBottom: 6 }}>مشخصات کلیدی</div>
-          {d.specs.length === 0
-            ? <Note tone="unk" icon="q">مشخصات فنی برای این کالا ثبت نشده. از فروشنده دربارهٔ اصالت و گارانتی بپرسید.</Note>
-            : (
-              <>
-                <table className="ctab"><tbody>{(all ? d.specs : shown).map((s, i) => <tr key={s.key + i}><th>{s.key}</th><td>{fa(s.value)}</td></tr>)}</tbody></table>
-                {!all && d.specs.length > shown.length && <button className="btn ghost" style={{ paddingInline: 0 }} onClick={() => setAll(true)}>همهٔ {fa(d.specs.length)} مشخصه <Icon n="fwd" s /></button>}
-              </>
-            )}
         </div>
         </div>
       </div>

@@ -10,3 +10,15 @@ const sub = (cb: () => void) => {
   return () => m.removeEventListener("change", cb);
 };
 export const useIsDesktop = () => useSyncExternalStore(sub, () => window.matchMedia(Q).matches, () => false);
+
+// Effective theme: the desktop toggle's choice (data-theme on <html>, event "tg-theme") or else the system setting.
+const themeSub = (cb: () => void) => {
+  const m = window.matchMedia("(prefers-color-scheme: dark)");
+  m.addEventListener("change", cb); window.addEventListener("tg-theme", cb);
+  return () => { m.removeEventListener("change", cb); window.removeEventListener("tg-theme", cb); };
+};
+const isDark = () => {
+  const t = document.documentElement.getAttribute("data-theme");
+  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+export const useDarkTheme = () => useSyncExternalStore(themeSub, isDark, () => false);
