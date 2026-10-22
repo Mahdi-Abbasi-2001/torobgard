@@ -92,7 +92,7 @@ export default function ConfirmStage(sp: StageProps) {
   Object.keys(labels).forEach((k) => { if (!labels[k]) delete labels[k]; });
   const mapListed = all.filter((s) => items.some((x) => x.q.shop?.shop_id === s.shop_id));
 
-  const wave = camp ? (camp.status === "done" ? `${fa(camp.confirmed)} فروشگاه تأیید کرد؛ بقیه را نپرسیدیم` : camp.status === "running" ? `موج‌به‌موج می‌پرسیم، هم‌زمان ${fa(camp.wave)} فروشگاه` : "پرسیدن تمام شد") : status.headline;
+  const wave = camp ? (camp.status === "done" ? `${fa(camp.confirmed)} فروشگاه تأیید کرد؛ بقیه را نپرسیدیم` : camp.status === "running" ? `هر بار از ${fa(camp.wave)} فروشگاه می‌پرسیم` : "پرسیدن تمام شد") : status.headline;
 
   const rows = (
     <div className="stack" style={{ gap: 10 }}>
@@ -102,14 +102,14 @@ export default function ConfirmStage(sp: StageProps) {
           onCall={() => setCallId(x.q.id)} onRecheck={() => recheck.mutate(x)} />
       ))}
       {queued.map((n) => <QueuedRow key={n.shop_id} name={n.name} why={n.why} listed={cardOf(n.shop_id)} />)}
-      {!items.length && !camp && <Note tone="unk" icon="send">هنوز از فروشگاهی نپرسیده‌اید. به مقایسه برگردید و چند فروشگاه را بپرسید.</Note>}
+      {!items.length && !camp && <Note tone="unk" icon="send">هنوز از هیچ فروشگاهی نپرسیده‌اید؛ به مقایسه برگردید و چند فروشگاه را انتخاب کنید.</Note>}
       <RipeLegend />
     </div>
   );
 
   const head = (
     <div className="mc-pad row between" style={{ alignItems: "flex-start", marginTop: desk ? 0 : 4 }}>
-      <div><h2 style={{ margin: 0, fontSize: desk ? 24 : 19, fontWeight: 800 }}>دارد قطعی می‌شود</h2><div className="xs faint">{wave}</div></div>
+      <div><h2 style={{ margin: 0, fontSize: desk ? 24 : 19, fontWeight: 800 }}>جواب فروشنده‌ها</h2><div className="xs faint">{wave}</div></div>
       <span className={`oc ${status.connected ? "open" : "unknown"}`}>{status.connected ? "زنده" : "در حال اتصال…"}</span>
     </div>
   );
@@ -119,33 +119,33 @@ export default function ConfirmStage(sp: StageProps) {
       {questionLine && (
         <div className="mc-card" style={{ padding: "10px 14px", gap: 6 }}>
           <span className="xs muted" style={{ lineHeight: 1.7 }}>سؤال: «<Bidi text={questionLine} />»</span>
-          {unasked.length > 0 && <button type="button" className="mc-links" style={{ background: "none", border: 0, justifyContent: "flex-start", display: "flex" }} onClick={() => setAskOpen(true)}>از {fa(unasked.length)} فروشگاه دیگرِ فهرست هم بپرس</button>}
+          {unasked.length > 0 && <button type="button" className="mc-links" style={{ background: "none", border: 0, justifyContent: "flex-start", display: "flex" }} onClick={() => setAskOpen(true)}>از {fa(unasked.length)} فروشگاه دیگرِ فهرست هم بپرسید</button>}
         </div>
       )}
       <div className="card frow" style={{ padding: "10px 12px", gap: 10 }}>
-        <div className="grow"><div className="sm b">اگر جایی نداشت، خودکار از بعدی بپرس</div><div className="xs faint">تا ۶ فروشگاه دیگر، فقط همین کالا</div></div>
+        <div className="grow"><div className="sm b">اگر جایی نداشت، خودکار از فروشگاه بعدی بپرس</div><div className="xs faint">تا ۶ فروشگاه دیگر، فقط همین کالا</div></div>
         <Toggle on={auto} onChange={setAuto} label="پرسیدن خودکار از جایگزین‌ها" />
       </div>
       <NotifyOptIn sid={sid} />
-      {(simulated || DEMO) && items.length > 0 && <Note tone="info" icon="spark"><b>پاسخ‌ها شبیه‌سازی‌شده‌اند، حالت نمایشی.</b> فروشندهٔ نمایشی مثل آدم واقعی می‌نویسد؛ ترب‌گرد جوابش را می‌خواند و اگر چیزی کم باشد دوباره می‌پرسد.</Note>}
+      {(simulated || DEMO) && items.length > 0 && <Note tone="info" icon="spark"><b>این جواب‌ها نمایشی‌اند.</b> فروشندهٔ نمایشی مثل آدم واقعی می‌نویسد؛ ترب‌گرد جوابش را می‌خواند و اگر چیزی کم باشد دوباره می‌پرسد.</Note>}
     </div>
   );
 
   const start = () => { set({ going: true }); go("go"); };
   const cta = status.held ? (
     <>
-      <button className="btn pri" onClick={start}>مسیر را شروع کن</button>
-      <div className="hint">{shortName(m.product ?? { title: "", brand: null })} نگه داشته شد؛ کد را در فروشگاه بگویید</div>
+      <button className="btn pri" onClick={start}>شروع مسیر</button>
+      <div className="hint">{shortName(m.product ?? { title: "", brand: null })} کنار گذاشته شد؛ کد را در فروشگاه بگویید</div>
     </>
   ) : best ? (
     <>
-      <button className="btn pri" onClick={() => setHoldId(best.q.id)}><Icon n="hold" s />{best.q.shop?.name} برایم نگه دارد</button>
-      <div className="mc-links"><button type="button" onClick={start}>بدون نگه‌داشتن، مسیر را ببین</button><button type="button" onClick={() => go("compare")}>فروشگاه‌های دیگر</button></div>
+      <button className="btn pri" onClick={() => setHoldId(best.q.id)}><Icon n="hold" s />از {best.q.shop?.name} بخواه نگه دارد</button>
+      <div className="mc-links"><button type="button" onClick={start}>بدون نگه داشتن، مسیر را ببین</button><button type="button" onClick={() => go("compare")}>فروشگاه‌های دیگر</button></div>
     </>
   ) : (
     <>
       <button className="btn pri" disabled><span className="spin" style={{ borderTopColor: "var(--on-accent)" }} />منتظر جواب فروشنده‌ها…</button>
-      <div className="mc-links"><button type="button" onClick={() => go("compare")}>فهرست و فروشگاه‌های دیگر</button></div>
+      <div className="mc-links"><button type="button" onClick={() => go("compare")}>برگشت به فهرست</button></div>
     </>
   );
 

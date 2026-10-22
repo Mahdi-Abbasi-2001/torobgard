@@ -14,7 +14,7 @@ import { WhereToLookCard } from "@/components/WhereToLook";
 import { Bidi, Sheet, Thumb } from "@/components/ui";
 
 type Msg = { me: boolean; text: string; blocks: Block[]; err?: string };
-const SUGGEST = ["اگر فردا بروم چه؟", "قسطی کجا می‌دهد؟", "در مغازه چه چیزی را چک کنم؟"];
+const SUGGEST = ["اگر فردا بروم، چه فرقی می‌کند؟", "قسطی کجا می‌دهد؟", "در مغازه چه چیزی را چک کنم؟"];
 
 export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: boolean; onClose: () => void; mission: Mission; initialQ?: string }) {
   const { sid } = useSession();
@@ -53,7 +53,7 @@ export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: bo
   return (
     <Sheet open={open} onClose={onClose} label="از ترب‌گرد بپرسید" className="agent-sheet">
       <div className="row between"><h2>از ترب‌گرد بپرسید</h2></div>
-      <span className="xs faint" style={{ marginTop: -8 }}>جواب، مأموریت را به‌روز می‌کند؛ لازم نیست گفتگو را دنبال کنید.</span>
+      <span className="xs faint" style={{ marginTop: -8 }}>سؤال بپرسید؛ جواب‌ها را می‌شود مستقیم به خریدتان اضافه کرد.</span>
       <div className="stack agent-body" style={{ gap: 10 }}>
         {!msgs.length && (
           <div className="stack" style={{ gap: 8 }}>
@@ -92,7 +92,7 @@ function Blk({ b, onPick, onChallenge }: { b: Block; onPick: (t: string) => void
             <div className="grow"><div className="b sm"><Bidi text={p.title} /></div>
               <div className="xs faint">{p.price_min ? `از ${mil(p.price_min)} تومان، ` : ""}{fa(p.shop_count)} فروشگاه</div></div>
           </div>
-          <button type="button" className="btn pri block" style={{ minHeight: 40 }} onClick={() => onChallenge(p.product_id)}>به دوئل اضافه کن</button>
+          <button type="button" className="btn pri block" style={{ minHeight: 40 }} onClick={() => onChallenge(p.product_id)}>به مقایسه اضافه کن</button>
         </div>
       ))}
     </div>

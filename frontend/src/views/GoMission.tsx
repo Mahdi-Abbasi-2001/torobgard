@@ -31,5 +31,5 @@ export default function GoMission({ productId, view, ids }: { productId?: string
       router.replace(`/m/${m.id}?s=${view}`);
     })();
   }, [ready, sessionReady, sid]); // eslint-disable-line react-hooks/exhaustive-deps
-  return <div className="mc"><div style={{ padding: 40 }}><Empty icon="route" title="در حال رفتن به مأموریت…">{" "}</Empty></div></div>;
+  return <div className="mc"><div style={{ padding: 40 }}><Empty icon="route" title="در حال باز کردن خرید…">{" "}</Empty></div></div>;
 }

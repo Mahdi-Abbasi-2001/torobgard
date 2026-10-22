@@ -7,7 +7,7 @@ import type { Hub } from "./LeafletMap";
 import { useIsDesktop } from "@/lib/media";
 
 type MapProps = {
-  origin: { lat: number; lon: number; label?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[]; height?: number | string;
+  origin: { lat: number; lon: number; label?: string; source?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[]; height?: number | string;
   hubs?: Hub[]; onHub?: (key: string) => void; labels?: Record<string, string>; states?: Record<string, string>; routes?: { pts: [number, number][]; alt?: boolean }[];
   onPick?: (id: string) => void; hover?: string | null; onHover?: (id: string | null) => void; className?: string;
 };

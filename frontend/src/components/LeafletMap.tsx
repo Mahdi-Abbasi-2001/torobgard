@@ -10,7 +10,7 @@ import { daysAgo, fa, mil, money, walk } from "@/lib/fa";
 import { useDarkTheme } from "@/lib/media";
 
 export type LeafletMapProps = {
-  origin: { lat: number; lon: number; label?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[];
+  origin: { lat: number; lon: number; label?: string; source?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[];
   onPick?: (id: string) => void; hover?: string | null; onHover?: (id: string | null) => void;
   className?: string; height: number | string; desk: boolean;
   /** one-trip hubs (a mall where several shops that list the product sit together), drawn as a glowing pill */
@@ -147,7 +147,7 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
     });
 
     L.marker([origin.lat, origin.lon], { keyboard: false, zIndexOffset: 1000, icon: L.divIcon({ className: "lm-me", html: "<i></i>", iconSize: [18, 18] }) })
-      .bindTooltip(`<div dir="rtl">شما${origin.label ? ` · ${esc(origin.label)}` : ""}</div>`, { direction: "top", offset: [0, -10], className: "lm-tip" }).addTo(layer);
+      .bindTooltip(`<div dir="rtl">${origin.source === "gps" ? "شما" : "نقطهٔ شروع"}${origin.label ? `: ${esc(origin.label)}` : ""}</div>`, { direction: "top", offset: [0, -10], className: "lm-tip" }).addTo(layer);
 
     function groupList(shops: ShopCard[]) {
       const box = document.createElement("div");

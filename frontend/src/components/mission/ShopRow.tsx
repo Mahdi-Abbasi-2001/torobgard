@@ -84,7 +84,7 @@ export function QueuedRow({ name, why, listed }: { name: string | null; why: str
         {listed?.offer?.price ? <div style={{ textAlign: "end" }}><span className="price faint" style={{ fontSize: 15 }}>{money(listed.offer.price)}</span><div className="xs faint">ثبت‌شده، {daysAgo(listed.offer.age_days)}</div></div> : null}
       </div>
       <Ripe r={1} />
-      <div className="xs muted">در موج بعد، اگر لازم شد{why ? `، چون ${why}` : ""}</div>
+      <div className="xs muted">نوبت بعدی است، اگر لازم شد{why ? `، چون ${why}` : ""}</div>
     </div>
   );
 }

@@ -17,7 +17,7 @@ import { SlotsSheet, type SlotsPatch } from "./SlotsSheet";
 import { slotsOf, slotSummary, type SlotKey } from "./slots";
 
 export const missionHref = (id: string, view?: View) => `/m/${id}${view ? `?s=${view}` : ""}`;
-export const missionTitle = (m: Mission) => m.product?.title ?? (m.query || m.text || "مأموریت");
+export const missionTitle = (m: Mission) => m.product?.title ?? (m.query || m.text || "خرید");
 
 /** The bar on every mission screen. Phones: brand and a link to the list. Desktop: brand, one tab per mission, login, theme. */
 export function MissionBar({ activeId }: { activeId?: string }) {
@@ -26,12 +26,12 @@ export function MissionBar({ activeId }: { activeId?: string }) {
   const desk = useIsDesktop();
   return (
     <header className="mc-bar">
-      <Link href="/" className="mc-brand" aria-label="ترب‌گرد، مأموریت تازه"><Radish size={28} />ترب‌گرد</Link>
-      <nav className="mc-tabs" aria-label="مأموریت‌ها">
+      <Link href="/" className="mc-brand" aria-label="ترب‌گرد، خرید تازه"><Radish size={28} />ترب‌گرد</Link>
+      <nav className="mc-tabs" aria-label="خریدها">
         {missions.slice(0, 6).map((m) => <TabFor key={m.id} m={m} on={m.id === activeId} />)}
-        <Link href="/" className="mc-tab new">+ مأموریت تازه</Link>
+        <Link href="/" className="mc-tab new">+ خرید تازه</Link>
       </nav>
-      {!desk && <><span className="grow" /><Link href="/missions" className="chip" style={{ minHeight: 38 }}>مأموریت‌ها{missions.length > 0 && <span className="tb-cnt" aria-label={`${fa(missions.length)} مأموریت`}>{fa(missions.length)}</span>}</Link></>}
+      {!desk && <><span className="grow" /><Link href="/missions" className="chip" style={{ minHeight: 38 }}>خریدها{missions.length > 0 && <span className="tb-cnt" aria-label={`${fa(missions.length)} خرید`}>{fa(missions.length)}</span>}</Link></>}
       {desk && (
         <>
           {user
@@ -70,7 +70,7 @@ export function Rail({ view, reached, id }: { view: View; reached: number; id: s
 /** Phone: the mission as a card on top of every stage (what, summary of the slots, the four stages, ask the assistant). */
 export function MissionHead({ m, view, status, onSlots, onAsk }: { m: Mission; view: View; status: MissionStatus; onSlots: () => void; onAsk: () => void }) {
   return (
-    <section className="mc-head" aria-label="مأموریت">
+    <section className="mc-head" aria-label="خرید">
       <div className="mc-head-top">
         <div style={{ minWidth: 0 }}>
           <div className="mc-title"><Bidi text={missionTitle(m)} /></div>
@@ -89,13 +89,13 @@ export function MissionAside({ m, view, status, onSlots, onAsk, children }: { m:
   const at = STAGE_OF[view];
   const notes = [m.product ? m.product.brand ?? "" : "", status.asked ? `${fa(status.asked)} پرسیده` : "", status.confirmed ? `${fa(status.confirmed)} تأیید` : "", status.held ? `کد ${fa(status.held.hold?.code ?? "")}` : ""];
   return (
-    <aside className="mc-aside" aria-label="مأموریت">
-      <div className="mc-label">مأموریت</div>
+    <aside className="mc-aside" aria-label="خرید">
+      <div className="mc-label">خرید</div>
       <div style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.45 }}><Bidi text={missionTitle(m)} /></div>
       <div className="slot-rows">
         {slotsOf(m).filter((s) => s.key !== "product").map((s) => (
           <button key={s.key} type="button" className={`slot-row ${s.open ? "open" : ""}`} onClick={() => onSlots(s.key)}>
-            <span className="k">{s.label}</span><span className="v">{s.value ? <Bidi text={fa(s.value)} /> : "باز"}</span>
+            <span className="k">{s.label}</span><span className="v">{s.value ? <Bidi text={fa(s.value)} /> : "مشخص نشده"}</span>
           </button>
         ))}
       </div>

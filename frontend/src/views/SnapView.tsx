@@ -236,7 +236,7 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
       )}
       <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
         <Link className="btn sec" href={`/p/${p.product_id}`}>صفحهٔ کالا</Link>
-        <button type="button" className="btn sec" onClick={() => startMission(p, { view: "find", fresh: true })}><Icon n="map" s />مأموریت برای این کالا</button>
+        <button type="button" className="btn sec" onClick={() => startMission(p, { view: "find", fresh: true })}><Icon n="map" s />خرید برای این کالا</button>
       </div>
       <ProductReview id={p.product_id} />
     </section>

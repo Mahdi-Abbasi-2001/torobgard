@@ -66,10 +66,10 @@ export function AskSheet({ open, onClose, m, shops, onSent, only }: { open: bool
       {!only && (
         <>
           <div className="seg" role="radiogroup" aria-label="روش پرسیدن">
-            <button role="radio" aria-checked={mode === "waves"} className={mode === "waves" ? "on" : ""} onClick={() => setMode("waves")}>موجی و هوشمند</button>
+            <button role="radio" aria-checked={mode === "waves"} className={mode === "waves" ? "on" : ""} onClick={() => setMode("waves")}>مرحله‌ای (پیشنهادی)</button>
             <button role="radio" aria-checked={mode === "direct"} className={mode === "direct" ? "on" : ""} onClick={() => setMode("direct")}>{`هم‌زمان از ${fa(chosen.length)} فروشگاه`}</button>
           </div>
-          <span className="xs muted">{mode === "waves" ? "اول دو فروشگاهِ اول را می‌پرسیم؛ اگر یکی «ندارم» گفت یا جواب نداد، سراغ بعدی می‌رویم تا یکی تأیید کند. فروشگاه‌های بسته را نمی‌پرسیم." : "همه هم‌زمان پیام می‌گیرند."}</span>
+          <span className="xs muted">{mode === "waves" ? "اول از دو فروشگاه اول می‌پرسیم؛ اگر یکی گفت «ندارم» یا جواب نداد، سراغ بعدی می‌رویم تا یکی تأیید کند. فروشگاه‌های بسته را نمی‌پرسیم." : "پیام برای همه هم‌زمان می‌رود."}</span>
         </>
       )}
       <div className="stack" style={{ gap: 6 }}>
@@ -82,7 +82,7 @@ export function AskSheet({ open, onClose, m, shops, onSent, only }: { open: bool
         <span className="xs faint">اگر فروشنده‌ای جواب نداد، متن آمادهٔ تماس تلفنی هم هست.</span>
       </div>
       <div className="frow" style={{ borderTop: "1px solid var(--line)" }}>
-        <span className="stack" style={{ gap: 0 }}><span className="sm b">اگر نداشتند، خودکار از بعدی‌ها بپرس</span><span className="xs faint">و از فروشنده مشابه بخواه</span></span>
+        <span className="stack" style={{ gap: 0 }}><span className="sm b">اگر نداشتند، خودکار از بعدی‌ها بپرس</span><span className="xs faint">و مدل مشابه را هم بپرس</span></span>
         <Toggle on={auto} onChange={setAuto} label="پرسیدن خودکار از جایگزین‌ها" />
       </div>
       <div className="stack" style={{ gap: 6 }}>
@@ -94,7 +94,7 @@ export function AskSheet({ open, onClose, m, shops, onSent, only }: { open: bool
       {ask.isError && <Note tone="bad" icon="alert">{(ask.error as Error).message}</Note>}
       <div className="sheet-foot">
         <button className="btn pri block" disabled={ask.isPending || !chosen.length || !keysToSend.length} onClick={send}>
-          {ask.isPending ? <span className="spin" style={{ borderTopColor: "var(--on-accent)" }} /> : <Icon n="spark" s />}بپرس، جواب تا {fa(timeout / 60)} دقیقه
+          {ask.isPending ? <span className="spin" style={{ borderTopColor: "var(--on-accent)" }} /> : <Icon n="spark" s />}بپرس؛ مهلت جواب {fa(timeout / 60)} دقیقه
         </button>
       </div>
     </Sheet>

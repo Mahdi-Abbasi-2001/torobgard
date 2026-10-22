@@ -30,7 +30,7 @@ export function MallSheet({ mallKey, hits, onClose, onShop }: { mallKey: string 
         <>
           <div><div className="b" style={{ fontSize: 19 }}>{fa(m.mall)}</div>
             <div className="xs faint">{m.area ? `${m.area}، ` : ""}{fa(m.shop_count)} فروشگاه در ترب</div></div>
-          {mineTotal > 0 && <div className="mc-verdict" style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}>برای مأموریت شما: {fa(mineTotal)} فروشگاه در این پاساژ این کالا را ثبت کرده‌اند؛ با رنگ قرمز مشخص شده‌اند.</div>}
+          {mineTotal > 0 && <div className="mc-verdict" style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}>برای خرید شما: {fa(mineTotal)} فروشگاه در این پاساژ این کالا را ثبت کرده‌اند؛ با رنگ قرمز مشخص شده‌اند.</div>}
           <div className="field" style={{ minHeight: 44 }}><Icon n="search" s /><label htmlFor="mall-q" className="sr">جستجو در پاساژ</label><input id="mall-q" value={term} onChange={(e) => setTerm(e.target.value)} placeholder="نام فروشگاه یا دسته، مثلاً «هندزفری»" /></div>
           <div className="stack" style={{ gap: 0 }}>
             {floors.map((f) => {

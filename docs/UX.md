@@ -1,5 +1,7 @@
 # UX: one mission, start to counter
 
+User-facing Persian calls a mission «خرید» (not «مأموریت»), the duel «مقایسه», a backup shop «جایگزین»: written as a shopper would say it, not translated from the English concept names.
+
 Design source: the Design canvas «Torob-Gard concept directions» (pages: Demo flow, Sheets & coverage, Desktop). The mentor's point: a chat
 thread (Torob Chat) or a result list (Torob Joo) is not a product. Ours is a **mission**: one errand with a certainty level that rises
 as sellers answer. Every screen shows the same four-stage rail and the same **ripeness meter** (listed → asked → confirmed → held).
@@ -26,9 +28,9 @@ Old links (`/p/[id]/shops`, `/ask`, `/track`, `/plan`, `/mine`, chat proposals) 
 
 ## Demo script (≈ 2 min)
 1. Type «هندزفری گردنی برای ورزش، تا ۳٫۵ میلیون، نزدیک علاالدین، عصر»: the slots fill in. Start.
-2. Duel: tap a need chip, «حریف بعدی», read the verdict; open details. «… را می‌خواهم».
-3. Map: drag the time scrubber (shops open/close), switch to taxi, tap the hub (mall floors). «این فروشگاه‌ها را کنار هم بگذار», change priority.
-4. «بگذار ترب‌گرد موجی بپرسد»: rows ripen, one says no and the next is asked. Open «گفتگو و جزئیات».
-5. «برایم نگه دار»: code appears. «مسیر را شروع کن».
-6. Trip: «نمایش: اگر تمام کرده بود» (demo only; `NEXT_PUBLIC_DEMO_MODE=0` hides it, backend `TOROB_DEMO_SOLDOUT=0` ignores it): the line reroutes.
+2. Duel: tap a need chip, «گزینهٔ بعدی», read the verdict; open details. «… را انتخاب می‌کنم».
+3. Map: drag the time scrubber (shops open/close), switch to taxi, tap the hub (mall floors). «مقایسهٔ این فروشگاه‌ها», change priority.
+4. «از فروشنده‌ها بپرس»: rows ripen, one says no and the next is asked. Open «گفتگو و جزئیات».
+5. «برایم نگه دار»: code appears. «شروع مسیر».
+6. Trip: «نمایشی: اگر تمام شده بود» (demo only; `NEXT_PUBLIC_DEMO_MODE=0` hides it, backend `TOROB_DEMO_SOLDOUT=0` ignores it): the line reroutes.
 7. «رسیدم و خریدم» → «بله، همان قیمت».

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { fa } from "@/lib/fa";
-import { AREAS, type Place } from "@/lib/geo";
+import { AREAS, outsideTehran, type Place } from "@/lib/geo";
 import { useSession } from "@/lib/session";
 import { Icon } from "./Icon";
 import { Note, Sheet } from "./ui";
@@ -16,7 +16,7 @@ export function useLocate(onDone?: () => void) {
     if (!("geolocation" in navigator)) { setStatus("denied"); return; }
     setStatus("asking");
     navigator.geolocation.getCurrentPosition(
-      (p) => { update((s) => ({ ...s, locationAsked: true, place: { lat: p.coords.latitude, lon: p.coords.longitude, label: "موقعیت فعلی شما", source: "gps" } })); setStatus("idle"); onDone?.(); },
+      (p) => { if (outsideTehran({ lat: p.coords.latitude, lon: p.coords.longitude })) { update((s) => ({ ...s, locationAsked: true })); setStatus("denied"); return; } update((s) => ({ ...s, locationAsked: true, place: { lat: p.coords.latitude, lon: p.coords.longitude, label: "موقعیت فعلی شما", source: "gps" } })); setStatus("idle"); onDone?.(); },
       () => { update((s) => ({ ...s, locationAsked: true })); setStatus("denied"); },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 120000 },
     );

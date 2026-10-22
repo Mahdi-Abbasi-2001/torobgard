@@ -1,7 +1,7 @@
 "use client";
 // "When do you arrive?" as something you drag (canvas B / F3): opening hours on every shop are judged for the chosen moment, and travel
 // times for the chosen way, so the map redraws as you move it.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Mode } from "@/lib/mission";
 import { MODE_LABEL, whenText } from "./slots";
 
@@ -18,15 +18,34 @@ const nearestStep = (w: string) => {
 };
 
 export function WhenScrubber({ when, onChange, compact = false }: { when: string; onChange: (w: string) => void; compact?: boolean }) {
-  const i = nearestStep(when);
+  const N = WHEN_STEPS.length - 1;
+  const idx = nearestStep(when);
   const custom = WHEN_STEPS.findIndex(([v]) => v === when) < 0;
+  const track = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState<number | null>(null); // 0..1 while the thumb is held; released, it glides to the nearest step
+  const frac = drag ?? idx / N;
+  // RTL: the earliest time is on the right
+  const at = (e: React.PointerEvent) => { const r = track.current!.getBoundingClientRect(); return Math.min(1, Math.max(0, (r.right - e.clientX) / r.width)); };
+  const commit = (f: number) => { const v = WHEN_STEPS[Math.round(f * N)][0]; if (v !== when) onChange(v); };
+  const move = (e: React.PointerEvent) => { const f = at(e); setDrag(f); commit(f); };
+  const key = (e: React.KeyboardEvent) => {
+    const d = e.key === "ArrowLeft" || e.key === "ArrowDown" ? 1 : e.key === "ArrowRight" || e.key === "ArrowUp" ? -1 : 0;
+    if (d) { e.preventDefault(); onChange(WHEN_STEPS[Math.min(N, Math.max(0, idx + d))][0]); }
+  };
   return (
     <div className="scrub">
       <div className="row between" style={{ alignItems: "baseline" }}>
-        <label htmlFor="scrub" className="xs muted">کی می‌رسید؟ بکشید</label>
+        <span id="scrub-l" className="xs muted">چه ساعتی می‌رسید؟ بکشید</span>
         <b className="scrub-now">{whenText(when)}</b>
       </div>
-      <input id="scrub" type="range" min={0} max={WHEN_STEPS.length - 1} step={1} value={i} aria-valuetext={whenText(when)} onChange={(e) => onChange(WHEN_STEPS[Number(e.target.value)][0])} />
+      <div ref={track} className="scrub-track" role="slider" tabIndex={0} aria-labelledby="scrub-l" aria-valuemin={0} aria-valuemax={N} aria-valuenow={idx} aria-valuetext={whenText(when)}
+        onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); move(e); }} onPointerMove={(e) => { if (drag != null) move(e); }}
+        onPointerUp={() => setDrag(null)} onPointerCancel={() => setDrag(null)} onKeyDown={key}>
+        <div className="scrub-rail" />
+        {WHEN_STEPS.map(([v], k) => <i key={v} className="scrub-tick" style={{ right: `${(k / N) * 100}%` }} />)}
+        <div className={`scrub-fill ${drag == null ? "glide" : ""}`} style={{ width: `${frac * 100}%` }} />
+        <div className={`scrub-thumb ${drag == null ? "glide" : "held"}`} style={{ right: `${frac * 100}%` }} />
+      </div>
       <div className={`scrub-steps ${compact ? "compact" : ""}`}>
         {WHEN_STEPS.map(([v, l]) => <button key={v} type="button" className={when === v ? "on" : ""} onClick={() => onChange(v)}>{l}</button>)}
         {custom && <button type="button" className="on">{whenText(when)}</button>}

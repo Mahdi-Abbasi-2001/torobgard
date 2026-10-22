@@ -253,3 +253,35 @@
   .mc { align-items: center; }
   .mc > * { width: 100%; max-width: 680px; }
 }
+
+/* ---------- smoothness: every control eases, every screen settles in ---------- */
+html { scroll-behavior: smooth; }
+.btn, .chip, .pickbtn, .slot-row, .seg button, .scrub-steps button, .modechips button, .duel-card, .duel-pref, .cmp-hit, .cmp-rm, .mc-tab, .iconbtn, .sel, .toggle, .field, .card, .tb, .note {
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .25s ease, transform .15s ease, opacity .25s ease;
+}
+.toggle::after { transition: inset-inline-start .22s cubic-bezier(.3, .7, .3, 1); }
+.btn:active:not([disabled]), .chip:active, .pickbtn:active, .slot-row:active, .duel-pref:active, .cmp-hit:active, .modechips button:active, .scrub-steps button:active, .seg button:active { transform: scale(.975); }
+.duel-card:has(.duel-hit:active) { transform: scale(.985); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+.mc-main > *, .mc-panel > *, .mc-center > .mc-pad { animation: rise .32s cubic-bezier(.2, .7, .2, 1) both; }
+.mc-main > *:nth-child(2) { animation-delay: .04s; } .mc-main > *:nth-child(3) { animation-delay: .08s; } .mc-main > *:nth-child(4) { animation-delay: .12s; }
+.shop-row, .cmp-shop, .duel-card, .mc-verdict { animation: pop .3s cubic-bezier(.2, .7, .2, 1) both; }
+.lm-pin { transition: background-color .25s ease, color .25s ease, border-color .25s ease, opacity .3s ease, transform .15s ease, box-shadow .2s ease; }
+.lm-hub { transition: opacity .3s ease, background-color .3s ease; }
+.scrim.out { animation: fadeout .2s ease forwards; }
+.sheet.out { animation: down .2s ease forwards; }
+@keyframes fadeout { to { opacity: 0; } }
+@keyframes down { to { transform: translateY(24px); opacity: 0; } }
+
+/* the arrival-time slider: a glide, not a click-click-click */
+.scrub-track { position: relative; height: 36px; touch-action: none; cursor: pointer; outline-offset: 4px; user-select: none; }
+.scrub-rail { position: absolute; inset-inline: 0; top: 15px; height: 6px; border-radius: 3px; background: var(--line-2); }
+.scrub-tick { position: absolute; top: 14px; width: 8px; height: 8px; margin-right: -4px; border-radius: 50%; background: var(--card); border: 2px solid var(--line-2); box-sizing: border-box; }
+.scrub-fill { position: absolute; right: 0; top: 15px; height: 6px; border-radius: 3px; background: var(--accent); }
+.scrub-thumb { position: absolute; top: 5px; width: 26px; height: 26px; margin-right: -13px; border-radius: 50%; background: #fff; border: 3px solid var(--accent); box-sizing: border-box; box-shadow: 0 2px 8px rgba(15, 23, 42, .25); }
+.scrub-thumb.held { transform: scale(1.18); box-shadow: 0 0 0 7px var(--accent-soft), 0 2px 8px rgba(15, 23, 42, .25); transition: transform .12s ease, box-shadow .2s ease; }
+.scrub-thumb.glide { transition: right .32s cubic-bezier(.3, .8, .3, 1), transform .2s ease, box-shadow .25s ease; }
+.scrub-fill.glide { transition: width .32s cubic-bezier(.3, .8, .3, 1); }
+.scrub-now { transition: color .2s ease; }
+.scrub-steps button { white-space: nowrap; }

@@ -78,17 +78,17 @@ export default function DecideStage(sp: StageProps) {
         <Thumb src={p.image} alt="" size={desk ? 96 : "100%"} h={desk ? 96 : 92} brand={p.brand} />
         <span className="duel-name"><Bidi text={shortName(p)} /></span>
         <span className="duel-price">{p.price_min != null ? <>{p.price_max && p.price_max !== p.price_min ? `${mil(p.price_min)} تا ${mil(p.price_max)}` : mil(p.price_min)}</> : "قیمت نامشخص"}</span>
-        <span className="xs faint">{fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} تا نزدیک شما` : ""}</span>
+        <span className="xs faint">{fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} تایش نزدیک شماست` : ""}</span>
       </button>
-      {!leader && <button type="button" className="duel-pref" onClick={swap}>این را ترجیح می‌دهم</button>}
+      {!leader && <button type="button" className="duel-pref" onClick={swap}>این را می‌پسندم</button>}
     </div>
   );
 
   const body = (
     <div className="mc-main">
       <div className="mc-pad row between" style={{ alignItems: "flex-end", marginTop: desk ? 0 : 4 }}>
-        <div><div className="xs faint">{challenger ? `دوئل ${fa(Math.min(m.beaten.length + 1, total))} از ${fa(total)}` : "مدل پیشنهادی"}</div>
-          <h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>{challenger ? (needText ? `کدام برای ${needText}؟` : "کدام را ترجیح می‌دهید؟") : "این بهترین گزینهٔ شماست"}</h2></div>
+        <div><div className="xs faint">{challenger ? `مقایسهٔ ${fa(Math.min(m.beaten.length + 1, total))} از ${fa(total)}` : "پیشنهاد ما"}</div>
+          <h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>{challenger ? (needText ? `برای ${needText}، کدام بهتر است؟` : "کدام بهتر است؟") : "گزینهٔ برتر شما"}</h2></div>
       </div>
 
       {presets.data && presets.data.presets.length > 0 && (
@@ -129,11 +129,11 @@ export default function DecideStage(sp: StageProps) {
           )}
           {!challenger && (
             <div className="mc-pad"><div className="mc-note">{all.length > 1 ? "همهٔ گزینه‌ها را دیدید." : "برای این جست‌وجو فقط یک مدل پیدا شد."}{" "}
-              {m.beaten.length > 0 && <button type="button" className="mc-links" style={{ display: "inline", background: "none", border: 0, color: "var(--accent-ink)", fontWeight: 700 }} onClick={() => set({ beaten: [], champion: null })}>از اول مقایسه کنم</button>}</div></div>
+              {m.beaten.length > 0 && <button type="button" className="mc-links" style={{ display: "inline", background: "none", border: 0, color: "var(--accent-ink)", fontWeight: 700 }} onClick={() => set({ beaten: [], champion: null })}>از اول مقایسه کن</button>}</div></div>
           )}
           {challenger && all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id && !m.beaten.includes(x.product_id))[0] && (
-            <div className="mc-pad mc-note">در صف: <Bidi text={shortName(all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id && !m.beaten.includes(x.product_id))[0])} />{" "}
-              <a href={`/compare?ids=${[lead.product_id, challenger.product_id, ...all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id).slice(0, 2).map((x) => x.product_id)].join(",")}`} style={{ color: "var(--accent-ink)", fontWeight: 700 }}>جدول کامل، تا ۴ کالا</a></div>
+            <div className="mc-pad mc-note">گزینهٔ بعدی: <Bidi text={shortName(all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id && !m.beaten.includes(x.product_id))[0])} />{" "}
+              <a href={`/compare?ids=${[lead.product_id, challenger.product_id, ...all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id).slice(0, 2).map((x) => x.product_id)].join(",")}`} style={{ color: "var(--accent-ink)", fontWeight: 700 }}>مقایسهٔ کامل جدولی</a></div>
           )}
           {res.data && res.data.capped && <div className="mc-pad mc-note">فقط بهترین گزینه‌های این جست‌وجو بررسی شد.</div>}
         </>
@@ -145,8 +145,8 @@ export default function DecideStage(sp: StageProps) {
   function Actions() {
     return (
       <div className="mc-pad row" style={{ gap: 10, flexWrap: "wrap" }}>
-        <button className="btn pri grow" style={{ minHeight: 52, fontSize: 16 }} onClick={() => choose(lead!)}>{shortName(lead!)} را می‌خواهم</button>
-        {challenger && <button className="btn sec" style={{ minHeight: 52 }} onClick={next}>حریف بعدی</button>}
+        <button className="btn pri grow" style={{ minHeight: 52, fontSize: 16 }} onClick={() => choose(lead!)}>{shortName(lead!)} را انتخاب می‌کنم</button>
+        {challenger && <button className="btn sec" style={{ minHeight: 52 }} onClick={next}>گزینهٔ بعدی</button>}
       </div>
     );
   }
@@ -158,14 +158,14 @@ export default function DecideStage(sp: StageProps) {
         panel={desk && detailId ? <ProductDetails id={detailId} onChallenge={(id) => set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] }))} /> : undefined}
         cta={!desk && lead ? (
           <div className="mc-cta-row">
-            <button className="btn pri" onClick={() => choose(lead)}>{shortName(lead)} را می‌خواهم</button>
-            {challenger && <button className="btn sec" onClick={next}>حریف بعدی</button>}
+            <button className="btn pri" onClick={() => choose(lead)}>{shortName(lead)} را انتخاب می‌کنم</button>
+            {challenger && <button className="btn sec" onClick={next}>گزینهٔ بعدی</button>}
           </div>
         ) : undefined}
         slotsCount={null} />
       <Sheet open={!desk && !!sheet} onClose={() => setSheet(null)} label="جزئیات کالا" className="tall">
         {sheet && <ProductDetails id={sheet} onClose={() => setSheet(null)} onChallenge={(id) => { set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] })); setSheet(null); }} />}
-        {sheet && lead && <div className="sheet-foot"><button className="btn pri block" onClick={() => { const p = all.find((x) => x.product_id === sheet); if (p) choose(p); }}>همین را می‌خواهم</button></div>}
+        {sheet && lead && <div className="sheet-foot"><button className="btn pri block" onClick={() => { const p = all.find((x) => x.product_id === sheet); if (p) choose(p); }}>همین را انتخاب می‌کنم</button></div>}
       </Sheet>
     </>
   );
@@ -176,9 +176,9 @@ export default function DecideStage(sp: StageProps) {
 function NoResults({ sp }: { sp: StageProps }) {
   const { m, set } = sp;
   const relax: { label: string; patch: Partial<typeof m> }[] = [];
-  if (m.budgetMax || m.budgetMin) relax.push({ label: "بودجه را بردار", patch: { budgetMin: null, budgetMax: null } });
-  if (m.cond.installment || m.cond.open || m.cond.near) relax.push({ label: "شرط‌های خرید را بردار", patch: { cond: { installment: false, open: false, near: false } } });
-  if (m.presetId) relax.push({ label: "نیاز را بردار", patch: { presetId: "", need: null } });
+  if (m.budgetMax || m.budgetMin) relax.push({ label: "بودجه را حذف کن", patch: { budgetMin: null, budgetMax: null } });
+  if (m.cond.installment || m.cond.open || m.cond.near) relax.push({ label: "شرط‌های خرید را حذف کن", patch: { cond: { installment: false, open: false, near: false } } });
+  if (m.presetId) relax.push({ label: "نیاز را حذف کن", patch: { presetId: "", need: null } });
   const counts = useQueries({ queries: relax.map((r) => ({
     queryKey: ["relax", m.query, m.category, r.label, m.budgetMax, m.cond],
     queryFn: () => api.search({ q: m.query, category: m.category ?? undefined, price_min: "budgetMin" in r.patch ? r.patch.budgetMin : m.budgetMin, price_max: "budgetMax" in r.patch ? r.patch.budgetMax : m.budgetMax, limit: 1 }, m.place,
@@ -186,7 +186,7 @@ function NoResults({ sp }: { sp: StageProps }) {
   })) });
   return (
     <div className="stack" style={{ gap: 12 }}>
-      <Empty icon="store" title="با این شرایط کالایی پیدا نشد">{relax.length ? "یکی از شرط‌ها را شل کنید؛ تعداد نتیجهٔ هر کدام کنارش است." : "نام کالا را کوتاه‌تر بنویسید، یا ببینید چنین فروشگاه‌هایی کجا هستند."}</Empty>
+      <Empty icon="store" title="با این شرایط چیزی پیدا نشد">{relax.length ? "یکی از شرط‌ها را کنار بگذارید؛ تعداد نتیجه‌ها کنار هر کدام آمده است." : "نام کالا را کوتاه‌تر بنویسید، یا ببینید چنین فروشگاه‌هایی کجا هستند."}</Empty>
       <div className="mc-pad stack" style={{ gap: 8 }}>
         {relax.map((r, i) => (
           <button key={r.label} className="card row between" style={{ padding: "12px 14px" }} onClick={() => set({ ...r.patch, beaten: [], champion: null } as Partial<typeof m>)}>

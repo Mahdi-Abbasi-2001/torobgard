@@ -11,17 +11,17 @@ export const MODE_LABEL = { walk: "پیاده", taxi: "تاکسی", car: "ماش
 export const budgetLabel = (min: number | null, max: number | null) =>
   min && max ? `${mil(min)} تا ${mil(max)}` : max ? `تا ${mil(max)}` : min ? `از ${mil(min)}` : null;
 export const whenText = (w: string) => (w === "now" ? "الان" : w === "evening" ? "امروز عصر" : w === "tomorrow" ? "فردا صبح" : whenLabel(w));
-export const condLabels = (c: SlotInput["cond"]) => [c.installment && "قسطی", c.open && "باز وقتی می‌رسم", c.near && "نزدیک من"].filter(Boolean) as string[];
+export const condLabels = (c: SlotInput["cond"]) => [c.installment && "قسطی", c.open && "هنگام رسیدن باز باشد", c.near && "نزدیک من"].filter(Boolean) as string[];
 
 export function slotsOf(m: SlotInput): Slot[] {
   const b = budgetLabel(m.budgetMin, m.budgetMax);
   const conds = condLabels(m.cond);
   return [
     { key: "product", label: "کالا", value: m.product?.title ? m.product.title : m.query || "", open: !m.product },
-    { key: "need", label: "نیاز", value: m.need ?? "", open: !m.need },
+    { key: "need", label: "برای", value: m.need ?? "", open: !m.need },
     { key: "budget", label: "بودجه", value: b ?? "", open: !b },
-    { key: "place", label: "کجا", value: m.place.source === "default" ? "حافظ × جمهوری" : m.place.label, open: false },
-    { key: "when", label: "کی", value: whenText(m.when), open: false },
+    { key: "place", label: "از کجا", value: m.place.source === "default" ? "مرکز تهران" : m.place.label, open: m.place.source === "default" },
+    { key: "when", label: "چه ساعتی", value: whenText(m.when), open: false },
     { key: "mode", label: "با", value: MODE_LABEL[m.mode], open: false },
     { key: "cond", label: "شرایط", value: conds.join("، "), open: !conds.length },
   ];

@@ -44,11 +44,11 @@ export default function DoneStage(sp: StageProps) {
   const diff = paid && median ? median - paid : null;
   const shopName = live.find((x) => x.q.shop?.shop_id === done?.shopId)?.q.shop?.name ?? chosen?.q.shop?.name;
 
-  const opts: ["same" | "diff" | "none", string][] = [["same", "بله، همان قیمت"], ["diff", "بود، ولی قیمت دیگری گفت"], ["none", "نبود"]];
+  const opts: ["same" | "diff" | "none", string][] = [["same", "بله، همان قیمت"], ["diff", "بود، ولی قیمت دیگری گفتند"], ["none", "نبود"]];
   const body = done ? (
     <div className="stack" style={{ gap: 12 }}>
       <div className="mc-card" style={{ padding: 20, gap: 14 }}>
-        <div className="mc-label">{done.found === false ? "کالا نبود" : "مأموریت تمام شد"}</div>
+        <div className="mc-label">{done.found === false ? "کالا نبود" : "خرید تمام شد"}</div>
         <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.4 }}>{done.found === false ? <>کالا در {shopName} نبود</> : <><Bidi text={m.product?.title ?? m.query} /> را از {shopName} گرفتید</>}</div>
         <Progress stage={3} finished />
         {done.found !== false && (
@@ -60,13 +60,13 @@ export default function DoneStage(sp: StageProps) {
         )}
       </div>
       <Note tone="ok" icon="check">ثبت شد. حالا کارت {shopName} برای همه می‌گوید «خریدار تأیید کرد، همین الان».</Note>
-      {done.found === false && <button className="btn sec block" onClick={() => { set({ done: null }); setPick(null); go("go"); }}>به فروشگاه پشتیبان برو</button>}
+      {done.found === false && <button className="btn sec block" onClick={() => { set({ done: null }); setPick(null); go("go"); }}>سراغ فروشگاه جایگزین برو</button>}
     </div>
   ) : (
     <div className="stack" style={{ gap: 12 }}>
       <div className="mc-card" style={{ padding: 18, gap: 12 }}>
-        <div className="b" style={{ fontSize: 17 }}>بود؟ همان قیمت؟</div>
-        <div className="xs muted" style={{ lineHeight: 1.7 }}>یک لمس. جوابتان کارت این فروشگاه را برای همه به‌روز می‌کند.</div>
+        <div className="b" style={{ fontSize: 17 }}>کالا بود؟ با همان قیمت؟</div>
+        <div className="xs muted" style={{ lineHeight: 1.7 }}>فقط یک ضربه؛ جواب شما به بقیهٔ خریدارها هم کمک می‌کند.</div>
         {live.length > 1 && (
           <label className="stack" style={{ gap: 4 }}><span className="xs faint">از کدام فروشگاه؟</span>
             <select className="sel-shop" value={chosen?.q.shop?.shop_id} onChange={(e) => setShopId(e.target.value)}>
@@ -74,7 +74,7 @@ export default function DoneStage(sp: StageProps) {
             </select></label>
         )}
         {live.length === 1 && <div className="xs faint">فروشگاه: <b>{chosen.q.shop!.name}</b>{listedPrice ? `، قیمت تأییدشده ${money(listedPrice)}` : ""}</div>}
-        {!chosen && <Note tone="unk" icon="store">فروشگاهی تأیید نکرده است؛ به مرحلهٔ تأیید برگردید.</Note>}
+        {!chosen && <Note tone="unk" icon="store">هنوز فروشگاهی تأیید نکرده؛ به مرحلهٔ تأیید برگردید.</Note>}
         {chosen && opts.map(([k, l]) => (
           <button key={k} type="button" className={`pickbtn ${pick === k ? "on" : ""}`} aria-pressed={pick === k} disabled={send.isPending} onClick={() => choose(k)}>{l}</button>
         ))}
@@ -90,7 +90,7 @@ export default function DoneStage(sp: StageProps) {
     </div>
   );
 
-  const cta = done ? <Link className="btn pri" href="/">مأموریت تازه</Link> : <button className="btn sec" onClick={() => go("go")}>برگشت به مسیر</button>;
+  const cta = done ? <Link className="btn pri" href="/">خرید تازه</Link> : <button className="btn sec" onClick={() => go("go")}>برگشت به مسیر</button>;
   return <Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12, paddingTop: 8 }}>{body}</div></div>} cta={cta} />;
   void fa;
 }

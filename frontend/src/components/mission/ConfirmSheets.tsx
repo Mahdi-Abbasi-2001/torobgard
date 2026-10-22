@@ -24,7 +24,7 @@ export function ChatSheet({ item, onClose }: { item: ShopProgress | null; onClos
         <button className="iconbtn soft" onClick={onClose} aria-label="بستن"><Icon n="x" /></button></div>
       {a && (
         <div className="mc-card" style={{ padding: 12 }}>
-          <div className="mc-label">ترب‌گرد از جواب فروشنده فهمید</div>
+          <div className="mc-label">از جواب فروشنده این‌ها را فهمیدیم</div>
           <div className="facts">{facts.map(([k, v, t]) => <div key={k} className={`fact ${t}`}><span className="xs">{k}</span><b>{v}</b></div>)}</div>
           <AnswerDetails q={q!} />
           <span className="xs muted">این تأیید روی کارت این فروشگاه برای همهٔ کاربران دیده می‌شود و تا ۲ ساعت تازه حساب می‌شود.</span>
@@ -56,7 +56,7 @@ export function HoldSheet({ item, onClose, onGo }: { item: ShopProgress | null; 
             <b className="num">{fa(item.hold.code)}</b>
             <span className="xs">این کد را به فروشنده نشان دهید</span>
           </div>
-          <button className="btn pri block" onClick={onGo}>مسیر را شروع کن</button>
+          <button className="btn pri block" onClick={onGo}>شروع مسیر</button>
         </div>
       ) : waiting ? (
         <div className="hold-wait"><span className="spin" />منتظر جواب فروشنده…</div>

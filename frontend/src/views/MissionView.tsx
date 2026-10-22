@@ -41,7 +41,7 @@ export default function MissionView({ id }: { id: string }) {
   if (!ready) return <div className="mc"><MissionBar /><div className="mc-body"><div className="mc-center mc-pad" style={{ paddingTop: 20 }}><div className="sk mc-skel" style={{ height: 120 }} /><div className="sk mc-skel" style={{ height: 260 }} /></div></div></div>;
   if (!m) return (
     <div className="mc"><MissionBar />
-      <Empty icon="q" title="این مأموریت روی این دستگاه نیست" action={<Link className="btn pri" href="/"><Icon n="spark" s />مأموریت تازه</Link>}>مأموریت‌ها فقط روی دستگاهی که ساخته‌اید می‌مانند. پاسخ فروشنده‌ها را در «مأموریت‌های من» می‌بینید.</Empty>
+      <Empty icon="q" title="این خرید روی این دستگاه نیست" action={<Link className="btn pri" href="/"><Icon n="spark" s />خرید تازه</Link>}>خریدها فقط روی دستگاهی که ساخته‌اید می‌مانند. جواب فروشنده‌ها را در «خریدهای من» می‌بینید.</Empty>
     </div>
   );
 

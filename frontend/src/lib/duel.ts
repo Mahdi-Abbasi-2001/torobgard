@@ -31,9 +31,9 @@ export function duelRows(a: Product, b: Product, cmp?: CompareResult, max = 6): 
     used.add(fa_.key);
   }
   // 2) the things every shopper compares in person
-  rows.push(pair("کمترین قیمت", "fixed", a.price_min, b.price_min, (n) => `${mil(n)}`, true));
-  rows.push(pair("فروشندهٔ این کالا", "fixed", a.shop_count, b.shop_count, (n) => `${fa(n)} فروشگاه`, false));
-  if (a.near || b.near) rows.push(pair("تا ۱۵ دقیقه پیاده", "fixed", a.near?.near ?? null, b.near?.near ?? null, (n) => `${fa(n)} فروشگاه`, false));
+  rows.push(pair("ارزان‌ترین قیمت", "fixed", a.price_min, b.price_min, (n) => `${mil(n)}`, true));
+  rows.push(pair("تعداد فروشگاه", "fixed", a.shop_count, b.shop_count, (n) => `${fa(n)} فروشگاه`, false));
+  if (a.near || b.near) rows.push(pair("نزدیک شما", "fixed", a.near?.near ?? null, b.near?.near ?? null, (n) => `${fa(n)} فروشگاه`, false));
   // 3) the specs where they differ most
   for (const r of cmp?.rows ?? []) {
     if (rows.length >= max) break;

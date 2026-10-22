@@ -55,6 +55,16 @@ export function BottomNav({ badge = 0 }: { badge?: number }) {
 }
 
 export function Sheet({ open, onClose, children, label, className = "" }: { open: boolean; onClose: () => void; children: ReactNode; label: string; className?: string }) {
+  // stays mounted for the length of the exit animation, so closing glides instead of vanishing
+  const [mounted, setMounted] = useState(open);
+  const [closing, setClosing] = useState(false);
+  useEffect(() => {
+    if (open) { setMounted(true); setClosing(false); return; } // eslint-disable-line react-hooks/set-state-in-effect
+    if (!mounted) return;
+    setClosing(true);
+    const t = setTimeout(() => { setMounted(false); setClosing(false); }, 200);
+    return () => clearTimeout(t);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps -- only the open flag drives the animation
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -62,11 +72,11 @@ export function Sheet({ open, onClose, children, label, className = "" }: { open
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", k); document.body.style.overflow = ""; };
   }, [open, onClose]);
-  if (!open) return null;
+  if (!mounted && !open) return null;
   return (
     <>
-      <div className="scrim" onClick={onClose} />
-      <div className={`sheet ${className}`} role="dialog" aria-modal="true" aria-label={label}>{children}</div>
+      <div className={`scrim ${closing ? "out" : ""}`} onClick={onClose} />
+      <div className={`sheet ${closing ? "out" : ""} ${className}`} role="dialog" aria-modal="true" aria-label={label}>{children}</div>
     </>
   );
 }

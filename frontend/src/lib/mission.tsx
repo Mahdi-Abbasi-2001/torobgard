@@ -12,7 +12,7 @@ export type Stage = 0 | 1 | 2 | 3;
 export type View = "decide" | "find" | "compare" | "confirm" | "go" | "done";
 export const STAGE_OF: Record<View, Stage> = { decide: 0, find: 1, compare: 1, confirm: 2, go: 3, done: 3 };
 export const STAGE_VIEW: View[] = ["decide", "find", "confirm", "go"];
-export const STAGE_LABEL = ["انتخاب", "پیدا کردن", "تأیید", "رفتن"];
+export const STAGE_LABEL = ["مدل", "فروشگاه", "تأیید", "رفتن"];
 
 export interface MissionProduct {
   product_id: string; title: string; image: string | null; brand: string | null; category: string | null;

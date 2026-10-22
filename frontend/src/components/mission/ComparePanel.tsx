@@ -12,7 +12,7 @@ import { ScoreBars } from "@/components/discover";
 import { FlagChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, confirmedPrice } from "@/components/honesty";
 import { Note, Sheet } from "@/components/ui";
 
-const PRIOS: [Priority, string][] = [["balanced", "متعادل"], ["price", "قیمت"], ["near", "نزدیکی"], ["trust", "اطلاعات مطمئن"], ["now", "همین الان"]];
+const PRIOS: [Priority, string][] = [["balanced", "پیشنهاد ترب‌گرد"], ["price", "قیمت"], ["near", "نزدیکی"], ["trust", "قابل‌اعتماد"], ["now", "الان باز باشد"]];
 const WIN_LABEL: Record<string, string> = { price: "ارزان‌ترین", distance: "نزدیک‌ترین", freshness: "تازه‌ترین قیمت", closes: "دیرتر می‌بندد", warranty: "بهترین گارانتی", trust: "مطمئن‌ترین اطلاعات" };
 const FOR_PRIO: Partial<Record<Priority, string>> = { price: "ارزان‌ترین", near: "نزدیک‌ترین", trust: "مطمئن‌ترین اطلاعات" };
 
@@ -34,7 +34,7 @@ export function ComparePanel({ m, set, listed, onShop, max = 5 }: { m: Mission; 
     const v = forPrio ? cmp.data.verdict.find((x) => x.for === forPrio) : null;
     if (v) return `${v.name}: ${v.why}`;
     const top = rows[0];
-    return top ? `${top.name} بهترین ترکیب است${top.why ? `: ${top.why}` : ""}` : null;
+    return top ? `${top.name} بهترین انتخاب کلی است${top.why ? `: ${top.why}` : ""}` : null;
   })();
   const remove = (id: string) => set({ picks: m.picks.filter((x) => x !== id) });
   const later = m.when !== "now";
@@ -42,7 +42,7 @@ export function ComparePanel({ m, set, listed, onShop, max = 5 }: { m: Mission; 
   return (
     <div className="stack" style={{ gap: 10 }}>
       <div className="row between">
-        <div className="b" style={{ fontSize: 16 }}>فهرست کوتاه <span className="xs faint">{fa(rows.length)} فروشگاه</span></div>
+        <div className="b" style={{ fontSize: 16 }}>فروشگاه‌های منتخب <span className="xs faint">{fa(rows.length)} فروشگاه</span></div>
         <div className="seg" role="radiogroup" aria-label="نمایش" style={{ minWidth: 120 }}>
           <button role="radio" aria-checked={!table} className={!table ? "on" : ""} style={{ minHeight: 32 }} onClick={() => setTable(false)}>فهرست</button>
           <button role="radio" aria-checked={table} className={table ? "on" : ""} style={{ minHeight: 32 }} onClick={() => setTable(true)}>جدول</button>
@@ -52,8 +52,8 @@ export function ComparePanel({ m, set, listed, onShop, max = 5 }: { m: Mission; 
         {PRIOS.map(([v, l]) => <button key={v} type="button" role="radio" aria-checked={m.priority === v} className={`chip ${m.priority === v ? "on" : ""}`} onClick={() => set({ priority: v })}>{l}</button>)}
       </div>
       {verdict && <div className="mc-verdict">{fa(verdict)}</div>}
-      {cmp.data?.one_trip && <div className="mc-note">{fa(cmp.data.one_trip.count)} تا از اینها در {fa(cmp.data.one_trip.mall)} هستند: یک سفر.</div>}
-      {m.picks.length === 0 && <Note tone="unk" icon="store">فروشگاهی انتخاب نشده؛ از نقشه یا «افزودن فروشگاه» چند تا را بگذارید.</Note>}
+      {cmp.data?.one_trip && <div className="mc-note">{fa(cmp.data.one_trip.count)} تا از این‌ها در {fa(cmp.data.one_trip.mall)} هستند؛ با یک رفت‌وآمد می‌شود به همه سر زد.</div>}
+      {m.picks.length === 0 && <Note tone="unk" icon="store">هنوز فروشگاهی انتخاب نشده؛ از روی نقشه یا با «افزودن فروشگاه» چند فروشگاه انتخاب کنید.</Note>}
       <div className="stack" style={{ gap: 8, opacity: cmp.isFetching && cmp.isPlaceholderData ? 0.6 : 1, transition: "opacity .2s" }}>
         {rows.map((s, i) => (
           <div key={s.shop_id} className="cmp-shop">

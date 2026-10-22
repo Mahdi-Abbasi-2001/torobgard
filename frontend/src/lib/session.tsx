@@ -5,7 +5,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api, authStore, type ShopFilters, type User } from "./api";
-import { DEFAULT_PLACE, type Place } from "./geo";
+import { DEFAULT_PLACE, outsideTehran, type Place } from "./geo";
 
 export interface SessionState {
   place: Place;
@@ -60,6 +60,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     if (auth) api.me().catch((e) => { // expired or revoked token: fall back to a fresh anonymous session
       if (e?.status === 401) { authStore.set(null); setUser(null); setSid(newId()); }
     });
+    if (saved.place && outsideTehran(saved.place)) delete saved.place; // a saved GPS fix from outside Tehran is not a usable starting point
     setState((s) => ({ ...s, ...saved, filters: { ...s.filters, ...saved.filters } }));
     setReady(true);
   }, []);

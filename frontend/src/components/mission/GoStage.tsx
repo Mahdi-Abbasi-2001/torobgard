@@ -52,20 +52,20 @@ export default function GoStage(sp: StageProps) {
   const okAgain = !!kid && kid.status === "answered" && now - new Date(kid.answered_at ?? kid.created_at).getTime() < 3 * 60_000;
   const rerouted = gone.some((x) => x.gone);
 
-  const banner = checking ? { tone: "info" as const, icon: "clock" as const, t: `دارم از ${main?.name} دوباره می‌پرسم…` }
-    : rerouted && main ? { tone: "warn" as const, icon: "refresh" as const, t: `مسیر عوض شد: ${gone.find((x) => x.gone)?.q.shop?.name} همین الان تمام کرد. توقف بعدی جایش آمد.` }
-    : rerouted ? { tone: "bad" as const, icon: "alert" as const, t: "فروشگاهی که تأیید کرده بود تمام کرد و فروشگاه تأییدشدهٔ دیگری نمانده. از فروشگاه‌های دیگر بپرسید." }
+  const banner = checking ? { tone: "info" as const, icon: "clock" as const, t: `دوباره از ${main?.name} می‌پرسیم…` }
+    : rerouted && main ? { tone: "warn" as const, icon: "refresh" as const, t: `مسیر عوض شد: ${gone.find((x) => x.gone)?.q.shop?.name} همین حالا گفت تمام شده. فروشگاه بعدی جایش آمد.` }
+    : rerouted ? { tone: "bad" as const, icon: "alert" as const, t: "فروشگاهی که تأیید کرده بود تمام شده و فروشگاه تأییدشدهٔ دیگری نداریم. از فروشگاه‌های دیگر بپرسید." }
     : okAgain ? { tone: "ok" as const, icon: "check" as const, t: "هنوز هست. با خیال راحت بروید." } : null;
 
   const finish = () => go("done");
-  const youLabel = plan.data?.start.label ?? m.place.label;
+  const youLabel = m.place.source === "default" ? "مرکز تهران" : m.place.label;
   const tips = plan.data?.checklist ?? [];
 
   const line = (
     <div className="mc-card trip">
       <div className="trip-stop">
         <div className="trip-rail"><i className="node you" /><i className="tseg on" /></div>
-        <div className="trip-body" style={{ paddingBottom: 14 }}><div className="row between"><b>شما</b><span className="xs faint">{plan.data?.start.time ? fa(plan.data.start.time) : "الان"}</span></div><div className="xs muted">{youLabel}، {m.mode === "walk" ? "پیاده" : m.mode === "taxi" ? "با تاکسی" : "با ماشین"}</div></div>
+        <div className="trip-body" style={{ paddingBottom: 14 }}><div className="row between"><b>{m.place.source === "gps" ? "شما" : "نقطهٔ شروع"}</b><span className="xs faint">{plan.data?.start.time ? fa(plan.data.start.time) : "الان"}</span></div><div className="xs muted">{youLabel}، {m.mode === "walk" ? "پیاده" : m.mode === "taxi" ? "با تاکسی" : "با ماشین"}</div></div>
       </div>
       {stops.map((s, i) => {
         const p = progressOf(s.shop_id);
@@ -74,7 +74,7 @@ export default function GoStage(sp: StageProps) {
           <div key={s.shop_id} className="trip-stop">
             <div className="trip-rail"><i className={`node ${i === 0 ? "mainstop" : "backup"}`} />{!last && <i className={`tseg ${i === 0 ? "" : "off"}`} />}</div>
             <div className="trip-body">
-              <div className="row between" style={{ gap: 8 }}><b style={{ fontSize: 15 }}>{s.name}</b><span className="xs faint">{i === 0 ? `${fa(s.walk_min_from_previous)} دقیقه` : "پشتیبان"}</span></div>
+              <div className="row between" style={{ gap: 8 }}><b style={{ fontSize: 15 }}>{s.name}</b><span className="xs faint">{i === 0 ? `${fa(s.walk_min_from_previous)} دقیقه` : "جایگزین"}</span></div>
               <div className="xs muted">{[s.mall, floorLabel(s.floor_label), s.unit ? `واحد ${fa(s.unit)}` : s.plaque ? `پلاک ${fa(s.plaque)}` : null].filter(Boolean).join("، ")}{`، رسیدن ${fa(s.arrive_at)}`}</div>
               <div className="sm" style={{ lineHeight: 1.6 }}>
                 {s.confirmed_price ? `تأیید فروشنده: ${money(s.confirmed_price)} تومان` : "تأیید فروشنده: موجود"}{p?.q.answered_at ? `، ${clock(p.q.answered_at)}` : ""}.
@@ -100,7 +100,7 @@ export default function GoStage(sp: StageProps) {
     <div className="stack" style={{ gap: 8 }}>
       <div className="trip-actions">
         <button className="btn sec" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: false })}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>
-        {DEMO && <button className="btn ghost demo-btn" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: true })} title="فقط در حالت نمایشی">نمایش: اگر تمام کرده بود</button>}
+        {DEMO && <button className="btn ghost demo-btn" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: true })} title="فقط در حالت نمایشی">نمایشی: اگر تمام شده بود</button>}
       </div>
       {recheck.isError && <Note tone="bad" icon="alert">{(recheck.error as Error).message}</Note>}
       {plan.data?.deep_links && main && (
@@ -139,14 +139,14 @@ export default function GoStage(sp: StageProps) {
       <button className="btn pri" onClick={finish}>رسیدم و خریدم</button>
       <div className="hint">بعد از خرید می‌پرسیم بود یا نه؛ جوابتان برای همه قیمت را به‌روز می‌کند.</div>
     </>
-  ) : <button className="btn pri" onClick={() => go("confirm")}>برگرد به تأیید فروشنده‌ها</button>;
+  ) : <button className="btn pri" onClick={() => go("confirm")}>برگشت به جواب فروشنده‌ها</button>;
 
   const body = (
     <div className="stack" style={{ gap: 12 }}>
       <div className="stack" style={{ gap: 2 }}><div className="xs faint">مسیر امروز</div>
-        <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops.length)} توقف، ${fa(plan.data!.total_walk_min)} دقیقه راه` : "مسیری نیست"}</h2></div>
+        <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops.length)} فروشگاه، ${fa(plan.data!.total_walk_min)} دقیقه راه` : "مسیری نداریم"}</h2></div>
       {banner && <Note tone={banner.tone} icon={banner.icon}>{banner.t}</Note>}
-      {plan.isError && <Note tone="unk" icon="store">هنوز فروشگاهی «موجود است» نگفته. به مرحلهٔ تأیید برگردید.</Note>}
+      {plan.isError && <Note tone="unk" icon="store">هنوز هیچ فروشگاهی نگفته که کالا موجود است؛ به مرحلهٔ تأیید برگردید.</Note>}
       {line}{actions}{check}
     </div>
   );

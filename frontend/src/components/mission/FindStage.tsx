@@ -55,7 +55,7 @@ export default function FindStage(sp: StageProps) {
 
   const toggle = (id: string) => {
     if (m.picks.includes(id)) { set({ picks: m.picks.filter((x) => x !== id) }); return; }
-    if (m.picks.length >= 5) { setWarn("حداکثر ۵ فروشگاه. برای افزودن، یکی را بردارید."); setTimeout(() => setWarn(""), 2500); return; }
+    if (m.picks.length >= 5) { setWarn("حداکثر ۵ فروشگاه؛ برای افزودن، یکی را حذف کنید."); setTimeout(() => setWarn(""), 2500); return; }
     set({ picks: [...m.picks, id] });
   };
   const zone = d?.zones?.[0];
@@ -77,7 +77,7 @@ export default function FindStage(sp: StageProps) {
 
   const conds = (
     <div className="hscroll cond-row" role="group" aria-label="شرایط خرید">
-      {([["installment", "قسطی", "card"], ["open", "باز وقتی می‌رسم", "clock"], ["near", "نزدیک من", "walk"]] as const).map(([k, l, ic]) => (
+      {([["installment", "قسطی", "card"], ["open", "هنگام رسیدن باز باشد", "clock"], ["near", "نزدیک من", "walk"]] as const).map(([k, l, ic]) => (
         <button key={k} type="button" className={`chip ${m.cond[k] ? "on" : ""}`} aria-pressed={m.cond[k]} onClick={() => patchSlots({ cond: { ...m.cond, [k]: !m.cond[k] } })}><Icon n={m.cond[k] ? "check" : ic} s />{l}</button>
       ))}
     </div>
@@ -92,7 +92,7 @@ export default function FindStage(sp: StageProps) {
     <div className="mc-card scrub-card">
       <WhenScrubber when={m.when} onChange={(w) => patchSlots({ when: w })} compact={!desk} />
       <ModeChips mode={m.mode} onChange={(mode) => patchSlots({ mode })} />
-      {m.mode === "car" && <Note tone="warn" icon="alert">بازار مرکزی داخل طرح ترافیک است؛ بدون مجوز با خودرو نروید.</Note>}
+      {m.mode === "car" && <Note tone="warn" icon="alert">بازار مرکزی داخل طرح ترافیک است؛ بدون مجوز نمی‌شود با ماشین رفت.</Note>}
     </div>
   );
 
@@ -103,11 +103,11 @@ export default function FindStage(sp: StageProps) {
   const askCta = (
     <>
       <button className="btn pri" disabled={!m.picks.length || ask.isPending} onClick={askNow}>
-        {ask.isPending ? <span className="spin" style={{ borderTopColor: "var(--on-accent)" }} /> : <Icon n="spark" s />}بگذار ترب‌گرد موجی بپرسد
+        {ask.isPending ? <span className="spin" style={{ borderTopColor: "var(--on-accent)" }} /> : <Icon n="spark" s />}از فروشنده‌ها بپرس
       </button>
-      <div className="mc-links"><button type="button" onClick={() => { setOnlyShop(null); setAskOpen(true); }} disabled={!m.picks.length}>چه می‌پرسیم؟ سؤال‌ها را ببین و عوض کن</button></div>
+      <div className="mc-links"><button type="button" onClick={() => { setOnlyShop(null); setAskOpen(true); }} disabled={!m.picks.length}>سؤال‌ها را ببینید یا تغییر دهید</button></div>
       {ask.isError && <Note tone="bad" icon="alert">{(ask.error as Error).message}</Note>}
-      <div className="hint">موجودی، قیمت امروز و ساعت را یک‌جا می‌پرسیم</div>
+      <div className="hint">موجودی، قیمت امروز و ساعت کاری را یک‌جا می‌پرسیم</div>
     </>
   );
 
@@ -159,7 +159,7 @@ export default function FindStage(sp: StageProps) {
           </div>
         }
         cta={noShops ? undefined : view === "compare" ? askCta : (
-          <button className="btn pri" disabled={!listed.length} onClick={() => go("compare")}>این فروشگاه‌ها را کنار هم بگذار</button>
+          <button className="btn pri" disabled={!listed.length} onClick={() => go("compare")}>مقایسهٔ این فروشگاه‌ها</button>
         )} />
       {sheets}
     </>
@@ -178,9 +178,9 @@ function FewNote({ go, n }: { go: (v: "decide") => void; n: number }) {
 function NoShops({ sp, catCount }: { sp: StageProps; catCount: number }) {
   const { m, patchSlots } = sp;
   const relax: { label: string; patch: Partial<Mission> }[] = [];
-  if (m.cond.near) relax.push({ label: "«نزدیک من» را بردار", patch: { cond: { ...m.cond, near: false } } });
-  if (m.cond.open) relax.push({ label: "«باز وقتی می‌رسم» را بردار", patch: { cond: { ...m.cond, open: false } } });
-  if (m.cond.installment) relax.push({ label: "«قسطی» را بردار", patch: { cond: { ...m.cond, installment: false } } });
+  if (m.cond.near) relax.push({ label: "«نزدیک من» را حذف کن", patch: { cond: { ...m.cond, near: false } } });
+  if (m.cond.open) relax.push({ label: "«هنگام رسیدن باز باشد» را حذف کن", patch: { cond: { ...m.cond, open: false } } });
+  if (m.cond.installment) relax.push({ label: "«قسطی» را حذف کن", patch: { cond: { ...m.cond, installment: false } } });
   if (m.when !== "now" && !relax.length) relax.push({ label: "زمان را «الان» کن", patch: { when: "now" } });
   const counts = useQueries({ queries: relax.map((r) => ({
     queryKey: ["frelax", m.productId, r.label, m.when, m.place.lat, JSON.stringify(m.cond)],
@@ -189,7 +189,7 @@ function NoShops({ sp, catCount }: { sp: StageProps; catCount: number }) {
   return (
     <div className="stack" style={{ gap: 10 }}>
       <Empty icon="store" title={relax.length ? "هیچ فروشگاهی همهٔ این شرایط را ندارد" : "نزدیک شما فروشگاهی این کالا را ثبت نکرده"}>
-        {relax.length ? "یکی از شرط‌ها را بردارید؛ تعداد نتیجهٔ هر کدام کنارش است." : "فروشگاه‌های این دسته را می‌توانید بپرسید."}
+        {relax.length ? "یکی از شرط‌ها را کنار بگذارید؛ تعداد نتیجه‌ها کنار هر کدام آمده است." : "فروشگاه‌های این دسته را می‌توانید بپرسید."}
       </Empty>
       <div className="mc-pad stack" style={{ gap: 8 }}>
         {relax.map((r, i) => (

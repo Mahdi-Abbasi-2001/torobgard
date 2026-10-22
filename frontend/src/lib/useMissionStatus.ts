@@ -78,7 +78,7 @@ export function useMissionStatus(m: Pick<Mission, "productId" | "going" | "done"
     return {
       loading: inq.isLoading, connected: inq.connected, items, camp, asked: items.length, waiting, confirmed, unavailable, silent,
       held: held ? { ...held, shopId: held.q.shop!.shop_id } : null, best, stage, finished,
-      headline: bits.length ? bits.join("، ") : pid ? "هنوز از فروشگاهی نپرسیده‌اید" : "کالا هنوز انتخاب نشده",
+      headline: bits.length ? bits.join("، ") : pid ? "هنوز از هیچ فروشگاهی نپرسیده‌اید" : "هنوز مدلی انتخاب نشده",
     };
   }, [inq.items, inq.isLoading, inq.connected, camps.data, pid, m?.going, m?.done]);
 }

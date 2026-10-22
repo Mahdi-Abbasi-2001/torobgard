@@ -36,30 +36,30 @@ export default function MissionsView() {
             </Link>
           )}
           <div className="row between">
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>مأموریت‌های من</h1>
-            <Link href="/" className="btn sec" style={{ minHeight: 40 }}>مأموریت تازه</Link>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>خریدهای من</h1>
+            <Link href="/" className="btn sec" style={{ minHeight: 40 }}>خرید تازه</Link>
           </div>
           <div className="seg" role="tablist" aria-label="وضعیت">
             <button role="tab" aria-selected={tab === "active"} className={tab === "active" ? "on" : ""} onClick={() => setTab("active")}>{`فعال، ${fa(active.length)}`}</button>
             <button role="tab" aria-selected={tab === "done"} className={tab === "done" ? "on" : ""} onClick={() => setTab("done")}>{`تمام‌شده، ${fa(done.length)}`}</button>
           </div>
           {ready && !list.length && (
-            <Empty icon="bag" title={tab === "active" ? "مأموریت فعالی ندارید" : "هنوز مأموریتی تمام نشده"} action={tab === "active" ? <Link className="btn pri" href="/"><Icon n="spark" s />شروع یک مأموریت</Link> : undefined}>
-              {tab === "active" ? "بنویسید دنبال چه هستید؛ ترب‌گرد تا رسیدن به مغازه همراهتان است." : "وقتی بعد از خرید بگویید کالا بود یا نه، مأموریت اینجا می‌آید."}
+            <Empty icon="bag" title={tab === "active" ? "خرید فعالی ندارید" : "هنوز خریدی تمام نشده"} action={tab === "active" ? <Link className="btn pri" href="/"><Icon n="spark" s />شروع یک خرید</Link> : undefined}>
+              {tab === "active" ? "بنویسید چه می‌خواهید؛ ترب‌گرد تا رسیدن به مغازه کنارتان است." : "وقتی بعد از خرید بگویید کالا بود یا نه، خرید به این بخش می‌آید."}
             </Empty>
           )}
           <div className="stack" style={{ gap: 10 }}>
             {list.map((m) => (
               <div key={m.id} className="mission-item">
                 <MissionCard m={m} />
-                <button type="button" className="mission-rm" aria-label="حذف مأموریت" title="حذف از این دستگاه" onClick={() => { if (confirm("این مأموریت از این دستگاه حذف شود؟")) remove(m.id); }}><Icon n="x" s /></button>
+                <button type="button" className="mission-rm" aria-label="حذف خرید" title="حذف از این دستگاه" onClick={() => { if (confirm("این خرید از این دستگاه حذف شود؟")) remove(m.id); }}><Icon n="x" s /></button>
               </div>
             ))}
           </div>
           <div className="mc-card" style={{ padding: 14 }}>
-            <div className="b sm">خبرم کن</div>
+            <div className="b sm">وقتی جواب آمد خبرم کنید</div>
             <NotifyOptIn sid={sid} />
-            <div className="xs muted" style={{ lineHeight: 1.7 }}>بدون حساب هم کار می‌کند. {user ? <>وارد شده‌اید: مأموریت‌ها و پاسخ‌ها روی همهٔ دستگاه‌هایتان می‌ماند.</> : <><Link href="/login" style={{ color: "var(--accent-ink)", fontWeight: 700 }}>ورود اختیاری</Link> تا پاسخ فروشنده‌ها روی گوشی دیگر هم بماند.</>}</div>
+            <div className="xs muted" style={{ lineHeight: 1.7 }}>بدون حساب هم کار می‌کند. {user ? <>وارد شده‌اید؛ خریدها و جواب‌ها روی همهٔ دستگاه‌هایتان می‌ماند.</> : <><Link href="/login" style={{ color: "var(--accent-ink)", fontWeight: 700 }}>ورود اختیاری</Link> تا پاسخ فروشنده‌ها روی گوشی دیگر هم بماند.</>}</div>
           </div>
         </main>
       </div>

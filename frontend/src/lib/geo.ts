@@ -18,3 +18,8 @@ export function km(a: { lat: number; lon: number }, b: { lat: number; lon: numbe
 }
 /** Walking minutes on Tehran bazaar streets (~4.5 km/h, +30% for indirect routes). */
 export const walkMin = (d: number) => Math.round((d * 1.3) / 4.5 * 60);
+
+/** The catalogue only has Tehran. A position farther than this from the centre cannot be a shopper's starting point for these shops. */
+const TEHRAN = { lat: 35.7, lon: 51.4 };
+export const kmFromTehran = (p: { lat: number; lon: number }) => km(p, TEHRAN);
+export const outsideTehran = (p: { lat: number; lon: number }) => kmFromTehran(p) > 40;
