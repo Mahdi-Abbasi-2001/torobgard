@@ -54,7 +54,8 @@ export default function ShopView({ id, product }: { id: string; product?: string
   return (
     <main className={`main ${product ? "has-cta" : ""}`}>
       <AppBar title="فروشگاه" sub={s.area ?? undefined} end={s.mall_key ? <Link className="iconbtn" href={`/mall/${encodeURIComponent(s.mall_key)}`} aria-label="راهنمای پاساژ"><Icon n="layers" /></Link> : undefined} />
-      <div className="pad stack" style={{ gap: 14 }}>
+      <div className="pad stack lay-2col" style={{ gap: 14 }}>
+        <div className="lay shop-main">
         <div className="stack" style={{ gap: 6 }}>
           <ShopName shop={s} />
           {!s.name_is_verified && <span className="xs faint">نام از داده‌ها نمایش داده می‌شود؛ ممکن است با تابلوی فروشگاه فرق کند.</span>}
@@ -76,8 +77,10 @@ export default function ShopView({ id, product }: { id: string; product?: string
           {s.weekly_hours ? <Hours wh={s.weekly_hours} /> : <Note tone="unk" icon="clock"><b>ساعت کاری ثبت نشده.</b> قبل از رفتن بپرسید؛ در استعلام سؤال ساعت را اضافه کنید.</Note>}
         </div>
 
+        </div>
+        <div className="lay shop-side">
         {s.offers.length ? (
-          <div className="stack" style={{ gap: 8 }}>
+          <div className="stack offers-grid" style={{ gap: 8 }}>
             <div className="h4">کالاهای ثبت‌شده <span className="n">{fa(s.offer_count)}</span></div>
             {s.offers.slice(0, more ? 30 : 3).map((o) => (
               <Link key={o.offer_id} href={`/p/${o.product_id}`} className="card" style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
@@ -96,6 +99,7 @@ export default function ShopView({ id, product }: { id: string; product?: string
         )}
         <NoCallNote />
         <SourceNote>منبع: ترب{s.name_is_verified ? " · نام فروشگاه تأییدشده" : ""}{s.in_traffic_zone ? " · داخل محدودهٔ طرح ترافیک" : ""}</SourceNote>
+        </div>
       </div>
       {product && (
         <div className="sticky-cta">

@@ -295,6 +295,90 @@ bdi{unicode-bidi:isolate}
 .micro .m{background:var(--paper);border:1px solid var(--line);border-radius:18px;overflow:hidden;direction:rtl;display:flex;flex-direction:column}
 .micro .m .lbl{direction:ltr;font-size:11.5px;color:var(--ink-3);padding:8px 12px;border-top:1px solid var(--line);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:auto}
 .note{font-size:12.5px;color:var(--ink-3);margin-top:6px}
+/* ================= DESKTOP & TABLET (new) =================
+   Everything below is scoped to .win (browser-window mock) so the phone frames above are untouched.
+   Class names match what frontend/ will use behind @media (min-width:960px). */
+.dsec .track{gap:36px;align-items:flex-start}
+.dart{margin:0;flex:0 0 auto;display:flex;flex-direction:column;gap:10px;scroll-snap-align:start}
+.dart figcaption{font-size:13px;color:var(--ink-2);line-height:1.5;max-width:calc(var(--w) * var(--z, .62))}
+.dart figcaption b{color:var(--ink);font-weight:650;display:block}
+.zoomctl{display:inline-flex;gap:4px;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--card);margin-inline-start:12px;vertical-align:2px}
+.zoomctl button{font:inherit;font-size:12px;border:0;background:none;color:var(--ink-2);padding:3px 9px;border-radius:7px;cursor:pointer}
+.zoomctl button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:650}
+.win{zoom:var(--z,.62);width:var(--w);height:var(--h);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line);background:var(--paper);display:flex;flex-direction:column}
+.win-bar{height:38px;flex:0 0 auto;display:flex;align-items:center;gap:12px;padding-inline:14px;background:var(--sunk);border-bottom:1px solid var(--line);direction:ltr}
+.win-bar i{width:11px;height:11px;border-radius:50%;background:var(--line-2);display:inline-block}
+.win-bar .url{flex:1;max-width:520px;margin-inline:auto;height:24px;border-radius:7px;background:var(--card);color:var(--ink-3);font:12px ui-monospace,SFMono-Regular,Menlo,monospace;display:flex;align-items:center;padding-inline:10px}
+.win-body{flex:1;overflow:auto;direction:rtl;text-align:start;font-family:var(--f-body);font-size:15px;line-height:1.7;color:var(--ink);background:var(--paper);display:flex;flex-direction:column;scrollbar-width:thin}
+/* shell */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:20px;height:64px;padding-inline:32px;background:var(--card);border-bottom:1px solid var(--line);flex:0 0 auto}
+.tb-brand{display:flex;align-items:center;gap:8px;font-weight:900;font-size:19px;white-space:nowrap}
+.tb-search{flex:1;max-width:560px;display:flex;align-items:center;gap:8px;height:44px;border-radius:12px;background:var(--paper);border:1px solid var(--line);padding-inline:4px 12px;font-size:14.5px;color:var(--ink-3)}
+.tb-search .sbtn{width:36px;height:36px;border-radius:10px}
+.tb-search.filled{color:var(--ink)}
+.tb-links{display:flex;align-items:center;gap:4px;margin-inline-start:auto}
+.tb-links a{display:inline-flex;align-items:center;gap:6px;height:40px;padding-inline:12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:none;position:relative;white-space:nowrap}
+.tb-links a:hover,.tb-links a.on{background:var(--paper);color:var(--ink)}
+.tb-links a.on{box-shadow:inset 0 -2.5px 0 var(--brand);border-radius:10px 10px 0 0}
+.tb-links .dot{min-width:18px;height:18px;border-radius:9px;background:var(--brand);color:var(--on-brand);font-size:11px;display:grid;place-items:center;padding-inline:4px;font-weight:700}
+.tb-theme{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line);background:var(--card);color:var(--ink-2)}
+.subbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:10px 32px;border-bottom:1px solid var(--line);background:var(--paper);flex:0 0 auto}
+.stepper{display:flex;align-items:center;gap:0;list-style:none;margin:0;padding:0}
+.stepper li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3);white-space:nowrap}
+.stepper li b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;border:1.5px solid var(--line-2);background:var(--card);color:var(--ink-3)}
+.stepper li.done{color:var(--ink-2)} .stepper li.done b{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.stepper li.now{color:var(--ink);font-weight:700} .stepper li.now b{border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 3px var(--accent-soft)}
+.stepper .ln{width:40px;height:2px;background:var(--line-2);margin-inline:10px}
+.stepper .ln.done{background:var(--accent)}
+.crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3);min-width:0}
+.crumbs b{color:var(--ink);font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk-main{width:100%;max-width:1280px;margin-inline:auto;padding:24px 32px 40px;display:flex;flex-direction:column;gap:20px}
+.dk-main.wide{max-width:none;padding:0}
+.dk .card{transition:border-color .15s,box-shadow .15s}
+.dk .card.hov,.dk a.card:hover{border-color:var(--line-2);box-shadow:0 1px 2px rgba(15,23,42,.05),0 8px 20px rgba(15,23,42,.08)}
+.dk .h4{font-size:16px}
+.dk-h1{margin:0;font-size:24px;font-weight:800;line-height:1.5;text-wrap:balance}
+.dk-h2{margin:0;font-size:18px;font-weight:750}
+.side{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px}
+.pv{display:flex;flex-direction:column;gap:6px;padding:12px}
+.pv .thumb{width:100%;height:132px}
+.fgroup{display:flex;flex-direction:column;gap:8px;padding-block:14px;border-bottom:1px solid var(--line)}
+.fgroup:last-child{border-bottom:0}
+.fgroup h4{margin:0;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;min-height:34px}
+.check .sel{width:20px;height:20px;border-radius:6px}
+.check .n{margin-inline-start:auto;color:var(--ink-3);font-size:12px}
+.pane{background:var(--card);border-inline-start:1px solid var(--line)}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 24px;border-bottom:1px solid var(--line);background:var(--paper)}
+.toolbar .sep{width:1px;height:24px;background:var(--line);margin-inline:4px}
+.select{display:inline-flex;align-items:center;gap:6px;height:38px;padding-inline:12px;border-radius:10px;border:1px solid var(--line-2);background:var(--card);font-size:13.5px;font-weight:600}
+.tray{position:absolute;inset-inline:16px;bottom:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.pin-pop{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:8px 10px;font-size:12.5px;line-height:1.5;width:200px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tbl th,.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:start;vertical-align:middle}
+.tbl thead th{font-size:12.5px;color:var(--ink-3);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.hov td{background:var(--paper)}
+.ctab.sticky th{position:sticky;inset-inline-start:0;background:var(--card);z-index:1}
+.ftabs{display:flex;gap:6px;flex-wrap:wrap}
+.ftabs button{font:inherit;font-size:13px;min-height:36px;padding-inline:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink-2);font-weight:600}
+.ftabs button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ftabs button.unk{border-style:dashed}
+.selrow{box-shadow:inset -3px 0 0 var(--accent)}
+.dk .shop.hov{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tablet .win-body{background:var(--sunk)}
+.tablet .tcol{width:100%;max-width:640px;margin-inline:auto;background:var(--paper);min-height:100%;display:flex;flex-direction:column;position:relative}
+.tablet .shop{padding:14px 16px}
+.win-body{position:relative}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:inline-grid;place-items:center;font-weight:800;font-size:12px;flex:0 0 auto}
+.avatar.l{width:40px;height:40px;font-size:16px}
+.howv{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.howv li{display:flex;gap:14px;align-items:flex-start;padding-block:10px;position:relative;font-size:14.5px}
+.howv li:not(:last-child)::after{content:"";position:absolute;inset-inline-start:17px;top:52px;bottom:-6px;width:2px;background:var(--line)}
+.howv .hi{width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto}
+.howv b{display:block}.howv b+span{font-size:13px;color:var(--ink-2);line-height:1.6}
+.snapimg{width:96px;height:96px;border-radius:12px;flex:0 0 auto;background:linear-gradient(135deg,#dfe6ee,#c9d3df);position:relative;overflow:hidden}
+.snapimg::after{content:"۳٬۲۰۰٬۰۰۰";position:absolute;inset-inline-end:6px;bottom:6px;background:#fffdf2;color:#c0161b;font:700 10px var(--f-body);padding:2px 5px;transform:rotate(-5deg)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -476,9 +560,9 @@ const S = D.shops, L = S.listed, C = S.category_only, PD = D.detail, INQ = D.inq
 const out = [];
 
 /* ---------- masthead ---------- */
-out.push(`<header class="mast"><div><h1>ترب‌گرد<small>Mobile UI · Persian RTL · in-person shopping in Tehran bazaars</small></h1>
+out.push(`<header class="mast"><div><h1>ترب‌گرد<small>Mobile + desktop UI · Persian RTL · in-person shopping in Tehran bazaars</small></h1>
 <p>15 screens, every state drawn from the real fixtures in <code>docs/fixtures/</code>. The core demo path comes first: Home → Product results → Shops for a product → Inquiry tracker. Phones scroll inside; each row scrolls sideways. Scenario clock: Wednesday 29 Mehr, 18:42, standing at Hafez × Jomhouri.</p>
-<nav class="toc" aria-label="Screens">${[['sys','0','Honesty system'],['home','1','Home'],['results','3','Results'],['shops','6','Shops'],['tracker','10','Tracker'],['chat','2','Chat'],['detail','4','Product'],['pcompare','5','Compare'],['shop','7','Shop detail'],['scompare','8','Compare shops'],['composer','9','Composer'],['alts','11','Alternatives'],['plan','12','Visit plan'],['mine','13','My shopping'],['seller','14','Seller inbox'],['mall','15','Mall directory'],['copy','—','Microcopy']].map(([id,n,t])=>`<a href="#${id}"><b>${n}</b>${t}</a>`).join('')}</nav></div>
+<nav class="toc" aria-label="Screens">${[['sys','0','Honesty system'],['home','1','Home'],['results','3','Results'],['shops','6','Shops'],['tracker','10','Tracker'],['chat','2','Chat'],['detail','4','Product'],['pcompare','5','Compare'],['shop','7','Shop detail'],['scompare','8','Compare shops'],['composer','9','Composer'],['alts','11','Alternatives'],['plan','12','Visit plan'],['mine','13','My shopping'],['seller','14','Seller inbox'],['mall','15','Mall directory'],['copy','—','Microcopy'],['dcore','D1–6','Desktop core'],['drest','D7–14','Desktop rest'],['tablet','T','Tablet'],['newblocks','N','New blocks'],['photo','N2','Photo check'],['accounts','N3','Accounts']].map(([id,n,t])=>`<a href="#${id}"><b>${n}</b>${t}</a>`).join('')}</nav></div>
 <div class="themes" role="group" aria-label="Theme"><button data-t="">System</button><button data-t="light">Light</button><button data-t="dark">Dark</button></div></header>`);
 
 /* ---------- 0. honesty system ---------- */
@@ -534,10 +618,11 @@ out.push(`<header class="mast"><div><h1>ترب‌گرد<small>Mobile UI · Persi
 {
   const cats = D.top.slice(0,6), malls = D.malls.slice(0,6);
   const searchBox = `<div class="field big" style="flex-direction:column;gap:10px"><span>یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون<span class="caret"></span></span>
-     <div class="row" style="justify-content:space-between;width:100%"><button class="iconbtn soft" aria-label="گفتن با صدا">${ic('mic')}</button><button class="btn brand" style="min-height:44px">${ic('search','s')}پیدا کن</button></div></div>`;
+     <div class="row" style="justify-content:space-between;width:100%"><span class="row" style="gap:2px"><button class="iconbtn soft" style="width:40px;height:40px" aria-label="عکس از کالا">${ic('cam')}</button><button class="btn ghost" style="padding-inline:4px;white-space:nowrap;font-size:14px">${ic('search','s')}فقط جستجو</button></span><button class="btn brand" style="min-height:44px;white-space:nowrap;padding-inline:14px">${ic('chat','s')}بپرس از دستیار</button></div></div>`;
   const locChip = (txt, state='') => `<button class="chip ${state}" style="min-height:40px">${ic('pin','s')}${txt}${ic('fwd','s')}</button>`;
   const head = loc => `<div class="pad stack" style="padding-top:6px;gap:14px">
      <div class="row" style="justify-content:space-between"><span class="row" style="gap:8px"><svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 9c-4.6 0-8 3.3-8 7.6 0 5 4.4 9.3 8 12.4 3.6-3.1 8-7.4 8-12.4C24 12.3 20.6 9 16 9z" fill="var(--brand)"/><path d="M13.5 13.5c-1.3.8-2.1 2.1-2.3 3.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/><path d="M16 9.5c-.4-3 .8-5.6 3.6-6.8.6 2.8-.8 5.5-3.6 6.8zM15.6 9.6C13.4 8.7 11.6 6.6 11.5 4c2.4.4 4 2.6 4.1 5.6z" fill="var(--leaf)"/></svg><span style="font-weight:900;font-size:20px;line-height:1">ترب‌گرد</span></span>${loc}</div>`;
+  const snapCard = `<div class="card row" style="padding:12px 14px;gap:12px;border-color:var(--accent-soft)"><span style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto">${ic('cam')}</span><span style="flex:1;min-width:0"><b class="sm" style="display:block">در فروشگاه هستید؟ از کالا عکس بگیرید</b><span class="xs muted">مدل را از جعبه یا برچسب می‌خوانیم و قیمت را با فروشگاه‌های نزدیک می‌سنجیم.</span></span>${ic('fwd','s')}</div>`;
   const how = `<div class="card" style="padding:12px 14px"><div class="xs faint" style="margin-bottom:8px">از «نمی‌دانم کدام» تا «جلوی واحد درست»</div>
      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">${[['spark','کالا را انتخاب کن'],['map','فروشگاه نزدیک'],['compare','مقایسه'],['send','استعلام و برو']].map(([i,t],k)=>`<div class="xs" style="display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-2)"><span style="width:36px;height:36px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center">${ic(i,'s')}</span>${fa(k+1)}. ${t}</div>`).join('')}</div></div>`;
   const ex = `<div class="stack" style="gap:8px"><span class="xs faint">نمونه‌ها را امتحان کنید</span><div class="wrapr">
@@ -547,7 +632,7 @@ out.push(`<header class="mast"><div><h1>ترب‌گرد<small>Mobile UI · Persi
   const recent = `<div class="card" style="padding:12px 14px;display:flex;gap:12px;align-items:center">${thumb('neck','انکر','', '').replace('class="thumb ','class="thumb " style="width:52px;height:52px"')}<div style="flex:1;min-width:0"><div class="b sm">${bidi('هندزفری گردنی انکر مدل Life U2i')}</div><div class="xs muted">۵ استعلام · <span style="color:var(--ok);font-weight:650">۱ قیمت تأییدشده</span> · ۱۸:۳۵</div></div>${ic('fwd')}</div>`;
 
   const A = phone({cap:'A · First run', sub:'Need-first input; location chip shows the guessed spot. Example chips = the three judge scenarios.', navOn:0,
-    body: head(locChip('حافظ × جمهوری')) + `<div><h2 style="margin:4px 0 2px;font-size:22px;font-weight:800;line-height:1.5;text-wrap:balance">دنبال چه هستید؟</h2><p class="lede">بگویید برای چه می‌خواهید و تا چقدر؛ بقیه‌اش با ما.</p></div>${searchBox}${ex}${how}${catList}</div><div style="height:16px"></div>${mallList}<div style="height:20px"></div>`});
+    body: head(locChip('حافظ × جمهوری')) + `<div><h2 style="margin:4px 0 2px;font-size:22px;font-weight:800;line-height:1.5;text-wrap:balance">دنبال چه هستید؟</h2><p class="lede">بگویید برای چه می‌خواهید و تا چقدر؛ بقیه‌اش با ما.</p></div>${searchBox}${ex}${snapCard}${how}${catList}</div><div style="height:16px"></div>${mallList}<div style="height:20px"></div>`});
   const B = phone({cap:'B · Location denied', sub:'Never a dead end: pick an area by hand. Bottom sheet, thumb-reachable.', navOn:0,
     body: head(locChip('موقعیت نامشخص','')) + `<div class="banner warn" style="border-radius:12px">${ic('pin','s')}<span>به موقعیت شما دسترسی نداریم. منطقه را انتخاب کنید تا فاصله‌ها درست حساب شود.</span></div>${searchBox}</div>`,
     over:`<div class="scrim"></div><div class="sheet"><h3>کجا خرید می‌کنید؟</h3><p class="lede" style="margin-top:-8px">موقعیت شما فقط برای محاسبهٔ فاصله استفاده می‌شود.</p>
@@ -941,6 +1026,404 @@ const trackerBody = (qs, banner='') => appbar('پیگیری استعلام', bid
   </div></section>`);
 }
 
+/* ======================================================================= */
+/* ================= DESKTOP & TABLET (≥960 / 641–959) =================== */
+const radish = (s=28) => `<svg viewBox="0 0 32 32" width="${s}" height="${s}" aria-hidden="true"><path d="M16 9c-4.6 0-8 3.3-8 7.6 0 5 4.4 9.3 8 12.4 3.6-3.1 8-7.4 8-12.4C24 12.3 20.6 9 16 9z" fill="var(--brand)"/><path d="M13.5 13.5c-1.3.8-2.1 2.1-2.3 3.6" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".85"/><path d="M16 9.5c-.4-3 .8-5.6 3.6-6.8.6 2.8-.8 5.5-3.6 6.8zM15.6 9.6C13.4 8.7 11.6 6.6 11.5 4c2.4.4 4 2.6 4.1 5.6z" fill="var(--leaf)"/></svg>`;
+P.sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>';
+P.grid = '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>';
+P.copy = '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>';
+P.insta = '<rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.8" cy="7.2" r=".6"/>';
+P.globe = '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5z"/>';
+
+const W_D = 1280, H_D = 820;
+const win = ({cap, sub='', url, body, w=W_D, h=H_D, cls=''}) =>
+  `<figure class="dart" style="--w:${w}px;--h:${h}px"><div class="win ${cls}"><div class="win-bar"><i></i><i></i><i></i><span class="url">torobgard.ir${url}</span></div><div class="win-body dk" lang="fa" dir="rtl">${body}</div></div><figcaption><b>${cap}</b>${sub}</figcaption></figure>`;
+const topbar = ({q='', on=-1, badge=1, user=null}={}) => `<header class="topbar">
+  <span class="tb-brand">${radish()}ترب‌گرد</span>
+  <div class="tb-search ${q?'filled':''}"><span class="sbtn">${ic('search','s')}</span><span style="flex:1">${q||'نام کالا یا نیازتان را بنویسید…'}</span><span title="عکس از کالا">${ic('cam','s')}</span></div>
+  <button class="chip" style="min-height:40px">${ic('pin','s')}حافظ × جمهوری${ic('fwd','s')}</button>
+  <nav class="tb-links"><a class="${on===0?'on':''}">${ic('chat','s')}گفتگو</a><a class="${on===1?'on':''}">${ic('bag','s')}خریدهای من${badge?`<span class="dot">${fa(badge)}</span>`:''}</a></nav>
+  ${user ? `<span class="chip" style="min-height:40px"><span class="avatar">${esc(user.slice(0,1).toUpperCase())}</span><bdi>${esc(user)}</bdi></span>` : `<button class="btn sec" style="min-height:40px">ورود / ثبت‌نام</button>`}
+  <button class="tb-theme" aria-label="تغییر پوسته">${ic('sun','s')}</button></header>`;
+const stepper = n => `<ol class="stepper" aria-label="مرحله ${fa(n+1)} از ۴">${STEPS.map((s,i)=>`${i?`<span class="ln ${i<=n?'done':''}"></span>`:''}<li class="${i<n?'done':i===n?'now':''}"><b>${i<n?ic('check','s'):fa(i+1)}</b>${s}</li>`).join('')}</ol>`;
+const subbar = (n, crumbs) => `<div class="subbar"><div class="crumbs">${crumbs}</div>${stepper(n)}</div>`;
+const prodCrumb = `${ic('back','s')}<span>نتایج «هندزفری گردنی»</span><span>/</span><b>${bidi(PD.title)}</b>`;
+const pv = (p, why='', inCmp=false) => `<div class="card pv ${inCmp?'':''}">${thumb(glyphOf(p.title), p.brand)}
+  <div class="ptitle">${bidi(p.title)}</div>
+  <div class="row" style="justify-content:space-between;align-items:baseline"><span class="price" style="font-size:16px">${p.price_min===p.price_max?'':'از '}${mil(p.price_min)}<small>تومان</small></span><span class="xs faint">${fa(p.shop_count)} فروشگاه</span></div>
+  ${p.price_min!==p.price_max?`<div class="range">تا ${mil(p.price_max)} · میانه ${mil(p.price_median)}</div>`:''}
+  ${why?`<div class="why"><b>چرا این؟</b><span>${why}</span></div>`:''}
+  <label class="check xs" style="min-height:28px;color:${inCmp?'var(--accent-ink)':'var(--ink-3)'}"><span class="sel ${inCmp?'on':''}">${inCmp?ic('check','s'):''}</span>${inCmp?'در مقایسه':'افزودن به مقایسه'}</label></div>`;
+
+/* ---- shared desktop blocks (also used by the mobile «new blocks» row) ---- */
+const W2L = D.where, RV = D.review, IG = D.shopIg;
+const whereCard = (d=W2L, max=3, hint=null) => `<section class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px" aria-label="کجا بگردم">
+  <div class="h4">${ic('loc','s')}کجا بگردم؟</div>
+  <div class="xs muted">طبق دستهٔ «${d.matched_categories.slice(0,2).map(c=>esc(c.name)).join('، ')}» در دادهٔ فروشگاه‌ها (${fa(d.matched_categories.reduce((a,c)=>a+c.shops,0))} فروشگاه)</div>
+  ${d.confidence==='low'||d.confidence==='none'?`<div class="warnbox unk">${ic('q','s')}<span>داده‌ی فروشگاه‌ها این دسته را کم پوشش می‌دهد؛ اینها فقط نزدیک‌ترین هم‌دسته‌ها هستند و موجودی مشخص نیست.</span></div>`:''}
+  ${d.places.slice(0,max).map(p=>`<div class="stack" style="gap:6px;padding-top:8px;border-top:1px solid var(--line)">
+     <div class="row" style="justify-content:space-between;align-items:baseline"><b>${faT(p.name)}</b><span class="xs muted">${fa(p.shop_count)} فروشگاه هم‌دسته</span></div>
+     <div class="xs muted">${esc(p.area)} · ${fa(p.distance_km)} کیلومتر · ${fa(p.walk_min)} دقیقه پیاده · بیشتر در ${p.common_floors.map(f=>faT(f)).join('، ')}</div>
+     <div class="row" style="gap:8px"><a class="btn sec" style="flex:1;min-height:38px">نشان</a><a class="btn sec" style="flex:1;min-height:38px">بلد</a><a class="btn sec" style="flex:1;min-height:38px">گوگل</a></div></div>`).join('')}
+  ${hint?`<div class="warnbox info">${ic('alert','s')}<span><b>طبق اطلاعات عمومی (تأییدنشده):</b> ${hint} · <u>جستجو روی نقشه</u></span></div>`:''}</section>`;
+const reviewCard = (r=RV) => `<section class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px" aria-label="نقد کوتاه">
+  <div class="h4">${ic('check','s')}نقد کوتاه</div>
+  ${r.pros.map(x=>`<div class="stack" style="gap:2px"><div class="sm" style="color:var(--ok)">✓ <span style="color:var(--ink)">${bidi(x.text)}</span></div><div class="xs faint">بر اساس مشخصهٔ «${esc(x.spec_key)}»: ${faT(x.spec_value)}</div></div>`).join('')}
+  ${r.cons.map(x=>`<div class="stack" style="gap:2px"><div class="sm" style="color:var(--warn)">! <span style="color:var(--ink)">${bidi(x.text)}</span></div><div class="xs faint">بر اساس مشخصهٔ «${esc(x.spec_key)}»: ${faT(x.spec_value)}</div></div>`).join('')}
+  <div class="stack" style="gap:4px"><div class="sm b">موقع خرید حضوری چک کنید</div>${r.tips.map(t=>`<div class="sm muted">• ${bidi(t)}</div>`).join('')}</div>
+  ${r.reputation?`<div class="warnbox info">${ic('alert','s')}<span><b>طبق اطلاعات عمومی (تأییدنشده):</b> ${esc(r.reputation.text)}</span></div>`:''}
+  <div class="xs faint">مزایا و معایب از مشخصات ثبت‌شدهٔ کالا در ترب آمده است؛ نظر کاربران در دسترس نیست.</div></section>`;
+const linkChips = s => (s.instagram||s.website)?`<div class="wrapr">${s.instagram?`<a class="chip">${ic('insta','s')}اینستاگرام <bdi class="xs faint">@${esc(s.instagram.handle)}</bdi></a>`:''}${s.website?`<a class="chip">${ic('globe','s')}وب‌سایت</a>`:''}</div>`:'';
+const sellerLines = o => o ? `<div class="xs muted" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden"><span class="faint">عنوان فروشنده: </span>${bidi(o.seller_title)}</div>${o.description?`<div class="xs faint" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${bidi(o.description)}</div>`:''}` : '';
+// desktop shop row: same ShopCard content with the seller's own listing text
+const shopCardD = (s, o={}) => shopCard(s, o).replace('<div class="shop-bottom">', `${s.tier==='category_only'?'':sellerLines(s.offer)}<div class="shop-bottom">`).replace('class="card shop', `class="card shop ${o.hov?'hov':''}`);
+const baleBox = `<div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px">
+  <div class="h4">جواب دادن از «بله»</div>
+  <div class="xs muted">ربات <bdi dir="ltr">@torobgard_bot</bdi> را در بله باز کنید و این دستور را بفرستید؛ بعد استعلام‌ها با دکمه در بله می‌آید.</div>
+  <div class="row" style="gap:8px"><code style="flex:1;direction:ltr;text-align:left;background:var(--sunk);border-radius:10px;padding:10px 12px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">/link ${esc(L[0].shop_id)} 567ac1449e640060a679</code><button class="btn sec" style="min-height:42px">${ic('copy','s')}کپی</button></div>
+  <div class="xs faint">اختیاری است؛ همین صفحه هم کار می‌کند.</div></div>`;
+
+/* ---- big desktop map ---- */
+function mapD(listed, cat, {W=780, H=700, sel=[], hover=null, route=null}={}) {
+  const o = D.shops.origin, k = Math.cos(o[0]*Math.PI/180)*111320, sc = 2.6, cLat = 35.6951, cLon = 51.4121;
+  const g = (lat, lon) => [W/2 + (lon-cLon)*k*sc, H/2 - (lat-cLat)*110540*sc];
+  const [ux,uy] = g(o[0],o[1]), [mx,my] = g(35.6949,51.4114);
+  const ring = m => (m/60*4.5*1000/1.3)*sc; // walking minutes → px (4.5 km/h, +30% detours), same model as the cards
+  const roads = `<rect width="${W}" height="${H}" fill="var(--map-bg)"/><defs><pattern id="mdots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="var(--map-block)"/></pattern></defs><rect width="${W}" height="${H}" fill="url(#mdots)"/>
+    ${[1,2,3].map(m=>`<circle cx="${ux}" cy="${uy}" r="${ring(m)}" fill="none" stroke="var(--line-2)" stroke-width="1.2" stroke-dasharray="6 6"/><text x="${ux+ring(m)*0.8}" y="${uy-ring(m)*0.6}" text-anchor="middle" class="pin-lbl" fill="var(--ink-3)" stroke="var(--map-bg)" stroke-width="5" paint-order="stroke" style="font-weight:500">${fa(m)} دقیقه پیاده</text>`).join('')}`;
+  const routeP = route ? `<path d="M${ux} ${uy} L${ux-30} ${uy+4} L${mx+40} ${my+20} L${mx} ${my}" fill="none" stroke="var(--info)" stroke-width="4" stroke-dasharray="1 8" stroke-linecap="round"/>` : '';
+  const cats = cat.map(s=>{ const [x,y]=g(s.lat,s.lon); return `<circle cx="${x}" cy="${y}" r="8" fill="var(--card)" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="3 2.5"/>`; }).join('');
+  const offs = [[-62,-34],[16,-34],[-62,8],[16,8],[-24,-58],[-24,30]];
+  const pins = listed.map((s,i)=>{ const [x0,y0]=g(s.lat,s.lon); const [dx,dy]=offs[i%6]; const x=mx+dx, y=my+dy-10; const on=sel.includes(s.shop_id), hv=hover===s.shop_id;
+    const txt = s.offer?.price ? mil(s.offer.price).replace(' میلیون',' م') : 'بپرسید';
+    const w = 62;
+    return `<g><line x1="${x+w/2}" y1="${y+12}" x2="${x0}" y2="${y0}" stroke="var(--accent)" stroke-width="1" opacity=".35"/><rect x="${x}" y="${y}" width="${w}" height="24" rx="12" fill="${hv||on?'var(--accent)':'var(--card)'}" stroke="var(--accent)" stroke-width="${hv?2.5:1.4}"/>
+      <text x="${x+w/2}" y="${y+16}" text-anchor="middle" class="pin-lbl" fill="${hv||on?'var(--on-accent)':'var(--accent-ink)'}">${txt}</text>${hv?(mapD.hover={x:(x+w/2)/W*100, y:y/H*100}, ''):''}${hv?`<rect x="${x-3}" y="${y-3}" width="${w+6}" height="30" rx="15" fill="none" stroke="var(--accent)" stroke-width="2" opacity=".35"/>`:''}</g>`; }).join('');
+  const user = `<circle cx="${ux}" cy="${uy}" r="20" fill="var(--info)" opacity=".16"/><circle cx="${ux}" cy="${uy}" r="8" fill="var(--info)" stroke="var(--card)" stroke-width="3"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:100%" role="img" aria-label="نقشهٔ فروشگاه‌ها">${roads}${routeP}${cats}${pins}${user}</svg>`;
+}
+
+/* ---- D1 · Shell + Home ---- */
+const dHome = win({url:'/', cap:'D1 · App shell + Home (1280)', sub:'Top bar: brand, search with a camera button, location, گفتگو / خریدهای من, «ورود / ثبت‌نام», theme. The need box asks the assistant (red); «فقط جستجو» is plain search; the camera opens the photo price check. Beside it: earlier inquiries and the four steps, each with one line of explanation; the need box grows to match the column.', body:
+  topbar() + `<main class="dk-main">
+   <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;align-items:start">
+    <section class="card" style="padding:28px;display:flex;flex-direction:column;gap:16px">
+      <div><h1 class="dk-h1" style="font-size:28px">دنبال چه هستید؟</h1><p class="lede" style="font-size:14.5px">بگویید برای چه می‌خواهید و تا چقدر؛ نزدیک‌ترین فروشگاه‌ها را پیدا می‌کنیم و قیمت را از خود فروشنده می‌پرسیم.</p></div>
+      <div class="field big" style="flex-direction:column;gap:10px;min-height:120px"><span class="faint">مثلاً: یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</span>
+        <div class="row" style="justify-content:space-between;width:100%;margin-top:auto"><span class="row" style="gap:4px"><button class="iconbtn soft">${ic('cam')}</button><button class="btn ghost">${ic('search','s')}فقط جستجو</button></span><button class="btn brand">${ic('chat','s')}بپرس از دستیار</button></div></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><span class="xs faint">نمونه‌ها:</span><span class="chip">هندزفری گردنی زیر ۳ میلیون</span><span class="chip">گوشی ۱۰ تا ۱۵ میلیون، قسطی</span><span class="chip">دوربین مداربسته ۴ کانال</span></div>
+      <div class="card row" style="padding:12px 14px;gap:12px;border-color:var(--accent-soft)"><span style="width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto">${ic('cam')}</span><span style="flex:1;min-width:0"><b class="sm" style="display:block">در فروشگاه هستید؟ از کالا عکس بگیرید</b><span class="xs muted">مدل را از جعبه یا برچسب می‌خوانیم و قیمت را با فروشگاه‌های نزدیک می‌سنجیم.</span></span>${ic('fwd','s')}</div>
+    </section>
+    <aside class="stack" style="gap:14px">
+      <div class="card" style="padding:16px"><div class="h4" style="margin-bottom:10px">ادامهٔ خرید قبلی</div>
+        <div class="row" style="gap:12px;padding-block:8px;border-bottom:1px solid var(--line)">${thumb('neck','انکر').replace('class="thumb ','class="thumb " style="width:48px;height:48px"')}<div style="flex:1;min-width:0"><div class="b sm">${bidi('هندزفری گردنی انکر مدل Life U2i')}</div><div class="xs muted">۵ استعلام · <span style="color:var(--ok);font-weight:650">۱ قیمت تأییدشده</span> · ۱۸:۳۵</div></div>${ic('fwd')}</div>
+        <div class="row" style="gap:12px;padding-block:8px">${thumb('hp').replace('class="thumb ','class="thumb " style="width:48px;height:48px"')}<div style="flex:1"><div class="b sm">گوشی ۱۰ تا ۱۵ میلیون، قسطی</div><div class="xs muted">۲ استعلام در انتظار · دیروز</div></div>${ic('fwd')}</div></div>
+      <div class="card" style="padding:18px 20px"><div class="xs faint" style="margin-bottom:10px">از «نمی‌دانم کدام» تا «جلوی واحد درست»</div>
+        <ol class="howv">${[['spark','کالا را انتخاب کن','نیازتان را بنویسید؛ مدل‌ها را با دلیل و بازهٔ قیمت پیشنهاد می‌دهیم.'],['map','فروشگاه نزدیک','فروشگاه‌هایی که همین کالا را ثبت کرده‌اند، روی نقشه و با فاصلهٔ پیاده.'],['compare','مقایسه','قیمت و تاریخ ثبتش، ساعت کاری، قسط و طبقه را کنار هم ببینید.'],['send','استعلام و برو','از چند فروشگاه با هم می‌پرسیم؛ قیمت تأییدشده و مسیر رفتن را می‌گیرید.']].map(([i,t,d],k)=>`<li><span class="hi">${ic(i,'s')}</span><span><b>${fa(k+1)}. ${t}</b><span>${d}</span></span></li>`).join('')}</ol></div>
+    </aside></div>
+   <section class="stack" style="gap:10px"><div class="row" style="justify-content:space-between"><h2 class="dk-h2">دسته‌های پرفروشگاه</h2><a class="btn ghost">همهٔ دسته‌ها ${ic('fwd','s')}</a></div>
+     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">${D.top.slice(0,6).map((c,i)=>`<a class="card ${i===1?'hov':''}" style="padding:14px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit"><span style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center">${ic(['layers','cam','spark','store','hp','card'][i],'s')}</span><b class="sm">${esc(c.name)}</b><span class="xs faint">${fa(c.n)} فروشگاه</span></a>`).join('')}</div></section>
+   <section class="stack" style="gap:10px"><h2 class="dk-h2">پاساژهای بزرگ <span class="xs faint" style="font-weight:500">راهنمای طبقه‌به‌طبقه</span></h2>
+     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">${D.malls.slice(0,6).map(m=>`<a class="card" style="padding:12px 14px;text-decoration:none;color:inherit"><div class="row" style="gap:6px;color:var(--accent)">${ic('layers','s')}<span class="b sm" style="color:var(--ink)">${faT(m.mall)}</span></div><div class="xs faint">${esc(m.area)} · ${fa(m.shop_count)} فروشگاه</div></a>`).join('')}</div></section>
+  </main>`});
+
+/* ---- D2 · Shops for product (key screen) ---- */
+const SELD = [L[0].shop_id, L[1].shop_id, L[2].shop_id];
+const dShops = win({url:'/p/product_24e2…/shops', cap:'D2 · Shops for a product: list + large map (1280) — key screen', sub:'Filters are a toolbar; listed and category-only stay separate sections. Hovering «آذروش سرودیس» highlights its price pin. The selection tray (≤5) is docked on the map pane with the «استعلام» button. No tiles yet: instead of invented streets the map shows walking-time rings around you, and it always frames every shop that lists the product.', h:860, body:
+  topbar({q:'هندزفری گردنی انکر'}) + subbar(1, prodCrumb) + `
+  <div class="toolbar"><div class="row" style="gap:10px;margin-inline-end:8px">${thumb('neck','انکر').replace('class="thumb ','class="thumb " style="width:40px;height:40px;border-radius:10px"')}<div><div class="b sm">${bidi(PD.title)}</div><div class="xs faint">${fa(S.counts.listed)} فروشگاه · از ${mil(PD.price_min)} تومان</div></div></div><span class="sep"></span>
+   <button class="chip">${ic('card','s')}قسطی</button><button class="chip">باز است الان</button><button class="chip">ارسال سریع</button><span class="sep"></span>
+   <span class="xs faint">فاصله</span><div class="seg" style="width:300px"><div>۵۰۰ م</div><div class="on">۱ کیلومتر</div><div>۳ کیلومتر</div><div>همه</div></div>
+   <span class="select" style="margin-inline-start:auto">${ic('sort','s')}مناسب‌ترین ${ic('fwd','s')}</span></div>
+  <div style="display:grid;grid-template-columns:480px minmax(0,1fr);flex:1;min-height:0">
+   <div style="overflow:auto;padding:16px 24px 24px;display:flex;flex-direction:column;gap:12px">
+     <div class="tabs" style="background:none;margin-inline:-24px;padding-inline:24px"><div class="on">${ic('store','s')}این کالا را دارند <span class="cnt">${fa(S.counts.listed)}</span></div><div>${ic('q','s')}فقط در این دسته <span class="cnt">${fa(S.counts.category_only)}</span></div></div>
+     <p class="lede">قیمت ثبت‌شده توسط خود فروشگاه؛ تاریخ هر قیمت کنارش است.</p>
+     ${L.slice(0,4).map((s,i)=>shopCardD(s,{sel:SELD.includes(s.shop_id), hov:i===1})).join('')}
+     <div class="divider" style="margin-inline:-24px"></div>
+     <div class="h4" style="color:var(--ink-2)">${ic('q','s')}فقط در این دسته فعالیت دارند <span class="n">${fa(S.counts.category_only)}</span></div>
+     <p class="lede">در همین دسته کالا می‌فروشند اما این مدل را ثبت نکرده‌اند. موجودی را باید بپرسید.</p>
+     ${C.slice(0,2).map(s=>shopCardD(s)).join('')}</div>
+   <div style="position:relative;border-inline-start:1px solid var(--line);min-height:640px">${mapD(L,C,{sel:SELD,hover:L[1].shop_id})}
+     <div class="maplegend" style="top:16px;inset-inline-end:16px"><span class="lg"><i></i>کالا را ثبت کرده · قیمت ثبت‌شده</span><span class="lg"><i class="c"></i>فقط در این دسته</span><span class="lg"><i class="u"></i>شما</span><span class="xs faint" style="max-width:220px">نقشهٔ طرح‌وار: جای فروشگاه‌ها واقعی است؛ خیابان‌ها رسم نشده‌اند.</span></div>
+     <div class="pin-pop" style="left:${mapD.hover.x}%;top:${mapD.hover.y}%;transform:translate(-50%,calc(-100% - 10px))"><b>${esc(L[1].name)}</b><div class="xs muted">پاساژ علاالدین · ۲ دقیقه پیاده</div><div class="row" style="justify-content:space-between"><span class="b num">${money(L[1].offer.price)}</span><span class="xs faint">ثبت ${ago(L[1].offer.age_days)}</span></div></div>
+     <div style="position:absolute;top:16px;inset-inline-start:16px;display:flex;flex-direction:column;gap:6px"><button class="iconbtn soft">${ic('plus')}</button><button class="iconbtn soft">${ic('minus')}</button><button class="iconbtn soft">${ic('loc')}</button></div>
+     <div class="tray"><div style="flex:1;min-width:0"><div class="b sm">۳ فروشگاه برای استعلام <span class="faint" style="font-weight:500">· تا ۵</span></div>
+       <div class="wrapr" style="margin-top:6px">${L.slice(0,3).map(s=>`<span class="chip on" style="min-height:32px">${esc(s.name)} ${ic('x','s x')}</span>`).join('')}</div></div>
+       <button class="btn sec">${ic('compare','s')}مقایسه</button><button class="btn pri">${ic('send','s')}استعلام از ۳ فروشگاه</button></div>
+   </div></div>`});
+
+/* ---- D3 · Results with permanent filter sidebar ---- */
+const rItems = [[PD,'گردنی و مقاوم در برابر آب؛ ۱۹ فروشگاه نزدیک شما'],[D.search.items[1],'ارزان‌ترین گردنی؛ ۲ فروشگاه'],[D.search.items[6],'گردنی؛ از ۱٫۷ میلیون در ۳ فروشگاه'],[D.search.items[7],'در بودجه؛ اختلاف قیمت زیاد'],[D.search.items[2],'سقف بودجه'],[D.search.items[5],'در بودجه · ۳ فروشگاه']];
+const filterSide = ({budget=true, brands=D.search.facets.brands.slice(0,7).map(b=>[b.name,b.count,false]), cats=D.search.facets.categories.slice(0,4).map((c,i)=>[c.name,c.count,i===0]), more=D.search.facets.brands.length}={}) => `<aside class="card side" style="padding:4px 16px 12px;gap:0">
+   <div class="fgroup"><h4>فیلترها <a class="btn ghost" style="min-height:30px;padding:0">پاک کردن</a></h4></div>
+   <div class="fgroup"><h4>بودجه <span class="sm num" style="font-weight:500">${budget?'تا <b>۳ میلیون</b>':'بدون سقف'}</span></h4>
+     <div class="slider"><div class="rail"></div><div class="fill" style="inset-inline:0 ${budget?40:0}%"></div><div class="knob" style="inset-inline-end:${budget?40:0}%;transform:none"></div></div>
+     <div class="row xs faint" style="justify-content:space-between"><span>۵۰۰ هزار</span><span>بدون سقف</span></div>
+     ${budget?'<span class="xs" style="color:var(--accent-ink)">· از متن شما برداشته شد</span>':''}</div>
+   <div class="fgroup"><h4>برند</h4>${brands.map(([n,c,on])=>`<label class="check"><span class="sel ${on?'on':''}">${on?ic('check','s'):''}</span>${esc(n)}<span class="n">${fa(c)}</span></label>`).join('')}${more?`<a class="xs" style="color:var(--accent-ink)">+ ${fa(more)} برند دیگر</a>`:''}</div>
+   <div class="fgroup"><h4>دسته</h4>${cats.map(([n,c,on])=>`<label class="check"><span class="sel ${on?'on':''}" style="border-radius:50%">${on?ic('check','s'):''}</span><span style="flex:1;min-width:0">${esc(n)}</span><span class="n">${c==null?'':fa(c)}</span></label>`).join('')}</div>
+   <div class="fgroup"><p class="xs faint" style="margin:0">قسطی، باز بودن، فاصله و ارسال سریع ویژگی فروشگاه‌اند؛ در صفحهٔ فروشگاه‌های هر کالا فیلترشان کنید.</p></div></aside>`;
+const dResults = win({url:'/search?q=هندزفری گردنی زیر ۳ میلیون', cap:'D3 · Results with a permanent filter sidebar (1280)', sub:'Filters live in the right sidebar instead of a bottom sheet and apply instantly; 3-column card grid; the compare tray is a sticky bar under the grid.', body:
+  topbar({q:'هندزفری گردنی زیر ۳ میلیون'}) + subbar(0, `<b>نتایج</b><span>«هندزفری گردنی زیر ۳ میلیون»</span>`) + `<main class="dk-main" style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start">
+    ${filterSide()}
+    <div class="stack" style="gap:14px">
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="sm muted"><b style="color:var(--ink)">۴۶</b> کالا تا ۳ میلیون تومان</span><span class="chip on">بودجه: تا ۳ میلیون <span class="xs">· از متن شما</span> ${ic('x','s x')}</span></div><span class="xs faint">فقط کالاهایی که فروشگاه دارند</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">${rItems.map(([p,w],i)=>pv(p,w,i<2).replace('class="card pv ', `class="card pv ${i===2?'hov':''} `)).join('')}</div>
+      <div class="card row" style="position:sticky;bottom:12px;padding:12px 16px;gap:12px;box-shadow:var(--shadow)"><span class="sm" style="flex:1"><b>۲ کالا</b> برای مقایسه · تا ۴ کالا</span><span class="chip on">${bidi('انکر Life U2i')} ${ic('x','s x')}</span><span class="chip on">${bidi('پرودا BN200')} ${ic('x','s x')}</span><button class="btn pri">${ic('compare','s')}مقایسه کن</button></div>
+    </div></main>`});
+const dResultsEmpty = win({url:'/search?q=دوربین مداربسته ۴ کانال&brand=ایمو', cap:'D3b · No results: relax suggestions + «کجا بگردم؟» inline', sub:'Real case: «دوربین مداربسته ۴ کانال» with brand «ایمو» returns 0; removing the brand brings back 40. The where-to-look card (real, low-confidence data for this query) sits beside the suggestions with its unverified note.', body:
+  topbar({q:'دوربین مداربسته ۴ کانال'}) + subbar(0, `<b>نتایج</b><span>«دوربین مداربسته ۴ کانال»</span>`) + `<main class="dk-main" style="display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start">
+    ${filterSide({budget:false, brands:[['ایمو',0,true],['تیاندی',1,false]], cats:[['پکیج سیستم‌های نظارتی و امنیتی',null,false],['ضبط کننده ویدیویی دوربین‌های نظارتی و امنیتی',null,false],['دوربین امنیتی خورشیدی',null,false]], more:0})}
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start">
+      <div class="card stack" style="padding:8px 20px 20px">
+        <div class="row" style="gap:8px;padding-top:14px"><span class="chip on">ایمو ${ic('x','s x')}</span></div>
+        <div class="empty" style="padding:16px 0 8px"><div class="art-i">${ic('search')}</div><h4>با برند «ایمو» چیزی پیدا نکردیم</h4><p>«دوربین مداربسته ۴ کانال» از این برند در فروشگاه‌ها ثبت نشده است.</p></div>
+        <span class="xs faint">یکی از این‌ها را امتحان کنید</span>
+        <a class="card row" style="padding:12px 14px;justify-content:space-between;color:inherit;text-decoration:none"><span class="sm">برند «ایمو» را بردار</span><span class="sm b" style="color:var(--accent-ink)">۴۰ کالا ${ic('fwd','s')}</span></a>
+      </div>
+      ${whereCard()}</div></main>`});
+/* ---- D4 · Product page ---- */
+const keyS = ['نوع اتصال','مناسب برای','قابلیت های مقاومتی','عمر باتری هدفون در حالت استندبای','نسخه بلوتوث','وزن','محدوده عملکرد','قطر درایور'];
+const specsD = keyS.map(k=>PD.specs.find(s=>s.key===k)).filter(Boolean);
+const posD = v => ((v-PD.price_min)/(PD.price_max-PD.price_min)*100).toFixed(1);
+const dProduct = win({url:'/p/product_24e2…', cap:'D4 · Product page (1280)', sub:'Right: gallery, price range drawn to scale, why-this and the short review. Left: the sticky action card (replaces the mobile bottom bar), key specs and similar products.', h:900, body:
+  topbar({q:'هندزفری گردنی انکر'}) + subbar(0, prodCrumb) + `<main class="dk-main" style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start">
+   <div class="stack" style="gap:16px">
+     <div class="card" style="padding:16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px"><div class="stack" style="gap:8px">${[0,1].map(i=>thumb('neck').replace('class="thumb ',`class="thumb " style="width:72px;height:72px;${i===0?'border-color:var(--accent)':''}"`)).join('')}</div>${thumb('neck','انکر').replace('class="thumb ','class="thumb " style="width:100%;height:280px"')}</div>
+     <div><div class="xs faint">${esc(PD.brand)} · ${esc(PD.category)}</div><h1 class="dk-h1">${bidi(PD.title)}</h1></div>
+     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+       <div class="row" style="justify-content:space-between;align-items:baseline"><span class="price" style="font-size:22px">از ${mil(PD.price_min)}<small>تومان</small></span><span class="sm muted">${fa(PD.shop_count)} فروشگاه</span></div>
+       <div style="position:relative;height:30px"><div style="position:absolute;inset-inline:0;top:12px;height:6px;border-radius:3px;background:linear-gradient(to left,var(--ok-soft),var(--sunk))"></div>${[[PD.price_min,'var(--ok)'],[PD.price_median,'var(--ink-3)'],[PD.price_max,'var(--ink-3)']].map(([v,c])=>`<span style="position:absolute;top:8px;inset-inline-start:calc(${posD(v)}% - 7px);width:14px;height:14px;border-radius:50%;background:var(--card);border:2.5px solid ${c}"></span>`).join('')}</div>
+       <div class="row xs num" style="justify-content:space-between"><span><b>${mil(PD.price_min)}</b><br><span class="faint">کمترین</span></span><span style="text-align:center"><b>${mil(PD.price_median)}</b><br><span class="faint">میانه</span></span><span style="text-align:left"><b>${mil(PD.price_max)}</b><br><span class="faint">بیشترین</span></span></div>
+       ${srcNote('منبع: ترب · قیمت‌های ثبت‌شده، از ۹ تا ۳۷ روز پیش؛ هنوز هیچ‌کدام تأیید نشده')}</div>
+     <div class="warnbox info">${ic('spark','s')}<span><b>چرا این؟</b> گردنی و مقاوم در برابر آب، مناسب ورزش. ۶ فروشگاه در پاساژ علاالدین، ۲ دقیقه پیاده، دارندش.</span></div>
+     ${reviewCard()}
+   </div>
+   <div class="stack" style="gap:16px">
+     <div class="card side" style="padding:16px;gap:12px;position:sticky;top:12px">
+       <div class="row" style="justify-content:space-between"><span class="b">خرید حضوری</span><span class="tag" style="background:var(--sunk);color:var(--ink-2)">${fa(PD.shop_count)} فروشگاه</span></div>
+       <div class="sm muted">نزدیک‌ترین: <b style="color:var(--ink)">${esc(L[0].name)}</b> · پاساژ علاالدین · ۲ دقیقه پیاده</div>
+       ${priceBadge(L[0].offer)}
+       <button class="btn pri block">${ic('map','s')}فروشگاه‌های نزدیک (${fa(PD.shop_count)})</button>
+       <div class="row" style="gap:8px"><button class="btn sec" style="flex:1">${ic('compare','s')}مقایسه</button><button class="btn sec" style="flex:1">${ic('chat','s')}پرسیدن از دستیار</button></div></div>
+     <div class="card" style="padding:16px"><div class="h4" style="margin-bottom:6px">مشخصات کلیدی</div><table class="ctab">${specsD.map(s=>`<tr><th>${esc(s.key)}</th><td>${faT(s.value)}</td></tr>`).join('')}</table><a class="btn ghost" style="padding:0">همهٔ ${fa(PD.specs.length)} مشخصه ${ic('fwd','s')}</a></div>
+     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="h4">کالاهای مشابه</div>${D.similar.slice(1,4).map(p=>`<div class="row" style="gap:10px;padding-block:6px;border-top:1px solid var(--line)">${thumb('neck',p.brand).replace('class="thumb ','class="thumb " style="width:52px;height:52px"')}<div style="flex:1;min-width:0"><div class="sm b" style="line-height:1.5">${bidi(p.title)}</div><div class="xs faint">از ${mil(p.price_min)} · ${fa(p.shop_count)} فروشگاه</div></div></div>`).join('')}</div>
+   </div></main>`});
+
+/* ---- D5 · Chat + results panel ---- */
+const dChat = win({url:'/chat', cap:'D5 · Chat with a results panel (1280)', sub:'Conversation on the right stays short; every block the agent produces lands in the results panel on the left, grouped by question (newest question on top, its text as the header). Inside a group the order is fixed: products → comparison → review → shops → where to look → inquiry, so products are never pushed below the fold by a long shop list. The «اطلاعات عمومی» line is example text; in the app the agent writes it.', h:880, body:
+  topbar({on:0}) + `<div style="display:grid;grid-template-columns:440px minmax(0,1fr);flex:1;min-height:0">
+   <section style="display:flex;flex-direction:column;border-inline-end:1px solid var(--line);background:var(--card);min-height:0">
+     <div class="stack" style="gap:12px;padding:20px;overflow:auto;flex:1">
+       <div class="msg me">یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</div>
+       <div class="msg ai">برای ورزش، مدل‌های گردنی جا نمی‌افتند و عرق را تحمل می‌کنند. نویزگیر برایتان مهم است؟</div>
+       <div class="wrapr" style="justify-content:flex-end"><span class="chip">گردنی</span><span class="chip">توگوشی بدون سیم</span><span class="chip on">نویزگیر مهم نیست</span></div>
+       <div class="msg me">گردنی؛ انکر چطوره؟</div>
+       <div class="msg ai">سه مدل پیدا کردم و نقد کوتاه انکر Life U2i را کنار گذاشتم ← ببینید. ۶ فروشگاه در علاالدین دارندش؛ از ۳ تا بپرسم؟</div>
+       <div class="toolline"><span class="spin"></span>در حال یافتن فروشگاه‌ها…</div></div>
+     <div style="padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px"><div class="field" style="flex:1;min-height:46px"><span class="faint">بنویسید یا بپرسید…</span></div><button class="iconbtn" style="background:var(--accent);color:var(--on-accent)">${ic('send')}</button></div>
+   </section>
+   <section style="overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px;background:var(--paper)">
+     <div class="row" style="justify-content:space-between"><h2 class="dk-h2">نتایج این گفتگو</h2><div class="ftabs"><button class="on">همه</button><button>کالاها</button><button>نقد</button><button>کجا بگردم</button><button>استعلام</button></div></div>
+     <div class="row sm" style="gap:8px;color:var(--ink-2)">${ic('chat','s')}<b style="color:var(--ink)">گردنی؛ انکر چطوره؟</b><span class="tag" style="background:var(--sunk);color:var(--ink-2)">تازه‌ترین</span></div>
+     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">${[PD,D.search.items[1],D.search.items[6]].map(p=>pv(p)).join('')}</div>
+     <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">${reviewCard()}${whereCard(W2L,2,'پاساژهای خیابان جمهوری، اطراف پاساژ علاءالدین')}</div>
+     <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px;border-color:var(--accent)"><div class="h4">${ic('send','s')}پیشنهاد استعلام</div>
+       <div class="sm">از این ۳ فروشگاه بپرسیم «${bidi('انکر Life U2i')}» موجود است و قیمت امروز چند؟</div>
+       <div class="wrapr">${L.slice(0,3).map(s=>`<span class="chip on">${esc(s.name)} · ${faT(s.floor_label||'')}</span>`).join('')}</div>
+       <div class="row" style="gap:8px"><button class="btn pri">${ic('send','s')}بله، بپرس</button><button class="btn sec">تغییر فروشگاه‌ها</button></div></div>
+     <div class="row sm" style="gap:8px;color:var(--ink-2);padding-top:14px;border-top:1px solid var(--line)">${ic('chat','s')}<b style="color:var(--ink)">یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</b></div>
+     <div class="xs faint">نتایج پرسش قبلی زیر همین خط می‌آید…</div>
+   </section></div>`});
+
+/* ---- D6 · Tracker split ---- */
+const sel6 = INQ[2], lst6 = listedOf(sel6.shop.shop_id);
+const dTrack = win({url:'/track', cap:'D6 · Inquiry tracker: split view (1280)', sub:'Timeline cards on the right (selected one marked); details and alternatives on the left instead of a modal sheet. The price-difference toast and live updates are unchanged.', h:880, body:
+  topbar({on:1}) + subbar(3, `<b>پیگیری استعلام</b><span>${bidi('هندزفری گردنی انکر مدل Life U2i')}</span>`) + `
+  <div class="banner info" style="padding-inline:32px">${ic('spark','s')}<span><b>پاسخ‌ها شبیه‌سازی‌شده‌اند — حالت نمایشی.</b> فروشنده‌های واقعی در این نسخه پاسخ نمی‌دهند.</span></div>
+  <main class="dk-main" style="display:grid;grid-template-columns:460px minmax(0,1fr);gap:24px;align-items:start">
+   <div class="stack" style="gap:10px"><div class="row xs muted" style="justify-content:space-between"><span>سؤال‌ها: موجودی الان · قیمت نهایی امروز</span><span class="oc open">زنده</span></div>${summary(inqAll)}
+     ${inqAll.map(q=>inqCard(q).replace('class="card shop ', `class="card shop ${q.id===sel6.id?'selrow hov':''} `)).join('')}</div>
+   <div class="stack" style="gap:16px">
+     <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px">
+       <div class="row" style="justify-content:space-between"><div>${shopName(sel6.shop)}<div class="loc">پاساژ علاءالدین ← طبقه منفی ۱ ← پلاک ۴۳ · ۲ دقیقه پیاده</div></div><span class="st answered">پاسخ داد</span></div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+         <div class="stack" style="gap:6px"><span class="xs faint">قیمت تأییدشده</span>${priceBadge(null,{confirmed:{price:sel6.answer.price, ago:'۱۲ دقیقه پیش'}})}</div>
+         <div class="stack" style="gap:6px"><span class="xs faint">قیمت ثبت‌شده</span>${priceBadge(lst6.offer)}<span class="diff">+۱۴٪ نسبت به ثبت‌شده</span></div></div>
+       <div class="qa">«${esc(sel6.answer.message)}» · باز تا ۱۹:۰۰ · قسط حضوری: بله</div>
+       ${mallLocator(listedOf(sel6.shop.shop_id))}
+       <div class="row" style="gap:8px"><button class="btn pri">${ic('route','s')}ساخت برنامهٔ بازدید</button><button class="btn sec">صفحهٔ فروشگاه</button></div></div>
+     <div class="card" style="padding:18px;display:flex;flex-direction:column;gap:12px">
+       <div class="row" style="justify-content:space-between"><div class="h4"><span class="st unavailable">ناموجود</span>${esc(INQ[3].shop.name)} این کالا را ندارد</div><span class="xs faint">جایگزین همان کالا</span></div>
+       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${INQ[3].alternatives.shops.map(s=>shopCard(s,{why:false, selectable:false})).join('')}</div>
+       <button class="btn pri" style="align-self:flex-start">${ic('send','s')}استعلام از این ${fa(INQ[3].alternatives.shops.length)} فروشگاه</button></div>
+   </div></main>
+   <div class="toast" style="position:absolute;bottom:24px;left:32px;right:auto;width:420px">${ic('alert')}<span><b>قیمت واقعی ۱۴٪ بیشتر از قیمت ثبت‌شده است.</b><br>مهرین رووان: ۲٬۸۵۰٬۰۰۰ به‌جای ۲٬۵۰۰٬۰۰۰ تومان</span></div>`});
+
+/* ---- D7 · Compare products ---- */
+const CP = D.compare;
+const cRows = [...CP.rows.filter(r=>r.values.every(v=>v!=null)), ...CP.rows.filter(r=>r.values.some(v=>v==null) && !/nhvn/.test(r.values.join(''))).slice(0,9)];
+const dCompare = win({url:'/compare?ids=…', cap:'D7 · Compare products (1280)', sub:'Wide table: the spec-name column is sticky, differing rows are tinted and come first, an empty slot invites a third model.', body:
+  topbar() + subbar(0, `<b>مقایسهٔ کالاها</b><span>۲ مدل</span>`) + `<main class="dk-main">
+   <div class="warnbox info">${ic('spark','s')}<span><b>برای شما کدام بهتر است؟</b> برای ورزش با بودجهٔ ۳ میلیون، <b>انکر Life U2i</b>: مقاوم در برابر آب، زیر بودجه و ۱۹ فروشگاه. هایلو نویزگیر فعال و باتری ۳۵ ساعته دارد اما از ۳٫۳ میلیون شروع می‌شود.</span></div>
+   <div class="card" style="padding:0;overflow:auto"><table class="ctab sticky" style="min-width:900px"><thead><tr><th style="width:220px;padding:16px"><label class="check xs">${ic('filter','s')}فقط تفاوت‌ها <span class="toggle on" style="margin-inline-start:auto;transform:scale(.8)"></span></label></th>
+     ${CP.products.map(p=>`<td style="padding:16px"><div class="row" style="gap:12px">${thumb(glyphOf(p.title),p.brand).replace('class="thumb ','class="thumb " style="width:64px;height:64px"')}<div><div class="b sm">${bidi(p.title)}</div><div class="sm num">از ${mil(p.price_min)} · <span class="faint">${fa(p.shop_count)} فروشگاه</span></div><a class="xs" style="color:var(--accent-ink)">فروشگاه‌ها ${ic('fwd','s')}</a></div></div></td>`).join('')}
+     <td style="padding:16px;width:240px"><div class="card" style="border-style:dashed;padding:18px;text-align:center;color:var(--ink-3)">${ic('plus')}<div class="sm">افزودن مدل سوم</div></div></td></tr></thead>
+     <tbody>${cRows.map(r=>`<tr class="${r.differs?'d':''}"><th>${esc(r.key)}</th>${r.values.map(v=>`<td>${v==null?'<span class="cell-unk">نامشخص</span>':faT(v)}</td>`).join('')}<td></td></tr>`).join('')}</tbody></table></div></main>`});
+
+/* ---- D8 · Compare shops ---- */
+const cs = [L[0], INQ[2].shop && listedOf(INQ[2].shop.shop_id), L[1], L[4]];
+const csRows = [['قیمت', s=>s===cs[1]?priceBadge(null,{confirmed:{price:2850000,ago:'۱۲ دقیقه پیش'}}):priceBadge(s.offer)],['فاصله',s=>`${fa(s.walk_min)} دقیقه پیاده`],['وضعیت',s=>openChip(s.open)],['محل',s=>`${esc(s.mall||'—')}<br>${floorTxt(s)||'<span class="cell-unk">طبقه نامشخص</span>'}`],['قسطی',s=>s.installment?'دارد':'ندارد'],['گارانتی',s=>'<span class="cell-unk">نامشخص</span>'],['ارسال سریع',s=>s.fast_delivery===true?'دارد':s.fast_delivery===false?'ندارد':'<span class="cell-unk">نامشخص</span>']];
+const dCompareShops = win({url:'/p/…/shops/compare', cap:'D8 · Compare shops (1280)', sub:'Up to 4 columns; the why-ranked row is part of the table so the reason sits next to the numbers.', body:
+  topbar({q:'هندزفری گردنی انکر'}) + subbar(2, prodCrumb) + `<main class="dk-main">
+   <div class="row" style="justify-content:space-between"><h1 class="dk-h1" style="font-size:20px">مقایسهٔ ۴ فروشگاه</h1><div class="seg" style="width:420px"><div class="on">بهترین</div><div>قیمت</div><div>فاصله</div><div>تازگی قیمت</div></div></div>
+   <div class="card" style="padding:0;overflow:auto"><table class="ctab sticky"><thead><tr><th style="width:160px"></th>${cs.map((s,i)=>`<td style="padding:14px"><span class="tag" style="background:${i===0?'var(--accent)':'var(--sunk)'};color:${i===0?'var(--on-accent)':'var(--ink-2)'}">${fa(i+1)}</span><div class="b" style="margin-top:6px">${esc(s.name)}</div></td>`).join('')}</tr></thead>
+   <tbody>${csRows.map(([k,f])=>`<tr><th>${k}</th>${cs.map(s=>`<td>${f(s)}</td>`).join('')}</tr>`).join('')}
+   <tr><th>چرا این رتبه؟</th>${['تنها قیمت تأییدشده نیست، اما ارزان‌ترین ثبت‌شده و الان باز است','قیمت تأییدشده توسط فروشنده؛ ۳۶۰ هزار گران‌تر','قیمت ۲۳ روز پیش ثبت شده؛ تا ۲۰:۳۰ باز','ساعت ثبت نشده؛ طبقهٔ ۵'].map(t=>`<td class="sm muted">${t}</td>`).join('')}</tr></tbody></table></div>
+   <div class="row" style="gap:10px;justify-content:flex-end"><button class="btn sec">برگشت به فهرست</button><button class="btn pri">${ic('send','s')}استعلام از این ۴ فروشگاه</button></div></main>`});
+
+/* ---- D9 · Composer ---- */
+const dAsk = win({url:'/p/…/ask', cap:'D9 · Inquiry composer (1280)', sub:'Form on the right; the live preview of the seller message and the chosen shops stay visible on the left.', body:
+  topbar({q:'هندزفری گردنی انکر'}) + subbar(3, prodCrumb) + `<main class="dk-main" style="display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;align-items:start">
+   <div class="card stack" style="padding:20px;gap:18px"><h1 class="dk-h1" style="font-size:20px">از فروشگاه‌ها بپرسیم</h1>
+     <div class="stack" style="gap:8px"><div class="h4">چه بپرسیم؟</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${[['آیا الان موجود است؟',1],['قیمت نهایی امروز چقدر است؟',1],['امروز تا چه ساعتی باز هستید؟',0],['امکان خرید قسطی دارید؟',1],['گارانتی دارد؟ چند ماهه؟',0],['چه رنگ‌هایی موجود است؟',0]].map(([t,on])=>`<label class="frow card" style="padding:0 12px;min-height:50px"><span class="sm">${t}</span><span class="sel ${on?'on':''}">${on?ic('check','s'):''}</span></label>`).join('')}</div></div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="stack" style="gap:6px"><div class="h4">یادداشت <span class="n">اختیاری</span></div><div class="field"><span>رنگ مشکی می‌خواهم.</span></div></div>
+       <div class="stack" style="gap:6px"><div class="h4">مهلت پاسخ</div><div class="seg"><div>۲ دقیقه</div><div class="on">۵ دقیقه</div><div>۱۵ دقیقه</div></div></div></div>
+     <button class="btn pri" style="align-self:flex-start;min-width:260px">${ic('send','s')}ارسال به ۳ فروشگاه</button></div>
+   <aside class="side"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px"><div class="h4">فروشگاه‌ها <span class="n">۳ از ۵</span></div>${L.slice(0,3).map(s=>`<div class="row" style="justify-content:space-between;padding-block:6px;border-top:1px solid var(--line)"><div><div class="sm b">${esc(s.name)}</div><div class="xs faint">${esc(s.mall)} · ${floorTxt(s)||'طبقه نامشخص'}</div></div><button class="iconbtn" style="width:36px;height:36px">${ic('x','s')}</button></div>`).join('')}<a class="btn ghost" style="align-self:flex-start;padding:0">${ic('plus','s')}افزودن فروشگاه</a></div>
+     <div class="card" style="padding:14px;background:var(--sunk);border-style:dashed"><div class="xs faint" style="margin-bottom:4px">پیش‌نمایش پیام برای فروشنده</div><div class="sm">سلام، مشتری‌ای نزدیک فروشگاه شماست و دربارهٔ «${bidi('هندزفری گردنی انکر مدل Life U2i')}» می‌پرسد: موجود است؟ قیمت نهایی امروز؟ قسط حضوری می‌پذیرید؟ «رنگ مشکی می‌خواهم.»</div></div></aside></main>`});
+
+/* ---- D10 · Visit plan ---- */
+const pl = D.plan, st1 = pl.stops[0], sdF = D.sd.shop_full_hours_in_mall;
+const stopD = (n, name, where, arrive, closes, extra) => `<li style="display:grid;grid-template-columns:32px 1fr;gap:12px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:800">${fa(n)}</span><span style="flex:1;width:2px;background:var(--line);margin-top:4px"></span></div>
+  <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px"><div class="row" style="justify-content:space-between"><b>${esc(name)}</b><span class="xs num muted">رسیدن ${arrive} · می‌بندد ${closes}</span></div><div class="crumb" style="font-size:13px">${where}</div>${extra}</div></li>`;
+const dPlan = win({url:'/plan', cap:'D10 · Visit plan (1280)', sub:'Stops on the right, the walking route on the map to the left; checklist and deep links underneath both.', body:
+  topbar({on:1}) + subbar(3, `<b>برنامهٔ بازدید</b><span>امروز · ۲ توقف · حدود ۲۰ دقیقه پیاده</span>`) + `<main class="dk-main" style="display:grid;grid-template-columns:440px minmax(0,1fr);gap:24px;align-items:start">
+   <div class="stack" style="gap:12px"><div class="row sm muted" style="gap:8px">${ic('loc','s')}شروع از حافظ × جمهوری · ۱۷:۱۲</div>
+     <ol style="list-style:none;margin:0;padding:0">${stopD(1,st1.name,`${esc(st1.mall)}<span class="ar">←</span>${faT(st1.floor_label)}<span class="ar">←</span><span class="u">واحد نامشخص</span>`,hm(st1.arrive_by),hm(st1.closes_at),priceBadge(null,{confirmed:{price:st1.confirmed_price,ago:'۲۴ دقیقه پیش'}}))}
+     ${stopD(2,sdF.name,`${esc(sdF.mall)}<span class="ar">←</span>${faT(sdF.floor_label)}<span class="ar">←</span>واحد ${fa(sdF.unit)}`,'۱۸:۵۵','۱۹:۰۰',`<div class="warnbox warn">${ic('clock','s')}<span>۵ دقیقه قبل از بسته شدن می‌رسید. اول اینجا بروید؟</span></div><button class="btn sec" style="min-height:40px;align-self:flex-start">جابه‌جا کن: اول ${esc(sdF.name)}</button>`)}</ol>
+     <div class="warnbox warn">${ic('alert','s')}<span><b>طرح ترافیک:</b> ${esc(pl.transport.suggestion)}</span></div></div>
+   <div class="stack" style="gap:16px"><div class="card" style="height:420px;overflow:hidden;padding:0;position:relative">${mapD(L.slice(0,1),[],{route:true,H:420})}</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px"><div class="h4">داخل فروشگاه</div>${[...st1.tips,'قیمت تأییدشده را نشان دهید: ۲٬۸۵۰٬۰۰۰ تومان'].map((t,i)=>`<label class="check"><span class="sel ${i===0?'on':''}">${i===0?ic('check','s'):''}</span>${esc(t)}</label>`).join('')}</div>
+     <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:8px"><div class="h4">مسیریابی تا توقف اول</div><div class="row" style="gap:8px"><a class="btn sec" style="flex:1">نشان</a><a class="btn sec" style="flex:1">بلد</a><a class="btn sec" style="flex:1">گوگل</a></div><button class="btn pri">${ic('route','s')}شروع مسیر</button></div></div></div></main>`});
+
+/* ---- D11 · Shop detail ---- */
+const DAYS = [['sat','شنبه'],['sun','یکشنبه'],['mon','دوشنبه'],['tue','سه‌شنبه'],['wed','چهارشنبه'],['thu','پنجشنبه'],['fri','جمعه']];
+const hoursT = wh => `<table class="hours"><tbody>${DAYS.map(([k,l])=>{const d=wh[k]; const sh=(d.shifts||[]).filter(x=>!(x.start_time==='00:00:00'&&x.end_time==='00:00:00')); const v=d.status==='closed'?'تعطیل':sh.map(x=>`${hm(x.start_time)}–${hm(x.end_time)}`).join('، '); return `<tr class="${k==='wed'?'today':''} ${k==='fri'?'fri':''}"><td>${l}${k==='wed'?' · امروز':''}</td><td>${v}</td></tr>`;}).join('')}</tbody></table>`;
+const dShop = win({url:'/shop/shop_0190…', cap:'D11 · Shop detail with link chips (1280)', sub:'«موبیفون» is a verified real name with an Instagram link (real record). Right: identity, locator, hours. Left: what it sells, with the seller\'s own titles.', body:
+  topbar() + `<main class="dk-main" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start">
+   <div class="stack" style="gap:16px"><div class="card" style="padding:18px;display:flex;flex-direction:column;gap:10px">${shopName(IG)}<div class="wrapr">${openChip({...IG.open, label:'بسته است · امروز ۰۹:۳۰ باز می‌شود'})}</div><div class="wrapr">${instChips(IG,true)}${fast(IG.fast_delivery)}</div>${linkChips(IG)}</div>
+     ${mallLocator(IG)}
+     <div class="row" style="gap:8px"><a class="btn sec" style="flex:1">نشان</a><a class="btn sec" style="flex:1">بلد</a><a class="btn sec" style="flex:1">گوگل</a></div>
+     <div class="card" style="padding:16px"><div class="h4" style="margin-bottom:6px">ساعت کاری</div>${IG.weekly_hours?hoursT(IG.weekly_hours):`<div class="warnbox unk">${ic('clock','s')}<span><b>ساعت کاری ثبت نشده.</b> قبل از رفتن بپرسید.</span></div>`}</div>
+     <div class="warnbox unk">${ic('lock','s')}<span>شمارهٔ تلفن در داده‌ها معتبر نیست؛ تماس فقط از راه «استعلام» است.</span></div></div>
+   <div class="stack" style="gap:12px"><div class="row" style="justify-content:space-between"><h2 class="dk-h2">کالاهای ثبت‌شده <span class="xs faint" style="font-weight:500">${fa(IG.offer_count)}</span></h2><div class="field" style="min-height:40px;width:260px">${ic('search','s')}<span class="faint sm">جستجو در کالاهای این فروشگاه</span></div></div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${IG.offers.slice(0,4).map(o=>`<a class="card" style="padding:12px;display:flex;flex-direction:column;gap:6px;color:inherit;text-decoration:none"><div class="sm b" style="line-height:1.6">${bidi(o.title||o.seller_title)}</div>${o.seller_title&&o.title?`<div class="xs muted"><span class="faint">عنوان فروشنده: </span>${bidi(o.seller_title)}</div>`:''}${priceBadge(o)}</a>`).join('')}</div>
+     <div class="row" style="gap:6px;flex-wrap:wrap">${IG.categories.slice(0,6).map(c=>`<span class="tag" style="background:var(--sunk);color:var(--ink-2)">${esc(c)}</span>`).join('')}</div>
+     ${srcNote('منبع: ترب · نام فروشگاه تأییدشده'+(IG.in_traffic_zone?' · داخل محدودهٔ طرح ترافیک':''))}</div></main>`});
+
+/* ---- D12 · Mall directory ---- */
+const M = D.mall, fl = M.floors, unkF = fl.find(f=>/نامشخص/.test(f.label));
+const dMall = win({url:'/mall/علالدین', cap:'D12 · Mall directory: floor tabs + search (1280)', sub:'Floor tabs replace the accordion; the unknown-floor group keeps its dashed tab. Shops in the active category are tinted.', body:
+  topbar() + `<main class="dk-main">
+   <div class="row" style="justify-content:space-between;align-items:flex-end"><div><h1 class="dk-h1">${faT(M.mall)}</h1><div class="sm muted">${esc(M.area)} · ${fa(M.shop_count)} فروشگاه · ${fa(fl.length-1)} طبقه</div></div><div class="field" style="width:380px;padding-inline:4px 12px"><span class="sbtn">${ic('search','s')}</span><span class="faint">جستجو در ${fa(M.shop_count)} فروشگاه…</span></div></div>
+   <div class="ftabs">${fl.map((f,i)=>`<button class="${i===0?'on':''} ${f===unkF?'unk':''}">${faT(f.label)} · ${fa(f.count)}</button>`).join('')}</div>
+   <div class="wrapr"><span class="chip on">هدفون، هدست و هندزفری ${ic('x','s x')}</span><span class="chip">گوشی موبایل</span><span class="chip">پاوربانک و شارژر همراه</span></div>
+   <table class="tbl"><thead><tr><th style="width:110px">واحد / پلاک</th><th>فروشگاه</th><th>دسته‌ها</th><th style="width:120px">کالاهای ثبت‌شده</th><th style="width:60px"></th></tr></thead>
+    <tbody>${fl[0].shops.map(s=>{const hit=s.categories.includes('هدفون، هدست و هندزفری'); return `<tr class="${hit?'':''}" style="${hit?'background:var(--accent-soft)':''}"><td><span class="tag num" style="background:var(--sunk);color:var(--ink-2)">${s.unit?fa(s.unit):s.plaque?'پلاک '+fa(s.plaque):'—'}</span></td><td class="b">${esc(s.name)}</td><td class="sm muted">${s.categories.length?esc(s.categories.slice(0,3).join('، ')):'<span style="color:var(--unk)">دسته ثبت نشده</span>'}</td><td class="sm ${s.offer_count?'':'faint'}">${s.offer_count?fa(s.offer_count)+' کالا':'بدون کالا'}</td><td>${ic('fwd','s')}</td></tr>`;}).join('')}</tbody></table>
+   <p class="xs faint">نمایش ${fa(fl[0].shops.length)} از ${fa(fl[0].count)} فروشگاه این طبقه. در آدرس ${fa(unkF.count)} فروشگاه طبقه نیامده؛ در زبانهٔ «طبقه نامشخص» هستند.</p></main>`});
+
+/* ---- D13 · My shopping ---- */
+const dMine = win({url:'/mine', cap:'D13 · My shopping: table with status filters (1280)', sub:'One row per product journey with live status counts; filters across the top.', h:640, body:
+  topbar({on:1}) + `<main class="dk-main"><div class="row" style="justify-content:space-between"><h1 class="dk-h1">خریدهای من</h1><div class="ftabs"><button class="on">همه ۳</button><button>در انتظار پاسخ ۲</button><button>پاسخ گرفته ۲</button><button>تمام‌شده ۱</button></div></div>
+   <table class="tbl"><thead><tr><th>کالا</th><th>شروع</th><th>استعلام‌ها</th><th>وضعیت</th><th>قدم بعدی</th></tr></thead><tbody>
+   ${[[bidi('هندزفری گردنی انکر مدل Life U2i'),'امروز ۱۸:۳۵','۵',`<span class="st answered">۱ پاسخ</span> <span class="st unavailable">۱ ناموجود</span> <span class="st sent">۲ در انتظار</span> <span class="st no_reply">۱ بی‌پاسخ</span>`,'<a class="btn sec" style="min-height:36px">برنامهٔ بازدید</a>',true],
+     ['گوشی ۱۰ تا ۱۵ میلیون، قسطی','دیروز ۱۶:۱۰','۲','<span class="st sent">۲ در انتظار</span>','<a class="btn ghost" style="min-height:36px">پیگیری</a>'],
+     ['دوربین مداربسته ۴ کانال','۲۵ مهر','۳','<span class="st answered">۳ پاسخ</span> <span class="tag" style="background:var(--sunk);color:var(--ink-3)">بایگانی</span>','<a class="btn ghost" style="min-height:36px">مشاهده</a>']].map(([t,d,n,s,a,h])=>`<tr class="${h?'hov':''}"><td class="b">${t}</td><td class="sm muted">${d}</td><td class="num">${fa(n)}</td><td>${s}</td><td>${a}</td></tr>`).join('')}</tbody></table></main>`});
+
+/* ---- D14 · Seller inbox (narrow) ---- */
+const dSeller = win({url:'/seller/shop_c060…/…', cap:'D14 · Seller inbox stays narrow, with the Bale box (1280)', sub:'Opened from a phone or a small window, so it stays a 560 px column on desktop. The optional «بله» box shows the copyable /link command.', h:760, body:
+  `<div class="sellerbar" style="background:var(--ink);color:var(--paper);padding:12px 32px;display:flex;gap:10px;align-items:center"><span style="width:40px;height:40px;border-radius:12px;background:var(--paper);color:var(--ink);display:grid;place-items:center">${ic('inbox')}</span><div><div class="b">${esc(L[0].name)}</div><div class="xs" style="opacity:.75">صندوق استعلام · نسخهٔ فروشنده</div></div></div>
+  <div style="max-width:560px;width:100%;margin-inline:auto;padding:20px 0 40px;display:flex;flex-direction:column;gap:14px">
+   ${baleBox}
+   <div class="xs muted">۱ استعلام منتظر پاسخ شماست</div>
+   <div class="card" style="padding:14px;display:flex;flex-direction:column;gap:10px"><div class="row xs muted" style="justify-content:space-between"><span>۲ دقیقه پیش</span><span class="num">مهلت ۰۳:۰۰</span></div><div class="b">${bidi(INQ[0].product.title)}</div><div class="qa">${INQ[0].questions.map(x=>esc(x.text)).join('<br>')}</div></div>
+   <div class="row" style="gap:10px"><button class="bigbtn ok" style="flex:1">${ic('check')}موجود است</button><button class="bigbtn no" style="flex:1">${ic('x')}ناموجود</button></div>
+   <button class="btn pri block" style="min-height:52px">${ic('send','s')}ارسال پاسخ</button></div>`});
+
+/* ---- Tablet (768) ---- */
+const tabWin = (url, cap, sub, inner, nav0=0) => win({url, cap, sub, w:768, h:900, cls:'tablet', body:`<div class="tcol"><div class="content" style="overflow:visible">${inner}</div><div class="nav" style="position:sticky;bottom:0">${NAVS.map(([i,l],k)=>`<div class="${k===nav0?'on':''}">${ic(i)}<span>${l}</span></div>`).join('')}</div></div>`});
+const tHome = tabWin('/', 'T1 · Tablet Home (768)', 'Same mobile pattern in a centred 640 px column on a grey ground; bottom nav kept; cards get a little more padding.',
+  `<div class="pad stack" style="padding-top:16px;gap:14px"><div class="row" style="justify-content:space-between"><span class="row" style="gap:8px">${radish()}<span style="font-weight:900;font-size:20px">ترب‌گرد</span></span><button class="chip" style="min-height:40px">${ic('pin','s')}حافظ × جمهوری${ic('fwd','s')}</button></div>
+   <h2 style="margin:4px 0 0;font-size:24px;font-weight:800">دنبال چه هستید؟</h2><div class="field big"><span class="faint">مثلاً: یه هندزفری بی‌سیم برای ورزش زیر ۳ میلیون</span></div>
+   <div class="wrapr"><span class="chip">هندزفری گردنی زیر ۳ میلیون</span><span class="chip">گوشی ۱۰ تا ۱۵ میلیون، قسطی</span><span class="chip">دوربین مداربسته ۴ کانال</span></div>
+   <div class="h4">دسته‌های پرفروشگاه</div><div class="wrapr">${D.top.slice(0,8).map(c=>`<span class="chip">${esc(c.name)} <span class="xs faint">${fa(c.n)}</span></span>`).join('')}</div></div>`);
+const tShops = tabWin('/p/…/shops', 'T2 · Tablet Shops (768)', 'Map and list stack like mobile; the map gets taller (300 px) and the sticky CTA spans the column.',
+  `${appbar('فروشگاه‌های نزدیک','نزدیک حافظ × جمهوری')}${steps(1)}<div class="pad">${productMini(PD,`${fa(S.counts.listed)} فروشگاه · از ${mil(PD.price_min)} تومان`)}</div><div style="height:10px"></div>${mapSvg(L,C,{sel:SELD,h:300})}<div class="pad stack" style="gap:10px;padding-block:12px 120px">${L.slice(0,3).map(s=>shopCard(s,{sel:true})).join('')}</div>
+   <div class="sticky-cta" style="position:sticky"><button class="btn pri block">${ic('send','s')}استعلام از ۳ فروشگاه</button></div>`, -1);
+
+/* ---- Mobile: the newer blocks ---- */
+const mWhere = phone({cap:'M1 · «کجا بگردم؟» (mobile)', sub:'Real where-to-look data for «دوربین مداربسته ۴ کانال» (low confidence). The unverified «اطلاعات عمومی» line appears only when the chat agent supplies a hint; its text here is an example.', body: appbar('نتایج') + steps(0) + `<div class="empty" style="padding-block:14px"><div class="art-i">${ic('search')}</div><h4>این مدل را هیچ فروشگاهی ثبت نکرده</h4></div><div class="pad">${whereCard(W2L,2,'پاساژهای خیابان جمهوری، اطراف پاساژ علاءالدین')}</div>`});
+const mReview = phone({cap:'M2 · «نقد کوتاه» (mobile)', sub:'Opened on tap from product detail. Each pro/con carries its spec evidence; reputation is labelled unverified.', body: appbar('') + steps(0) + `<div class="pad stack" style="gap:12px"><div><h2 style="margin:0;font-size:18px;font-weight:800;line-height:1.6">${bidi(PD.title)}</h2></div>${reviewCard()}</div>`});
+const mLinks = phone({cap:'M3 · Shop links + seller text (mobile)', sub:'Instagram chip on a verified shop; listed cards show the seller\'s own title and note under the name.', body: appbar('فروشگاه') + `<div class="pad stack" style="gap:12px"><div class="card" style="padding:14px;display:flex;flex-direction:column;gap:8px">${shopName(IG)}${linkChips(IG)}<div class="wrapr">${openChip({...IG.open,label:'بسته است · امروز ۰۹:۳۰ باز می‌شود'})}</div></div>${shopCardD(L[3],{sel:true})}</div>`});
+const mBale = phone({cap:'M4 · Bale connect (mobile seller page)', sub:'Optional second channel; the command is copyable and the page keeps working without it.', cls:'seller', body: `<div class="appbar" style="background:var(--ink);color:var(--paper);padding-block:10px"><span style="width:40px;height:40px;border-radius:12px;background:var(--paper);color:var(--ink);display:grid;place-items:center">${ic('inbox')}</span><h3 style="color:var(--paper)">${esc(L[0].name)}<span class="t2" style="color:var(--line-2)">صندوق استعلام · نسخهٔ فروشنده</span></h3></div><div class="pad stack" style="gap:14px;padding-block:14px">${baleBox}<div class="xs muted">استعلام تازه‌ای ندارید. این صفحه خودکار به‌روز می‌شود.</div></div>`});
+
+const zoomCtl = `<span class="zoomctl" role="group" aria-label="Desktop frame size"><button data-z=".62" aria-pressed="true">Fit</button><button data-z="1" aria-pressed="false">100%</button></span>`;
+const dsection = (n, id, title, desc, src, arts) => `<section class="sec dsec" id="${id}"><div class="sec-h"><div class="sec-n">${n}</div><h2>${title}${zoomCtl}</h2><p>${desc}<br><span class="src">${src}</span></p></div><div class="track">${arts.join('')}</div></section>`;
+out.push(`<section class="sec" id="desktop" style="border-bottom:0;padding-bottom:0"><div class="sec-h"><div class="sec-n">D</div><h2>Desktop &amp; tablet</h2><p>Mobile (≤ 640) above is unchanged. Tablet (641–959) keeps the mobile patterns in a wider centred column. Desktop (≥ 960) adds a top bar with the 4-step stepper, multi-pane layouts and side panels instead of sheets; content max-width 1280 (1360 with more padding at ≥ 1440). Frames are drawn at 1280 × 820 and shown at 62 %; use «100%» to see real size.</p></div></section>`);
+out.push(dsection('D1–D6','dcore','Desktop: core screens','Shell, shops for a product (list + large map), results with the filter sidebar, product page, chat with results panel and the split tracker, in the order of the brief.','all fixtures above · where_to_look_low_confidence.json · product_review.json',[dHome, dShops, dResults, dResultsEmpty, dProduct, dChat, dTrack]));
+out.push(dsection('D7–D14','drest','Desktop: remaining screens','Compare products and shops, composer, visit plan, shop detail with link chips, mall directory, My shopping and the narrow seller inbox.','product_compare.json · shop_with_instagram.json · mall_directory.json · visit_plan_SPEC…',[dCompare, dCompareShops, dAsk, dPlan, dShop, dMall, dMine, dSeller]));
+out.push(dsection('T','tablet','Tablet (641–959)','No new patterns: the phone layout in a centred 640 px column.','',[tHome, tShops]));
+out.push(section('N','newblocks','Newer blocks on mobile','The four blocks added since the first design, drawn in the phone layout so desktop and mobile stay consistent.','where_to_look_low_confidence.json · product_review.json · shop_with_instagram.json · seller inbox (bale)',[mWhere, mReview, mLinks, mBale]));
+
+
+/* ================= Photo price check + accounts (newer features) ================= */
+const SNAP_C = [PD, D.similar[0], D.similar[1]];
+const snapRead = `<div class="card" style="padding:10px;display:flex;gap:12px;align-items:flex-start"><div class="snapimg" role="img" aria-label="عکسی که گرفتید">${thumb('neck','انکر').replace('class="thumb ','class="thumb " style="width:96px;height:96px;border:0;background:none"')}</div>
+  <div class="stack" style="gap:6px;flex:1;min-width:0"><div class="xs faint row" style="gap:6px">${ic('eye','s')}از عکس خوانده شد · خوانا</div>
+  <div class="wrapr"><span class="tag" style="background:var(--sunk);color:var(--ink-2)">هندزفری گردنی بی‌سیم</span><span class="tag" style="background:var(--sunk);color:var(--ink-2)">ساندکور</span><span class="tag" style="background:var(--info-soft);color:var(--info-ink)"><bdi>Life U2i (Upgraded)</bdi></span><span class="tag" style="background:var(--warn-soft);color:var(--warn)">قیمت روی برچسب: ۳٬۲۰۰٬۰۰۰</span></div>
+  <span class="btn ghost" style="align-self:flex-start;padding:0">${ic('cam','s')}عکس دیگر</span></div></div>`;
+const snapRefine = `<div class="stack" style="gap:6px"><span class="xs faint">درست نخواند؟ اصلاح کنید و جستجو کنید</span><div class="field"><span class="sbtn" style="width:40px;height:40px;border-radius:12px;background:var(--brand);color:var(--on-brand);display:grid;place-items:center">${ic('search','s')}</span><bdi style="flex:1">Life U2i</bdi></div></div><p class="xs faint" style="margin:0">عکس فقط برای همین خواندن به سرور فرستاده می‌شود و ذخیره نمی‌شود.</p>`;
+const snapCands = `<div class="h4">همین است؟</div>${SNAP_C.map((p,i)=>`<div class="card row" style="padding:10px;gap:10px;${i===0?'border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)':''}"><span class="sel ${i===0?'on':''}" style="border-radius:50%">${i===0?ic('check','s'):''}</span>${thumb('neck',p.brand).replace('class="thumb ','class="thumb " style="width:48px;height:48px"')}<span style="flex:1;min-width:0"><span class="b sm" style="display:block;line-height:1.5">${bidi(p.title)}</span><span class="xs faint">${fa(p.shop_count)} فروشگاه · از ${mil(p.price_min)}</span></span></div>`).join('')}`;
+const snapCheck = `<section class="card" style="padding:14px;display:flex;flex-direction:column;gap:12px"><div class="h4">${ic('sort','s')}سنجش قیمت</div>
+  <div class="stack" style="gap:6px"><span class="sm b">قیمتی که این فروشگاه گفته (تومان)</span><div class="field" style="min-height:52px"><b class="num" style="flex:1;font-size:18px">۳٬۲۰۰٬۰۰۰</b><span class="xs faint">تومان</span></div><span class="xs faint">از برچسب قیمت در عکس خوانده شد؛ اگر فرق دارد اصلاح کنید.</span></div>
+  <div class="row xs num" style="justify-content:space-between;background:var(--sunk);border-radius:12px;padding:10px 12px"><span><b>${mil(PD.price_min)}</b><br><span class="faint">کمترین ثبت‌شده</span></span><span style="text-align:center"><b>${mil(PD.price_median)}</b><br><span class="faint">میانه</span></span><span style="text-align:left"><b>۱۷</b><br><span class="faint">فروشگاه با قیمت</span></span></div>
+  <div class="warnbox info">${ic('spark','s')}<span><b>۱۱٪ پایین‌تر از میانه</b>، ولی ۴ فروشگاه تا ۲۰ دقیقه پیاده ارزان‌تر ثبت کرده‌اند.</span></div>
+  <div class="sm b">ارزان‌تر در نزدیکی</div>${L.slice(0,3).map(x=>shopCard(x,{selectable:false,why:false})).join('')}
+  <button class="btn pri block">${ic('send','s')}از ۳ فروشگاه بپرس: موجود است؟ قیمت امروز؟</button>
+  <span class="xs faint">قیمت‌ها همان ثبت‌شده در ترب‌اند و تأیید نشده‌اند؛ برای قیمت قطعی استعلام بگیرید.</span>
+  <div class="row" style="gap:8px"><span class="btn sec">صفحهٔ کالا</span><span class="btn sec">${ic('map','s')}همهٔ فروشگاه‌ها</span></div></section>`;
+const mSnap = phone({cap:'M5 · Photo price check (mobile)', sub:'Snapped in a shop: brand, model and the tag price are read and shown as «از عکس خوانده شد» (editable). The shopper confirms the product, then sees the quoted price against prices other shops nearby have listed, the cheaper ones within 20 minutes, and a one-tap inquiry. «قیمت خوبی است» only appears when nothing nearby is cheaper.',
+  body: appbar('عکس کالا','مدل و قیمت را با فروشگاه‌های نزدیک بسنجید') + `<div class="pad stack" style="gap:12px;padding-bottom:20px">${snapRead}${snapRefine}${snapCands}${snapCheck}</div>`});
+const mSnapRelated = phone({cap:'M6 · Photo: model not in any shop', sub:'Real case: the Galaxy A15 phone itself is not listed, only its cases and parts. Said plainly, never offered as a match; where-to-look follows.',
+  body: appbar('عکس کالا') + `<div class="pad stack" style="gap:12px"><div class="card" style="padding:10px;display:flex;gap:10px"><div class="snapimg" style="width:64px;height:64px"></div><div class="stack" style="gap:6px"><div class="xs faint">از عکس خوانده شد · خوانا</div><div class="wrapr"><span class="tag" style="background:var(--sunk);color:var(--ink-2)">گوشی موبایل</span><span class="tag" style="background:var(--sunk);color:var(--ink-2)">سامسونگ</span><span class="tag" style="background:var(--info-soft);color:var(--info-ink)"><bdi>Galaxy A15</bdi></span></div></div></div>
+  <div class="warnbox warn">${ic('alert','s')}<span><b>خود این مدل در فروشگاه‌ها ثبت نشده.</b> این‌ها لوازم یا قطعات همین مدل‌اند؛ برای خود کالا از فروشگاه‌های همین دسته بپرسید.</span></div>
+  ${['کیف چرمی مگنتی سامسونگ Galaxy A15','محافظ صفحه نمایش سامسونگ Galaxy A15'].map(t=>`<div class="card pcard">${thumb('hp')}<div style="flex:1;min-width:0"><div class="ptitle">${bidi(t)}</div><div class="xs faint">۳ فروشگاه</div></div></div>`).join('')}</div>`});
+const dSnap = win({url:'/snap', cap:'D15 · Photo price check (1280)', sub:'Same flow, two columns: the photo, what was read and the correction box on the right; candidates and the price check on the left.', h:900, body:
+  topbar() + `<main class="dk-main"><div class="row" style="gap:10px">${ic('back')}<div><h1 class="dk-h1" style="font-size:21px">عکس کالا</h1><div class="xs faint">مدل و قیمت را با فروشگاه‌های نزدیک بسنجید</div></div></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start"><div class="stack" style="gap:14px">${snapRead}${snapRefine}</div><div class="stack" style="gap:12px">${snapCands}${snapCheck}</div></div></main>`});
+
+const loginForm = (signup) => `<div class="seg"><div class="${signup?'':'on'}">ورود</div><div class="${signup?'on':''}">ثبت‌نام</div></div>
+  <p class="lede" style="margin:0">${signup?'با یک نام کاربری و رمز، خریدهایتان روی هر دستگاهی همراه شماست. استعلام‌هایی که تا حالا روی این دستگاه فرستاده‌اید به حساب منتقل می‌شود.':'وارد شوید تا خریدها، استعلام‌ها و پاسخ فروشنده‌ها روی این دستگاه هم بیاید.'}</p>
+  <div class="stack" style="gap:6px"><span class="sm b">نام کاربری</span><div class="field"><bdi>reza_28</bdi></div>${signup?'<span class="xs faint">۳ تا ۳۲ حرف؛ حرف، عدد، نقطه، خط تیره یا زیرخط.</span>':''}</div>
+  <div class="stack" style="gap:6px"><span class="sm b">رمز عبور</span><div class="field"><span style="flex:1;letter-spacing:2px">••••••••••</span><span class="btn ghost" style="min-height:32px;padding-inline:6px">نمایش</span></div>${signup?'<span class="xs faint">دست‌کم ۸ حرف.</span>':''}</div>
+  ${signup?'':`<div class="warnbox bad">${ic('alert','s')}<span>نام کاربری یا رمز عبور درست نیست.</span></div>`}
+  <button class="btn pri block">${signup?'ساخت حساب':'ورود'}</button><p class="xs faint" style="text-align:center;margin:0">بدون حساب هم می‌توانید جستجو کنید و استعلام بفرستید.</p>`;
+const mSignup = phone({cap:'M7 · Sign up (mobile)', sub:'Optional account: username + password. Signing up moves this device\'s inquiries into the account.', body: appbar('ساخت حساب') + `<div class="pad stack" style="gap:14px">${loginForm(true)}</div>`});
+const mMine = phone({cap:'M8 · خریدهای من with the account card', sub:'Signed out: an invitation to sign in so purchases follow you to any device. Signed in (shown): username and a link to the account page.', navOn:2,
+  body: appbar('خریدهای من','',{back:false}) + `<div class="pad stack" style="gap:10px"><div class="card row" style="padding:10px 14px;gap:10px"><span class="avatar l" style="width:32px;height:32px">R</span><span class="sm" style="flex:1">وارد شده‌اید: <b><bdi>reza_28</bdi></b></span><span class="btn ghost" style="min-height:36px">حساب</span></div>
+  <a class="card row" style="padding:12px 14px;gap:10px;border-style:dashed;opacity:.85">${ic('lock','s')}<span class="sm" style="flex:1"><b>ورود یا ثبت‌نام</b><span class="xs muted" style="display:block">(حالتِ واردنشده) تا خریدها و پاسخ فروشنده‌ها روی هر دستگاهی همراهتان باشد.</span></span>${ic('fwd','s')}</a>
+  <div class="seg"><div class="on">فعال ۱</div><div>تمام‌شده ۰</div></div>
+  <div class="card" style="padding:12px 14px;display:flex;flex-direction:column;gap:8px"><div class="row" style="gap:10px">${thumb('neck').replace('class="thumb ','class="thumb " style="width:44px;height:44px"')}<div style="flex:1"><div class="b sm">${bidi('هندزفری گردنی انکر مدل Life U2i')}</div><div class="xs muted">۱۸:۳۵ · ۵ استعلام</div></div></div><div class="wrapr"><span class="st answered">۱ پاسخ</span><span class="st sent">۲ در انتظار</span></div></div></div>`});
+const dLogin = win({url:'/login', cap:'D16 · Sign in (1280), wrong password', sub:'Centred 440 px card under the normal top bar; the top bar shows «ورود / ثبت‌نام» when signed out and the username when signed in.', h:640, body:
+  topbar() + `<main class="dk-main"><div class="card" style="max-width:440px;width:100%;margin:24px auto 0;padding:24px;display:flex;flex-direction:column;gap:14px">${loginForm(false)}</div></main>`});
+const dSignedIn = win({url:'/mine', cap:'D17 · Top bar when signed in', sub:'The account chip replaces «ورود / ثبت‌نام».', h:200, body: topbar({on:1, user:'reza_28'})});
+out.push(section('N2','photo','Photo price check («عکس بگیر، قیمت را بسنج»)','A shopper photographs a box, label or price tag in a shop. Vision reads brand, model and price; the shopper confirms the product; listed prices nearby, cheaper shops and a one-tap inquiry follow. Camera buttons: phone need box and search field, desktop top bar.','real test: Anker Life U2i box + tag ۳٬۲۰۰٬۰۰۰ · shops_for_product.json · catalogue search',[mSnap, mSnapRelated]));
+out.push(dsection('D15','dphoto','Desktop: photo price check','','',[dSnap]));
+out.push(section('N3','accounts','Accounts (optional, username + password)','Anonymous use still works. An account keeps inquiries, seller answers and chat memory on every device. Passwords hashed (scrypt); a signed-in user\'s shopping can only be read with their login token.','POST /api/auth/signup · /login · /me · /logout',[mSignup, mMine]));
+out.push(dsection('D16–17','daccounts','Desktop: sign in and top bar','','',[dLogin, dSignedIn]));
+
 out.push(`<p class="note">Built from docs/design-brief.md, docs/screens.md and docs/fixtures/*.json. Product photos from image.torob.com cannot load inside this page, so thumbnails use drawn placeholders; the real app should show the fixture <code>image</code> URLs and fall back to the "بدون تصویر" tile.</p>`);
 document.getElementById('app').innerHTML = out.join('');
 
@@ -962,6 +1445,8 @@ function renderShops() {
   chip.classList.toggle('on', instOn); chip.innerHTML = (instOn?ic('check','s'):ic('card','s')) + 'قسطی';
 }
 document.addEventListener('click', ev => {
+  const zb = ev.target.closest('[data-z]');
+  if (zb) { const sec = zb.closest('section'); sec.querySelectorAll('.dart').forEach(f => f.style.setProperty('--z', zb.dataset.z)); zb.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === zb))); return; }
   const t = ev.target.closest('[data-toggle="inst"], [data-act]'); if (!t) return;
   if (t.matches('[data-toggle="inst"]') && t.closest('#shopsA')) { instOn = !instOn; renderShops(); }
   if (t.dataset.act === 'inst') { instOn = !instOn; renderShops(); }

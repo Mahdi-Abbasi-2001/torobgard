@@ -14,7 +14,7 @@ import { ProductCard, ShopCard } from "@/components/cards";
 import { InquiryCard } from "@/components/inquiry";
 import { WhereToLookCard } from "@/components/WhereToLook";
 import { ReviewCardView } from "@/components/ReviewCard";
-import { AppBar, Bidi, BottomNav } from "@/components/ui";
+import { AppBar, Bidi, BottomNav, Empty } from "@/components/ui";
 
 type Msg = { me: boolean; text: string; blocks: Block[]; err?: string };
 
@@ -50,7 +50,9 @@ export default function ChatView({ initial }: { initial?: string }) {
   useEffect(() => { if (initial && ready && sid && !started.current) { started.current = true; send(initial); } }, [ready, sid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <main className="main" style={{ paddingBottom: 150 }}>
+    <main className="main chat-main" style={{ paddingBottom: 150 }}>
+      <div className="lay lay-chat">
+      <section className="lay chat-conv" aria-label="گفتگو">
       <AppBar title="دستیار خرید" back="/" />
       {degraded && <div className="banner warn"><Icon n="alert" s /><span><b>دستیار هوشمند الان در دسترس نیست.</b> جستجوی ساده فعال است؛ بودجه و نام کالا را از متن شما برمی‌داریم و فیلترها همه کار می‌کنند.</span></div>}
       <div className="pad stack" style={{ gap: 12, paddingTop: 12 }}>
@@ -58,7 +60,7 @@ export default function ChatView({ initial }: { initial?: string }) {
         {msgs.map((m, i) => m.me ? <div key={i} className="msg me">{m.text}</div> : (
           <div key={i} className="stack" style={{ gap: 8 }}>
             {m.text && <div className="msg ai" style={{ whiteSpace: "pre-wrap" }}>{m.text.replace(/\*\*|__|^#+\s*/gm, "")}</div>}
-            {m.blocks.map((b, j) => <BlockView key={j} b={b} onPick={send} />)}
+            {m.blocks.map((b, j) => <div key={j} className={`lay chat-inline${b.type === "chips" ? " keep" : ""}`}><BlockView b={b} onPick={send} /></div>)}
             {m.err && <div className="note bad"><Icon n="alert" s /><span>{m.err}</span></div>}
           </div>
         ))}
@@ -72,8 +74,50 @@ export default function ChatView({ initial }: { initial?: string }) {
         </div>
         <button className="iconbtn" style={{ background: "var(--accent)", color: "var(--on-accent)" }} aria-label="ارسال" disabled={busy}><Icon n="send" /></button>
       </form>
+      </section>
+      <ResultsPanel msgs={msgs} onPick={send} />
+      </div>
       <BottomNav />
     </main>
+  );
+}
+
+/** Desktop: every card the agent produced, newest first, so the conversation itself stays short. */
+const KIND: Partial<Record<Block["type"], string>> = { product_cards: "کالاها", shop_list: "فروشگاه‌ها", review: "نقد", location_widget: "کجا بگردم", comparison_table: "مقایسه", inquiry_proposal: "استعلام", inquiry_status: "استعلام" };
+// reading order inside one answer: what to buy → is it good → where → act
+const ORDER: Partial<Record<Block["type"], number>> = { product_cards: 0, comparison_table: 1, review: 2, shop_list: 3, location_widget: 4, inquiry_proposal: 5, inquiry_status: 6 };
+function ResultsPanel({ msgs, onPick }: { msgs: Msg[]; onPick: (t: string) => void }) {
+  const [kind, setKind] = useState<string | null>(null);
+  // one group per question, newest question first; inside a group the blocks keep a fixed reading order
+  const turns = msgs.flatMap((m, i) => (m.me ? [] : [{
+    i, q: msgs[i - 1]?.me ? msgs[i - 1].text : "",
+    blocks: m.blocks.filter((b) => b.type !== "chips").sort((x, y) => (ORDER[x.type] ?? 9) - (ORDER[y.type] ?? 9)),
+  }])).filter((t) => t.blocks.length).reverse();
+  const all = turns.flatMap((t) => t.blocks);
+  const kinds = [...new Set(all.map((b) => KIND[b.type]).filter(Boolean))] as string[];
+  return (
+    <section className="dk-only chat-results" aria-label="نتایج این گفتگو">
+      <div className="row between" style={{ flexWrap: "wrap", gap: 8 }}>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 750 }}>نتایج این گفتگو</h2>
+        {kinds.length > 1 && (
+          <div className="floor-tabs" role="tablist">
+            <button role="tab" aria-selected={!kind} className={!kind ? "on" : ""} onClick={() => setKind(null)}>همه</button>
+            {kinds.map((k) => <button key={k} role="tab" aria-selected={kind === k} className={kind === k ? "on" : ""} onClick={() => setKind(k)}>{k}</button>)}
+          </div>
+        )}
+      </div>
+      {!all.length && <Empty icon="spark" title="هنوز نتیجه‌ای نیست">کالاها، فروشگاه‌ها، نقد کوتاه و پیشنهاد استعلامی که دستیار پیدا می‌کند اینجا کنار گفتگو جمع می‌شود.</Empty>}
+      {turns.map((t, n) => {
+        const shown = kind ? t.blocks.filter((b) => KIND[b.type] === kind) : t.blocks;
+        if (!shown.length) return null;
+        return (
+          <div key={t.i} className="stack chat-turn" style={{ gap: 14 }}>
+            {t.q && <div className="chat-turn-q"><Icon n="chat" s /><span>{t.q}</span>{n === 0 && turns.length > 1 && <span className="tag" style={{ background: "var(--sunk)", color: "var(--ink-2)" }}>تازه‌ترین</span>}</div>}
+            {shown.map((b, j) => <BlockView key={j} b={b} onPick={onPick} />)}
+          </div>
+        );
+      })}
+    </section>
   );
 }
 
@@ -82,7 +126,7 @@ function BlockView({ b, onPick }: { b: Block; onPick: (t: string) => void }) {
   const { setPicks } = useSession();
   const now = useNow(30_000);
   if (b.type === "product_cards") return (
-    <div className="stack" style={{ gap: 8 }}>
+    <div className="stack block-products" style={{ gap: 8 }}>
       {b.title && <div className="h4">{b.title}</div>}
       {b.applied.price_max ? <div className="wrapr"><span className="chip on">بودجه: تا {mil(b.applied.price_max)}</span></div> : null}
       {b.items.map((p) => <ProductCard key={p.product_id} p={p} />)}
@@ -110,7 +154,7 @@ function BlockView({ b, onPick }: { b: Block; onPick: (t: string) => void }) {
     );
   }
   if (b.type === "shop_list") return (
-    <div className="stack" style={{ gap: 8 }}>
+    <div className="stack block-shops" style={{ gap: 8 }}>
       {b.product && <Link href={`/p/${b.product.product_id}`} className="xs row" style={{ gap: 6, color: "var(--ink-3)" }}><Icon n="store" s />فروشگاه‌ها برای: <b style={{ color: "var(--ink)" }}><Bidi text={b.product.title} /></b></Link>}
       {b.listed.map((s) => <ShopCard key={s.shop_id} s={s} />)}
       {!b.listed.length && b.counts.category_only > 0 && <div className="note unk"><Icon n="q" s /><span>هیچ فروشگاهی این کالا را ثبت نکرده؛ {fa(b.counts.category_only)} فروشگاه در این دسته هست و باید بپرسید.</span></div>}

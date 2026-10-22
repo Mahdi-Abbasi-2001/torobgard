@@ -9,7 +9,7 @@ import { Icon } from "@/components/Icon";
 import { AppBar, BottomNav, Bidi, Empty, ErrorState, Seg, SkeletonCards, Thumb } from "@/components/ui";
 
 export default function MineView() {
-  const { sid } = useSession();
+  const { sid, user } = useSession();
   const inq = useInquiries(sid);
   const [picked, setTab] = useState<"active" | "done" | null>(null);
   const groups = useMemo(() => {
@@ -26,6 +26,13 @@ export default function MineView() {
   return (
     <main className="main has-nav">
       <AppBar title="خریدهای من" back={false} />
+      <div className="pad" style={{ paddingBottom: 10 }}>
+        {user
+          ? <div className="card row" style={{ padding: "10px 14px", gap: 10 }}><span className="auth-avatar" style={{ width: 32, height: 32 }}>{user.username.slice(0, 1).toUpperCase()}</span>
+              <span className="grow sm">وارد شده‌اید: <b><bdi>{user.username}</bdi></b></span><Link className="btn ghost" style={{ minHeight: 36 }} href="/login">حساب</Link></div>
+          : <Link href="/login?next=/mine" className="card row" style={{ padding: "12px 14px", gap: 10 }}><Icon n="lock" s />
+              <span className="grow sm"><b>ورود یا ثبت‌نام</b><span className="xs muted" style={{ display: "block" }}>تا خریدها و پاسخ فروشنده‌ها روی هر دستگاهی همراهتان باشد.</span></span><Icon n="fwd" s /></Link>}
+      </div>
       {inq.isLoading && <SkeletonCards n={3} />}
       {inq.isError && <ErrorState error={inq.error} retry={() => inq.refetch()} />}
       {inq.data && !groups.length && (
@@ -36,7 +43,7 @@ export default function MineView() {
         </div>
       )}
       {groups.length > 0 && (
-        <div className="pad stack" style={{ gap: 10 }}>
+        <div className="pad stack mine-list" style={{ gap: 10 }}>
           <Seg label="وضعیت" value={tab} onChange={setTab} options={[["active", `فعال ${fa(act.length)}`], ["done", `تمام‌شده ${fa(done.length)}`]]} />
           {!list.length && <p className="sm muted center">{tab === "active" ? "استعلام در انتظاری ندارید." : "هنوز استعلامی تمام نشده."}</p>}
           {list.map(({ g }) => {

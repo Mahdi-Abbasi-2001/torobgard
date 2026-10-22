@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, type Inquiry } from "@/lib/api";
 import { fa, mil, money } from "@/lib/fa";
+import { useIsDesktop } from "@/lib/media";
 import { useSession } from "@/lib/session";
 import { useInquiries, useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
@@ -20,6 +21,8 @@ export default function TrackView({ product }: { product?: string }) {
   const [altId, setAltId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  const [selId, setSel] = useState<string | null>(null);
+  const desk = useIsDesktop();
   const listedRef = useRef(new Map<string, { price: number | null; age_days: number | null }>());
   const pidRef = useRef<string | undefined>(product);
 
@@ -68,12 +71,18 @@ export default function TrackView({ product }: { product?: string }) {
       <BottomNav /></main>
   );
   const p = items[0].product!;
+  // desktop side panel: the chosen card (default: first answer) and the alternatives for the latest failure
+  const sel = items.find((x) => x.id === selId) ?? items.find((x) => x.status === "answered") ?? items[0];
+  const altFor = alt ?? (sel && isFailed(sel) ? sel : items.find(isFailed)) ?? null;
 
   return (
     <main className="main has-cta">
+      <div className="lay lay-head">
       <AppBar title="پیگیری استعلام" sub={<Bidi text={p.title} />} back="/mine" end={<Link href={`/p/${pid}/shops`} className="iconbtn" aria-label="فروشگاه‌های بیشتر"><Icon n="plus" /></Link>} />
       <Steps at={3} />
       {(simulated || DEMO) && <div className="banner info"><Icon n="spark" s /><span><b>پاسخ‌ها شبیه‌سازی‌شده‌اند — حالت نمایشی.</b> فروشنده‌های واقعی در این نسخه پاسخ نمی‌دهند.</span></div>}
+      </div>
+      <div className="lay lay-track">
       <div className="pad stack" style={{ gap: 10, paddingTop: 10 }}>
         {products.length > 1 && (
           <div className="hscroll" style={{ paddingInline: 0 }}>
@@ -86,8 +95,21 @@ export default function TrackView({ product }: { product?: string }) {
         </div>
         <Summary qs={items} />
         {items.map((q) => (
-          <InquiryCard key={q.id} q={q} now={now} flash={flash === q.id} listed={q.shop ? listed.get(q.shop.shop_id) : null} onAlternatives={() => setAltId(q.id)} />
+          <div key={q.id} className={`lay trk-item${sel?.id === q.id ? " is-sel" : ""}`} onClick={() => setSel(q.id)}>
+            <InquiryCard q={q} now={now} flash={flash === q.id} listed={q.shop ? listed.get(q.shop.shop_id) : null} onAlternatives={() => { setAltId(q.id); setSel(q.id); }} />
+          </div>
         ))}
+      </div>
+      <aside className="dk-only trk-detail" aria-label="جزئیات استعلام">
+        {sel && (
+          <div className="panel">
+            <div className="row between"><span className="h4">جزئیات</span>{sel.shop && <Link className="btn ghost" style={{ minHeight: 36 }} href={`/shop/${sel.shop.shop_id}?product=${pid}`}>صفحهٔ فروشگاه <Icon n="fwd" s /></Link>}</div>
+            <InquiryCard q={sel} now={now} listed={sel.shop ? listed.get(sel.shop.shop_id) : null} />
+            {sel.note && <div className="qa">یادداشت شما: «{sel.note}»</div>}
+          </div>
+        )}
+        {altFor && <div className="panel"><AltBody q={altFor} onAsk={(ids) => askMore.mutate(ids)} pending={askMore.isPending} /></div>}
+      </aside>
       </div>
 
       {toast && <div className="toast" role="status"><Icon n="alert" /><span>{toast}</span></div>}
@@ -98,7 +120,7 @@ export default function TrackView({ product }: { product?: string }) {
         <div className="xs faint center" style={{ marginTop: 6 }}>{okCount ? `با ${fa(okCount)} فروشگاه تأییدشده` : "بعد از اولین پاسخ «موجود است» فعال می‌شود"}</div>
       </div>
 
-      <Sheet open={!!alt} onClose={() => setAltId(null)} label="جایگزین‌ها">
+      <Sheet open={!!alt && !desk} onClose={() => setAltId(null)} label="جایگزین‌ها">
         {alt && <AltBody q={alt} onAsk={(ids) => askMore.mutate(ids)} pending={askMore.isPending} />}
       </Sheet>
     </main>

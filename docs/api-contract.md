@@ -6,6 +6,9 @@ Interactive docs: run the backend, open `/docs`. Machine-readable: `docs/openapi
 |---|---|
 | `GET /api/search/products?q=&category=&brand=&price_min=&price_max=&has_shops=&limit=&offset=` | Persian FTS (prefix, AND). Budget phrases inside `q` («زیر ۳ میلیون») are parsed → `applied`. Returns `items`, `total`, `facets{categories,brands}` |
 | `GET /api/products/{id}` | + specs, images |
+| `POST /api/auth/signup` · `POST /api/auth/login {username, password, session_id?}` | optional accounts; returns `{user: {id, username, session_id}, token}`. Signup adopts the device's anonymous session; login moves its inquiries into the account. scrypt passwords, SHA-256-stored tokens (30 days), 8 failed logins / 15 min per username and IP |
+| `GET /api/auth/me` · `POST /api/auth/logout` | `Authorization: Bearer <token>`. A session owned by a user needs that token on every session route (`/sessions/*`, `/inquiries`, `/visit-plan`, `/chat`); SSE takes `?token=` |
+| `POST /api/identify {image: data URL}` | snap-to-identify: a vision model reads brand/model/price from a shopper's photo; returns `read`, `query`, `match` (exact\|related\|type_only\|none) and `candidates`. Photo is not stored. `IDENTIFY_DAILY_CAP` (default 600) |
 | `POST /api/products/compare {ids:[2-4]}` | spec rows, differing first |
 | `GET /api/products/{id}/similar` | same category, price band, title/brand overlap |
 | `GET /api/products/{id}/shops?lat&lon&radius_km&installment&provider&open_now&fast_delivery&price_max&include_category_only&sort=best\|price\|distance\|freshness` | `listed[]` (has `offer`) + `category_only[]` + `counts`. Default location: Jomhouri/Hafez |

@@ -24,7 +24,7 @@ export default function SellerView({ shop, token }: { shop: string; token: strin
   const past = q.data.items.filter((i) => !pending.includes(i));
 
   return (
-    <main className="main">
+    <main className="main seller-main">
       <header className="sellerbar">
         <span className="mk"><Icon n="inbox" /></span>
         <div className="grow"><div className="b">{q.data.shop.name}</div><div className="xs" style={{ opacity: .75 }}>صندوق استعلام · نسخهٔ فروشنده</div></div>

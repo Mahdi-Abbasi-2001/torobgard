@@ -43,9 +43,11 @@ export default function AskView({ id }: { id: string }) {
 
   return (
     <main className="main has-cta">
+      <div className="lay lay-head">
       <AppBar title="استعلام" sub={p.data ? <Bidi text={p.data.title} /> : undefined} />
       <Steps at={3} />
-      <form className="pad stack" style={{ gap: 16 }} onSubmit={(e) => { e.preventDefault(); send.mutate(); }}>
+      </div>
+      <form className="pad stack ask-form" style={{ gap: 16 }} onSubmit={(e) => { e.preventDefault(); send.mutate(); }}>
         <div className="stack" style={{ gap: 8 }}>
           <div className="h4">فروشگاه‌ها <span className="n">{fa(picks.length)} از ۵</span></div>
           <div className="wrapr">
@@ -59,7 +61,7 @@ export default function AskView({ id }: { id: string }) {
           {picks.length >= 5 && <Note tone="unk" icon="alert">حداکثر ۵ فروشگاه. برای افزودن، یکی را بردارید.</Note>}
         </div>
 
-        <fieldset className="stack" style={{ gap: 8, border: 0, padding: 0, margin: 0 }}>
+        <fieldset className="stack ask-qs" style={{ gap: 8, border: 0, padding: 0, margin: 0 }}>
           <legend className="h4" style={{ marginBottom: 8 }}>چه بپرسیم؟</legend>
           {(questions.data?.items ?? DEFAULT_Q.map((k) => ({ key: k, text: k }))).map((x) => {
             const on = qs.includes(x.key);

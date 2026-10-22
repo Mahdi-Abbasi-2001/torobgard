@@ -6,12 +6,12 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, ctx: RouteContext<"/api/sessions/[id]/events">) {
   const { id } = await ctx.params;
-  const upstream = await fetch(`${API_URL}/api/sessions/${encodeURIComponent(id)}/events`, {
+  const upstream = await fetch(`${API_URL}/api/sessions/${encodeURIComponent(id)}/events${new URL(req.url).search}`, { // keeps ?token=
     headers: { Accept: "text/event-stream" },
     signal: req.signal,
     cache: "no-store",
   });
-  if (!upstream.ok || !upstream.body) return new Response("upstream unavailable", { status: 502 });
+  if (!upstream.ok || !upstream.body) return new Response(upstream.ok ? "upstream unavailable" : await upstream.text(), { status: upstream.ok ? 502 : upstream.status });
   return new Response(upstream.body, {
     headers: {
       "Content-Type": "text/event-stream; charset=utf-8",

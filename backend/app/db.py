@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS {p}inquiries(
 CREATE TABLE IF NOT EXISTS {p}bale_links(shop_id TEXT PRIMARY KEY, chat_id TEXT, linked_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}bale_kv(k TEXT PRIMARY KEY, v TEXT);
 CREATE TABLE IF NOT EXISTS {p}product_reviews(product_id TEXT PRIMARY KEY, data TEXT, model TEXT, created_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}users(id TEXT PRIMARY KEY, username TEXT, username_norm TEXT UNIQUE, pw TEXT, session_id TEXT UNIQUE, created_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}auth_tokens(token_hash TEXT PRIMARY KEY, user_id TEXT, created_at TEXT, expires_at TEXT);
 CREATE INDEX IF NOT EXISTS {p}ix_inq_session ON inquiries(session_id);
 CREATE INDEX IF NOT EXISTS {p}ix_inq_token ON inquiries(token);
 """

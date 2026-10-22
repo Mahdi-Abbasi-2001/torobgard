@@ -30,9 +30,11 @@ export default function CompareView({ ids }: { ids: string[] }) {
   const cols = `30% repeat(${products.length}, 1fr)`;
 
   return (
-    <main className="main has-cta">
+    <main className="main has-cta compare-main">
+      <div className="lay lay-head">
       <AppBar title="مقایسهٔ کالاها" sub={`${fa(products.length)} مدل`} />
       <Steps at={0} />
+      </div>
       <div className="pad stack" style={{ gap: 12 }}>
         <div style={{ display: "grid", gridTemplateColumns: cols, gap: 8, alignItems: "end" }}>
           <span />

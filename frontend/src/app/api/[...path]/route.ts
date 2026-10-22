@@ -11,7 +11,11 @@ async function proxy(req: Request, ctx: { params: Promise<{ path: string[] }> })
   const target = `${API_URL}/api/${path.map(encodeURIComponent).join("/")}${url.search}`;
   const init: RequestInit = {
     method: req.method,
-    headers: { "Content-Type": req.headers.get("content-type") ?? "application/json", Accept: req.headers.get("accept") ?? "*/*" },
+    headers: {
+      "Content-Type": req.headers.get("content-type") ?? "application/json", Accept: req.headers.get("accept") ?? "*/*",
+      ...(req.headers.get("authorization") ? { Authorization: req.headers.get("authorization")! } : {}),
+      ...(req.headers.get("x-forwarded-for") ? { "X-Forwarded-For": req.headers.get("x-forwarded-for")! } : {}),
+    },
     cache: "no-store",
     signal: req.signal,
   };

@@ -6,12 +6,14 @@ import { Icon } from "./Icon";
 import { FastChip, InstallmentChips, LocLine, OpenChip, PriceBadge, ShopName } from "./honesty";
 import { Bidi, Thumb } from "./ui";
 
-export function ShopCard({ s, selected, onSelect, confirmed, href, flash }: {
+export function ShopCard({ s, selected, onSelect, confirmed, href, flash, hovered, onHover }: {
   s: Shop; selected?: boolean; onSelect?: () => void; confirmed?: { price: number; ago: string } | null; href?: string; flash?: boolean;
+  hovered?: boolean; onHover?: (id: string | null) => void; // desktop: highlights the shop's pin on the map
 }) {
   const cat = s.tier === "category_only";
   return (
-    <div className={`card shop ${cat ? "cat" : ""} ${flash ? "flash" : ""}`}>
+    <div className={`card shop ${cat ? "cat" : ""} ${flash ? "flash" : ""}${hovered ? " hov" : ""}`}
+      onMouseEnter={onHover && (() => onHover(s.shop_id))} onMouseLeave={onHover && (() => onHover(null))}>
       <div className="shop-top">
         {onSelect && (
           <button type="button" className={`sel ${selected ? "on" : ""}`} role="checkbox" aria-checked={!!selected} aria-label={`انتخاب ${s.name} برای استعلام`} onClick={onSelect}>

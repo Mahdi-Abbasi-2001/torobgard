@@ -8,7 +8,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const { id } = await ctx.params;
   const upstream = await fetch(`${API_URL}/api/chat/${encodeURIComponent(id)}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    headers: { "Content-Type": "application/json", Accept: "text/event-stream", ...(req.headers.get("authorization") ? { Authorization: req.headers.get("authorization")! } : {}) },
     body: await req.text(),
     signal: req.signal,
     cache: "no-store",

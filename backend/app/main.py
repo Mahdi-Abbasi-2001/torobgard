@@ -126,6 +126,33 @@ async def product_review(product_id: str):
     return r
 
 
+class IdentifyIn(BaseModel):
+    image: str = Field(max_length=4_000_000)  # data URL (JPEG/PNG/WebP); the client downsizes to ~1024 px first
+
+
+@app.post("/api/identify", tags=["products"])
+async def identify(body: IdentifyIn):
+    """Snap-to-identify: read brand/model/price from a shopper's photo, then return candidate products to confirm.
+    The photo is processed in memory and never stored."""
+    from .services import identify as ident
+    try:
+        ident.decode_image(body.image)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    try:
+        read = await ident.read_photo(OpenAICompatLLM(), body.image)
+    except RuntimeError as e:
+        raise HTTPException(503, str(e))
+    except Exception:
+        raise HTTPException(503, "تشخیص عکس الان ممکن نشد. دوباره امتحان کنید یا نام کالا را بنویسید.")
+    con = db.connect()
+    try:
+        items, query, match = ident.candidates(con, read)
+    finally:
+        con.close()
+    return {"read": read, "query": query, "match": match, "candidates": items}
+
+
 @app.get("/api/products/{product_id}/similar", tags=["products"])
 def similar(product_id: str, con: Con, limit: int = 8):
     return {"items": catalog.similar_products(con, product_id, limit)}
@@ -184,12 +211,68 @@ def top_categories(con: Con, limit: int = 24):
 
 
 # ------------------------------------------------------------------ sessions & inquiries
+# ------------------------------------------------------------------ accounts (optional username + password)
+from .services import auth  # noqa: E402
+
+
+def _token(request: Request) -> str | None:
+    h = request.headers.get("authorization") or ""
+    return h[7:].strip() if h.lower().startswith("bearer ") else (request.query_params.get("token") or None)
+
+
+def _guard(con, session_id: str, request: Request):
+    try:
+        auth.guard(con, session_id, _token(request))
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.message)
+
+
+class AuthIn(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+    session_id: str | None = Field(None, max_length=64, description="this device's anonymous session, adopted/merged into the account")
+
+
+@app.post("/api/auth/signup", tags=["auth"])
+def auth_signup(body: AuthIn, con: Con):
+    try:
+        user, token = auth.signup(con, body.username, body.password, body.session_id)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.message)
+    return {"user": user, "token": token}
+
+
+@app.post("/api/auth/login", tags=["auth"])
+def auth_login(body: AuthIn, request: Request, con: Con):
+    ip = request.headers.get("x-forwarded-for", "").split(",")[0].strip() or (request.client.host if request.client else "")
+    try:
+        user, token = auth.login(con, body.username, body.password, body.session_id, ip)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.message)
+    return {"user": user, "token": token}
+
+
+@app.get("/api/auth/me", tags=["auth"])
+def auth_me(request: Request, con: Con):
+    u = auth.user_for_token(con, _token(request))
+    if not u:
+        raise HTTPException(401, "وارد نشده‌اید.")
+    return {"user": u}
+
+
+@app.post("/api/auth/logout", tags=["auth"])
+def auth_logout(request: Request, con: Con):
+    auth.logout(con, _token(request))
+    return {"ok": True}
+
+
 class SessionPatch(BaseModel):
     state: dict
 
 
 @app.put("/api/sessions/{session_id}", tags=["sessions"])
-def put_session(session_id: str, body: SessionPatch, con: Con):
+def put_session(session_id: str, body: SessionPatch, request: Request, con: Con):
+    _guard(con, session_id, request)
     cur = inq.get_session(con, session_id) or {}
     cur.update(body.state)
     inq.save_session(con, session_id, cur)
@@ -197,7 +280,8 @@ def put_session(session_id: str, body: SessionPatch, con: Con):
 
 
 @app.get("/api/sessions/{session_id}", tags=["sessions"])
-def get_session(session_id: str, con: Con):
+def get_session(session_id: str, request: Request, con: Con):
+    _guard(con, session_id, request)
     return inq.get_session(con, session_id) or {}
 
 
@@ -216,20 +300,27 @@ def inquiry_questions():
 
 
 @app.post("/api/inquiries", tags=["inquiries"])
-def create_inquiries(body: InquiryIn, con: Con):
+def create_inquiries(body: InquiryIn, request: Request, con: Con):
+    _guard(con, body.session_id, request)
     created = inq.create(con, body.session_id, body.shop_ids, body.product_id, body.questions, body.timeout_s, body.note)
     return {"items": [inq.view(con, c["id"]) for c in created]}
 
 
 @app.get("/api/sessions/{session_id}/inquiries", tags=["inquiries"])
-def session_inquiries(session_id: str, con: Con):
+def session_inquiries(session_id: str, request: Request, con: Con):
+    _guard(con, session_id, request)
     inq.expire_overdue(con)
     return {"items": inq.list_for_session(con, session_id)}
 
 
 @app.get("/api/sessions/{session_id}/events", tags=["inquiries"])
 async def session_events(session_id: str, request: Request):
-    """Server-sent events: inquiry status changes in real time."""
+    """Server-sent events: inquiry status changes in real time. Accounts pass their token as ?token= (EventSource has no headers)."""
+    _c = db.connect()
+    try:
+        _guard(_c, session_id, request)
+    finally:
+        _c.close()
     q = inq.subscribe(session_id)
 
     async def gen():
@@ -303,8 +394,9 @@ class PlanIn(BaseModel):
 
 
 @app.post("/api/visit-plan", tags=["plan"])
-def make_visit_plan(body: PlanIn, con: Con):
+def make_visit_plan(body: PlanIn, request: Request, con: Con):
     """Plan built from sellers' confirmations ("available"), newest answer per shop; optional unconfirmed shop_ids."""
+    _guard(con, body.session_id, request)
     stops, seen = [], set()
     for i in inq.list_for_session(con, body.session_id):
         sid = i["shop"]["shop_id"] if i["shop"] else None
@@ -352,6 +444,11 @@ async def chat(session_id: str, body: ChatIn, request: Request):
     chips, inquiry_proposal, inquiry_status. Falls back to rule-based search when the LLM is unavailable."""
     if not _rate_ok(session_id):
         raise HTTPException(429, "پیام‌ها خیلی سریع است؛ کمی صبر کنید.")
+    _c = db.connect()
+    try:
+        _guard(_c, session_id, request)
+    finally:
+        _c.close()
 
     async def gen():
         try:

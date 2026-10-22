@@ -1,4 +1,5 @@
 // Chat agent client: POST /api/chat/{sid}, parse the SSE stream into typed events (docs/api-contract.md).
+import { authHeader } from "./api";
 import type { CompareResult, Inquiry, Product, ProductReview, ShopCard, WherePlace } from "./api";
 
 export type Block =
@@ -22,7 +23,7 @@ export type ChatEvent =
 export async function streamChat(sid: string, message: string, onEvent: (e: ChatEvent) => void, signal?: AbortSignal) {
   let r: Response;
   try {
-    r = await fetch(`/api/chat/${encodeURIComponent(sid)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message }), signal });
+    r = await fetch(`/api/chat/${encodeURIComponent(sid)}`, { method: "POST", headers: { "Content-Type": "application/json", ...authHeader() }, body: JSON.stringify({ message }), signal });
   } catch {
     throw new Error("اتصال به اینترنت برقرار نیست.");
   }

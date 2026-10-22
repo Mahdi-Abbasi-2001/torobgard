@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { fa } from "@/lib/fa";
+import { useIsDesktop } from "@/lib/media";
 import { normalize } from "@/lib/text";
 import { Icon } from "@/components/Icon";
 import { AppBar, Empty, ErrorState, SkeletonCards } from "@/components/ui";
@@ -13,6 +14,8 @@ export default function MallView({ mallKey }: { mallKey: string }) {
   const [term, setTerm] = useState("");
   const [cat, setCat] = useState<string | null>(null);
   const [open, setOpen] = useState<Set<string>>(new Set());
+  const [tab, setTab] = useState<string | null>(null); // desktop: one floor at a time
+  const desk = useIsDesktop();
   const m = q.data;
   const topCats = useMemo(() => {
     const c = new Map<string, number>();
@@ -27,7 +30,10 @@ export default function MallView({ mallKey }: { mallKey: string }) {
     (!t || normalize(s.name).includes(t) || s.categories.some((c) => normalize(c).includes(t)) || (s.unit ?? "").includes(term) || (s.plaque ?? "").includes(term)) &&
     (!cat || s.categories.includes(cat));
   const filtering = !!t || !!cat;
-  const floors = m.floors.map((f) => ({ ...f, hits: f.shops.filter(match) })).filter((f) => !filtering || f.hits.length);
+  const allFloors = m.floors.map((f) => ({ ...f, hits: f.shops.filter(match) })).filter((f) => !filtering || f.hits.length);
+  const fk = (f: { floor: number | null }) => String(f.floor ?? "unk");
+  const tabKey = tab ?? (allFloors[0] ? fk(allFloors[0]) : null);
+  const floors = desk && !filtering ? allFloors.filter((f) => fk(f) === tabKey) : allFloors;
   const toggle = (k: string) => setOpen((o) => { const n = new Set(o); if (n.has(k)) n.delete(k); else n.add(k); return n; });
 
   return (
@@ -39,12 +45,17 @@ export default function MallView({ mallKey }: { mallKey: string }) {
           <label htmlFor="mq" className="sr">جستجو در پاساژ</label>
           <input id="mq" value={term} onChange={(e) => setTerm(e.target.value)} placeholder={`جستجو در ${fa(m.shop_count)} فروشگاه…`} />
         </div>
+        {!filtering && (
+          <div className="dk-only floor-tabs" role="tablist" aria-label="طبقه‌ها">
+            {allFloors.map((f) => <button key={fk(f)} role="tab" aria-selected={fk(f) === tabKey} className={`${fk(f) === tabKey ? "on" : ""}${f.floor == null ? " unk" : ""}`} onClick={() => setTab(fk(f))}>{fa(f.label)} · {fa(f.shops.length)}</button>)}
+          </div>
+        )}
         <div className="wrapr">{topCats.map((c) => <button key={c} className={`chip ${cat === c ? "on" : ""}`} onClick={() => setCat(cat === c ? null : c)}>{c}{cat === c && <Icon n="x" s className="x" />}</button>)}</div>
         {!floors.length && <Empty icon="search" title="فروشگاهی پیدا نشد">نام فروشگاه، دسته یا شمارهٔ واحد را امتحان کنید.</Empty>}
         {floors.map((f) => {
-          const k = String(f.floor ?? "unk"), unk = f.floor == null, isOpen = filtering || open.has(k);
+          const k = String(f.floor ?? "unk"), unk = f.floor == null, isOpen = filtering || open.has(k) || (desk && k === tabKey);
           return (
-            <div key={k} className="card" style={{ overflow: "hidden", ...(unk ? { border: "1.5px dashed var(--unk)", background: "transparent", boxShadow: "none" } : {}) }}>
+            <div key={k} className="card mall-floor" style={{ overflow: "hidden", ...(unk ? { border: "1.5px dashed var(--unk)", background: "transparent", boxShadow: "none" } : {}) }}>
               <button className="frow" style={{ padding: "0 14px", width: "100%", background: "none", border: 0 }} aria-expanded={isOpen} onClick={() => toggle(k)}>
                 <span className="b sm" style={unk ? { color: "var(--ink-2)" } : undefined}>{fa(f.label)}</span>
                 <span className="row xs muted" style={{ gap: 6 }}>{fa(filtering ? f.hits.length : f.shops.length)} فروشگاه<Icon n={isOpen ? "minus" : "plus"} s /></span>

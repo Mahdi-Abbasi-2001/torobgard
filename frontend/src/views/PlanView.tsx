@@ -10,6 +10,7 @@ import { useSession } from "@/lib/session";
 import { useInquiries, useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
 import { PriceBadge } from "@/components/honesty";
+import { ShopMap } from "@/components/ShopMap";
 import { AppBar, Bidi, Empty, Note, SkeletonCards, Steps } from "@/components/ui";
 
 const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
@@ -72,9 +73,12 @@ export default function PlanView({ product }: { product?: string }) {
 
   return (
     <main className="main has-cta">
+      <div className="lay lay-head">
       <AppBar title="برنامهٔ بازدید" sub={`امروز · ${fa(stops.length)} توقف · حدود ${fa(total)} دقیقه پیاده`} />
       <Steps at={3} />
-      <div className="pad stack" style={{ gap: 12 }}>
+      </div>
+      <div className="pad stack lay-2col" style={{ gap: 12 }}>
+        <div className="lay plan-main">
         <div className="row sm muted" style={{ gap: 8 }}><Icon n="loc" s />شروع از {state.place.label} · {clock(new Date(now).toISOString())}</div>
         <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {stops.map((s, i) => (
@@ -99,6 +103,9 @@ export default function PlanView({ product }: { product?: string }) {
             </li>
           ))}
         </ol>
+        </div>
+        <div className="lay plan-side">
+        <div className="dk-only"><ShopMap origin={state.place} listed={stops.map((s) => s.shop)} cat={[]} selected={stops.map((s) => s.shop.shop_id)} /></div>
         {malls.size === 1 && stops.length > 1 && <Note tone="info" icon="layers">همهٔ توقف‌ها در {[...malls][0]} است؛ طبقه‌ها را از پایین به بالا بروید.</Note>}
         {traffic && <Note tone="warn" icon="alert"><b>طرح ترافیک:</b> این مسیر داخل محدودهٔ طرح است. با مترو (ایستگاه‌های حافظ یا امام خمینی) بیایید؛ ورود خودرو بدون مجوز ممکن نیست.</Note>}
         {first && (
@@ -120,6 +127,7 @@ export default function PlanView({ product }: { product?: string }) {
               <span className={`sel ${done[t] ? "on" : ""}`} aria-hidden="true">{done[t] && <Icon n="check" s />}</span>
             </label>
           ))}
+        </div>
         </div>
       </div>
       {first && (

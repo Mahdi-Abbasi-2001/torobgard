@@ -35,7 +35,20 @@ Production: `npm run build && npm start`.
 | `/shop/[id]` | Shop detail: mall locator, weekly hours (today highlighted, suspicious hours flagged), installments, offers, no call button |
 | `/mall/[key]` | Mall directory: floor accordion, search, category filter, «طبقه نامشخص» group |
 | `/seller/[shop]/[token]` | Seller inbox (open the link from `GET /api/demo/seller-link/{shop}`): big buttons, listed price prefilled, 403/409 states |
+| `/login` | Optional account: sign in / sign up (username + password). Entry points: desktop top bar, account card on «خریدهای من». Signing out starts a fresh anonymous session |
+| `/snap` | Photo of a product in a shop: what was read (editable), «همین است؟» candidates, price check against listed prices nearby, cheaper shops + one-tap inquiry. Camera buttons: Home need box, desktop top bar, phone search field |
 | `/chat` | Streaming agent (`/api/chat`, blocks → components); falls back to simple search + banner when the LLM is unavailable |
+
+## Desktop and tablet (design/canvas.src.html, sections D and T)
+- Phones (≤ 640 px) are untouched. Tablet (641–959) only widens the column to 640 px. Desktop (≥ 960) is a CSS layer at the end of
+  `src/app/globals.css`.
+- Layout wrappers in the views use `className="lay lay-…"`. Below 960 px `.lay` is `display: contents`, so the wrapper draws nothing
+  and the phone layout is pixel-identical; on desktop each wrapper becomes a grid or column. `.dk-only` parts are hidden on phones,
+  `.m-only` parts are hidden on desktop.
+- `src/components/TopBar.tsx` replaces the bottom nav on desktop (search, location, گفتگو / خریدهای من, light/dark toggle stored in
+  `localStorage["tg-theme"]`). `useIsDesktop()` (`src/lib/media.ts`) is used only where JS must differ: the large map in
+  `ShopMap.tsx`, the tracker's side panel instead of the alternatives sheet, and the mall's floor tabs.
+- Before changing any view, check phones stay identical: screenshot the routes at 375 px before and after and diff them.
 
 ## Not wired yet (backend pieces missing)
 - `/api/visit-plan` now exists; `src/views/PlanView.tsx` still computes the plan client-side. Swap when convenient.

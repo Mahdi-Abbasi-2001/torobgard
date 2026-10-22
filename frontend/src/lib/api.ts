@@ -71,14 +71,33 @@ export interface ProductReview {
   generated_by: string | null; cached: boolean; disclaimer: string;
 }
 
+export interface PhotoRead {
+  brand: string | null; brand_fa: string | null; model: string | null; product_type: string | null; search_query: string | null;
+  price_seen: number | null; price_text: string | null; visible_text: string | null; confidence: "high" | "medium" | "low";
+}
+export interface IdentifyResult {
+  read: PhotoRead; query: string | null; candidates: Product[];
+  /** exact: this model · related: only accessories/parts of it · type_only: no model readable · none */
+  match: "exact" | "related" | "type_only" | "none";
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
+// Login token (optional accounts). Kept in localStorage; sent on every API call so a user's session stays private.
+const AUTH_KEY = "tg-auth";
+export interface User { id: string; username: string; session_id: string }
+export const authStore = {
+  get(): { token: string; user: User } | null { try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch { return null; } },
+  set(v: { token: string; user: User } | null) { try { if (v) localStorage.setItem(AUTH_KEY, JSON.stringify(v)); else localStorage.removeItem(AUTH_KEY); } catch {} },
+};
+export const authHeader = (): Record<string, string> => { const a = typeof window === "undefined" ? null : authStore.get(); return a ? { Authorization: `Bearer ${a.token}` } : {}; };
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(`/api${path}`, { ...init, headers: { "Content-Type": "application/json", ...init?.headers } });
+    r = await fetch(`/api${path}`, { ...init, headers: { "Content-Type": "application/json", ...authHeader(), ...init?.headers } });
   } catch {
     throw new ApiError(0, "اتصال به اینترنت برقرار نیست.");
   }
@@ -118,6 +137,7 @@ export const api = {
   mall: (key: string) => req<MallDirectory>(`/malls/${encodeURIComponent(key)}`),
   whereToLook: (p: { q: string; category?: string | null; hint?: string | null }, loc: Loc) =>
     req<WhereToLook>(`/where-to-look${qs({ q: p.q, category: p.category, hint: p.hint, ...at(loc) })}`),
+  identify: (image: string) => req<IdentifyResult>(`/identify`, { method: "POST", body: JSON.stringify({ image }) }),
   review: (id: string) => req<ProductReview>(`/products/${encodeURIComponent(id)}/review`),
   topCategories: (limit = 8) => req<{ items: { name: string; multi_shop_products: number }[] }>(`/categories/top${qs({ limit })}`),
   getSession: (id: string) => req<Record<string, unknown>>(`/sessions/${id}`),
@@ -130,5 +150,12 @@ export const api = {
     req<{ shop: { shop_id: string; name: string; mall: string | null; unit: string | null }; bale?: { enabled: boolean; bot_username?: string | null; linked?: boolean; command?: string }; items: Inquiry[] }>(`/seller/${shop}/${token}/inquiries`),
   sellerAnswer: (shop: string, token: string, id: string, a: Partial<Answer>) =>
     req<Inquiry>(`/seller/${shop}/${token}/inquiries/${id}/answer`, { method: "POST", body: JSON.stringify(a) }),
-  eventsUrl: (sid: string) => `${process.env.NEXT_PUBLIC_EVENTS_BASE ?? ""}/api/sessions/${sid}/events`,
+  // EventSource cannot send headers, so an account's token rides in the query string (HTTPS in production)
+  eventsUrl: (sid: string) => { const a = typeof window === "undefined" ? null : authStore.get(); return `${process.env.NEXT_PUBLIC_EVENTS_BASE ?? ""}/api/sessions/${sid}/events${a ? `?token=${encodeURIComponent(a.token)}` : ""}`; },
+  signup: (username: string, password: string, session_id: string) =>
+    req<{ user: User; token: string }>(`/auth/signup`, { method: "POST", body: JSON.stringify({ username, password, session_id }) }),
+  login: (username: string, password: string, session_id: string) =>
+    req<{ user: User; token: string }>(`/auth/login`, { method: "POST", body: JSON.stringify({ username, password, session_id }) }),
+  me: () => req<{ user: User }>(`/auth/me`),
+  logout: () => req<{ ok: boolean }>(`/auth/logout`, { method: "POST" }),
 };

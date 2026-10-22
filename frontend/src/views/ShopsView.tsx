@@ -24,6 +24,7 @@ export default function ShopsView({ id }: { id: string }) {
   const [catMore, setCatMore] = useState(false);
   const [tab, setTab] = useState<0 | 1>(0);
   const [warn, setWarn] = useState("");
+  const [hov, setHov] = useState<string | null>(null);
   const catRef = useRef<HTMLDivElement>(null);
 
   const p = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
@@ -47,20 +48,23 @@ export default function ShopsView({ id }: { id: string }) {
   const flashKey = JSON.stringify(f);
 
   return (
-    <main className="main has-cta">
+    <main className="main has-cta shops-page">
+      <div className="lay lay-head">
       <AppBar title="فروشگاه‌های نزدیک" sub={`نزدیک ${state.place.label}`} end={
-        <button className="iconbtn" aria-label={view === "map" ? "نمایش فهرست" : "نمایش نقشه"} onClick={() => setView(view === "map" ? "list" : "map")}><Icon n={view === "map" ? "list" : "map"} /></button>} />
+        <button className="iconbtn m-only" aria-label={view === "map" ? "نمایش فهرست" : "نمایش نقشه"} onClick={() => setView(view === "map" ? "list" : "map")}><Icon n={view === "map" ? "list" : "map"} /></button>} />
       <OfflineBanner />
       <Steps at={1} />
-      {p.data && <div className="pad"><ProductMini p={p.data} sub={d ? `${fa(d.counts.listed)} فروشگاه${p.data.price_min ? ` · از ${mil(p.data.price_min)} تومان` : ""}` : "…"} /></div>}
-      <div style={{ height: 10 }} />
+      </div>
+      <div className="lay lay-shops">
+      {p.data && <div className="pad shops-prod"><ProductMini p={p.data} sub={d ? `${fa(d.counts.listed)} فروشگاه${p.data.price_min ? ` · از ${mil(p.data.price_min)} تومان` : ""}` : "…"} /></div>}
+      <div className="shops-spacer" style={{ height: 10 }} />
       {d && (
         <div className="tabs" role="tablist">
           <button role="tab" aria-selected={tab === 0} className={tab === 0 ? "on" : ""} onClick={() => { setTab(0); window.scrollTo({ top: 0, behavior: "smooth" }); }}><Icon n="store" s />این کالا را دارند <span className="cnt">{fa(d.counts.listed)}</span></button>
           <button role="tab" aria-selected={tab === 1} className={tab === 1 ? "on" : ""} onClick={() => { setTab(1); catRef.current?.scrollIntoView({ behavior: "smooth" }); }}><Icon n="q" s />فقط در این دسته <span className="cnt">{fa(d.counts.category_only)}</span></button>
         </div>
       )}
-      <div className="hscroll" style={{ paddingBlock: 10 }}>
+      <div className="hscroll shops-chips" style={{ paddingBlock: 10 }}>
         <button className={`chip ${f.installment ? "on" : ""}`} aria-pressed={!!f.installment} onClick={() => setF({ installment: !f.installment })}><Icon n={f.installment ? "check" : "card"} s />قسطی</button>
         <button className={`chip ${f.open_now ? "on" : ""}`} aria-pressed={!!f.open_now} onClick={() => setF({ open_now: !f.open_now })}>{f.open_now && <Icon n="check" s />}باز است الان</button>
         <button className={`chip ${f.radius_km != null ? "on" : ""}`} onClick={() => setSheet(true)}>{f.radius_km != null ? `تا ${RADII.find((r) => r[0] === f.radius_km)?.[1]}` : "فاصله: همه"}</button>
@@ -70,11 +74,12 @@ export default function ShopsView({ id }: { id: string }) {
 
       {q.isLoading && <SkeletonCards n={4} />}
       {q.isError && <ErrorState error={q.error} retry={() => q.refetch()} />}
-      {d && view === "map" && d.listed.length + d.category_only.length > 0 && (
-        <ShopMap origin={state.place} listed={d.listed} cat={d.category_only.slice(0, 12)} selected={chosen} onPick={pick} />
+      {d && d.listed.length + d.category_only.length > 0 && (
+        <ShopMap origin={state.place} listed={d.listed} cat={d.category_only.slice(0, 12)} selected={chosen} onPick={pick}
+          hover={hov} onHover={setHov} className={view === "map" ? undefined : "m-hide"} />
       )}
       {d && (
-        <div className="stack" style={{ gap: 10, paddingTop: 12, opacity: q.isFetching ? .6 : 1, transition: "opacity .2s" }}>
+        <div className="stack shops-list" style={{ gap: 10, paddingTop: 12, opacity: q.isFetching ? .6 : 1, transition: "opacity .2s" }}>
           {d.listed.length === 0 ? (
             <ZeroListed id={id} f={f} setF={setF} catCount={d.counts.category_only} />
           ) : (
@@ -85,7 +90,7 @@ export default function ShopsView({ id }: { id: string }) {
               </div>
               {d.listed.every((s) => s.open.state === "closed") && <div className="pad"><Note tone="unk" icon="clock">همهٔ این فروشگاه‌ها الان بسته‌اند. استعلام را حالا بفرستید تا وقتی باز شدند جواب بگیرید.</Note></div>}
               <div className="pad stack" style={{ gap: 10 }} key={flashKey}>
-                {d.listed.map((s) => <ShopCard key={s.shop_id} s={s} selected={chosen.includes(s.shop_id)} onSelect={() => pick(s.shop_id)} href={`/shop/${s.shop_id}?product=${id}`} flash={q.isPlaceholderData === false && active > 0} />)}
+                {d.listed.map((s) => <ShopCard key={s.shop_id} s={s} selected={chosen.includes(s.shop_id)} onSelect={() => pick(s.shop_id)} href={`/shop/${s.shop_id}?product=${id}`} flash={q.isPlaceholderData === false && active > 0} hovered={hov === s.shop_id} onHover={setHov} />)}
               </div>
             </>
           )}
@@ -97,7 +102,7 @@ export default function ShopsView({ id }: { id: string }) {
                 <p className="lede">این فروشگاه‌ها در همین دسته کالا می‌فروشند، اما این مدل را ثبت نکرده‌اند. موجودی را باید بپرسید.</p>
               </div>
               <div className="pad stack" style={{ gap: 10 }}>
-                {d.category_only.slice(0, catMore ? 20 : 4).map((s) => <ShopCard key={s.shop_id} s={s} selected={chosen.includes(s.shop_id)} onSelect={() => pick(s.shop_id)} />)}
+                {d.category_only.slice(0, catMore ? 20 : 4).map((s) => <ShopCard key={s.shop_id} s={s} selected={chosen.includes(s.shop_id)} onSelect={() => pick(s.shop_id)} hovered={hov === s.shop_id} onHover={setHov} />)}
                 {!catMore && d.category_only.length > 4 && <button className="btn sec block" onClick={() => setCatMore(true)}>نمایش فروشگاه‌های بیشتر این دسته</button>}
               </div>
             </>
@@ -105,8 +110,19 @@ export default function ShopsView({ id }: { id: string }) {
         </div>
       )}
 
+      </div>
       {warn && <div className="toast" role="status"><Icon n="alert" />{warn}</div>}
       <div className="sticky-cta">
+        {chosen.length > 0 && d && (
+          <div className="dk-only">
+            <div className="b sm">{fa(chosen.length)} فروشگاه برای استعلام <span className="faint" style={{ fontWeight: 500 }}>· تا ۵</span></div>
+            <div className="tray-chips" style={{ marginTop: 6 }}>
+              {chosen.map((cid) => { const s = [...d.listed, ...d.category_only].find((x) => x.shop_id === cid); return s ? (
+                <button key={cid} type="button" className="chip on" style={{ minHeight: 32 }} onClick={() => pick(cid)} onMouseEnter={() => setHov(cid)} onMouseLeave={() => setHov(null)} aria-label={`حذف ${s.name}`}>{s.name}<Icon n="x" s className="x" /></button>
+              ) : null; })}
+            </div>
+          </div>
+        )}
         <div className="row">
           {chosen.length >= 2 && <Link className="btn sec" href={`/p/${id}/shops/compare?ids=${chosen.join(",")}`}><Icon n="compare" s />مقایسه</Link>}
           <button className="btn pri grow" disabled={!chosen.length} onClick={() => router.push(`/p/${id}/ask`)}>

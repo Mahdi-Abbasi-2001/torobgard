@@ -43,9 +43,9 @@ export function WhereToLookCard({ data }: { data: WhereData }) {
 }
 
 /** Self-fetching variant for empty states (search with no results, product nobody lists). */
-export function WhereToLook({ q, category }: { q: string; category?: string | null }) {
+export function WhereToLook({ q, category, className = "" }: { q: string; category?: string | null; className?: string }) {
   const { state } = useSession();
   const d = useQuery({ queryKey: ["where", q, category, state.place.lat], queryFn: () => api.whereToLook({ q, category }, state.place), enabled: !!(q || category), staleTime: 5 * 60_000 });
   if (!d.data || d.data.places.length === 0) return null;
-  return <div className="pad"><WhereToLookCard data={d.data} /></div>;
+  return <div className={`pad ${className}`}><WhereToLookCard data={d.data} /></div>;
 }

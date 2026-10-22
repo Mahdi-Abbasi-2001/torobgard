@@ -58,9 +58,11 @@ export default function CompareShopsView({ id, ids }: { id: string; ids: string[
   ];
 
   return (
-    <main className="main has-cta">
+    <main className="main has-cta scompare-main">
+      <div className="lay lay-head">
       <AppBar title="مقایسهٔ فروشگاه‌ها" sub={p.data ? <Bidi text={p.data.title} /> : undefined} />
       <Steps at={2} />
+      </div>
       <div className="pad stack" style={{ gap: 12 }}>
         <Seg label="مرتب‌سازی" value={sort} onChange={setSort} options={[["best", "بهترین"], ["price", "قیمت"], ["distance", "فاصله"], ["freshness", "تازگی قیمت"]]} />
         <div className="tablewrap">

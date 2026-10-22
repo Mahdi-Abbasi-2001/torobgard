@@ -3,11 +3,11 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";
-import { fa, mil, money } from "@/lib/fa";
+import { fa, mil, money, walk } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductCard } from "@/components/cards";
-import { SourceNote } from "@/components/honesty";
+import { PriceBadge, SourceNote } from "@/components/honesty";
 import { ProductReview } from "@/components/ReviewCard";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards, Steps, Thumb } from "@/components/ui";
 
@@ -30,17 +30,21 @@ export default function ProductView({ id }: { id: string }) {
   const shown = specs.length >= 3 ? specs : d.specs.slice(0, 6);
   const pos = (v: number) => (d.price_max! > d.price_min! ? ((v - d.price_min!) / (d.price_max! - d.price_min!)) * 100 : 50);
   const inCmp = state.compare.includes(id);
+  const nearest = [...(shops.data?.listed ?? [])].sort((a, b) => (a.walk_min ?? 99) - (b.walk_min ?? 99))[0];
 
   return (
     <main className="main has-cta">
+      <div className="lay lay-head">
       <AppBar end={<button className="iconbtn" aria-pressed={inCmp} aria-label="افزودن به مقایسه" onClick={() => toggleCompare(id)} style={{ color: inCmp ? "var(--accent)" : undefined }}><Icon n="compare" /></button>} />
       <Steps at={0} />
+      </div>
       <div className="tabs" style={{ marginBottom: 12 }}>
         <span className="on" style={{ whiteSpace: "nowrap" }}><Icon n="pin" s />خرید حضوری <span className="cnt">{fa(d.shop_count)}</span></span>
         <a href="#specs">مشخصات</a>
         <Link href={`/compare?ids=${[...new Set([id, ...state.compare])].slice(0, 4).join(",")}`}>مقایسه</Link>
       </div>
-      <div className="pad stack" style={{ gap: 14 }}>
+      <div className="pad stack lay-product" style={{ gap: 14 }}>
+        <div className="lay pd-main">
         <Thumb src={d.images[0] ?? d.image} alt={d.title} size="100%" h={220} brand={d.brand} />
         <div>
           <div className="xs faint">{d.brand ?? "برند نامشخص"} · {d.category}</div>
@@ -86,6 +90,21 @@ export default function ProductView({ id }: { id: string }) {
         )}
 
         <ProductReview id={d.product_id} />
+        </div>
+        <div className="lay pd-side">
+        <div className="sticky-cta">
+          <div className="dk-only">
+            <div className="row between"><span className="b">خرید حضوری</span><span className="tag" style={{ background: "var(--sunk)", color: "var(--ink-2)" }}>{fa(d.shop_count)} فروشگاه</span></div>
+            {nearest && <>
+              <div className="sm muted" style={{ marginBlock: 6 }}>نزدیک‌ترین: <b style={{ color: "var(--ink)" }}>{nearest.name}</b>{nearest.mall ? ` · ${nearest.mall}` : ""} · {walk(nearest.walk_min)} پیاده</div>
+              <PriceBadge offer={nearest.offer} />
+            </>}
+          </div>
+          <div className="row">
+            <button className="btn sec" onClick={() => toggleCompare(id)} aria-pressed={inCmp}><Icon n={inCmp ? "check" : "compare"} s />{inCmp ? "در مقایسه" : "مقایسه"}</button>
+            <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />فروشگاه‌های نزدیک</Link>
+          </div>
+        </div>
         <div id="specs">
           <div className="h4" style={{ marginBottom: 6 }}>مشخصات کلیدی</div>
           {d.specs.length === 0
@@ -97,11 +116,6 @@ export default function ProductView({ id }: { id: string }) {
               </>
             )}
         </div>
-      </div>
-      <div className="sticky-cta">
-        <div className="row">
-          <button className="btn sec" onClick={() => toggleCompare(id)} aria-pressed={inCmp}><Icon n={inCmp ? "check" : "compare"} s />{inCmp ? "در مقایسه" : "مقایسه"}</button>
-          <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />فروشگاه‌های نزدیک</Link>
         </div>
       </div>
     </main>
