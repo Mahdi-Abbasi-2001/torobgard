@@ -144,7 +144,10 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
   const router = useRouter();
   const { state, setPicks } = useSession();
   const [text, setText] = useState(seen ? money(seen) : "");
+  // a price read from the photo is only a guess (BoxAPI once read ۳٬۲۰۰٬۰۰۰ as ۳۲۰٬۰۰۰): no verdict until the shopper confirms it
+  const [confirmed, setConfirmed] = useState(false);
   const quoted = text ? parseNum(text) : null;
+  const fromPhoto = !!seen && quoted === seen;
   const shops = useQuery({ queryKey: ["pshops-snap", p.product_id, state.place.lat, state.place.lon], queryFn: () => api.productShops(p.product_id, state.place, { sort: "best" }, 60) });
   const listed = (shops.data?.listed ?? []).filter((s) => s.offer?.price);
   const prices = listed.map((s) => s.offer!.price!).sort((a, b) => a - b);
@@ -152,6 +155,13 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
   const cheaper = quoted ? listed.filter((s) => s.offer!.price! < quoted).sort((a, b) => (a.walk_min ?? 99) - (b.walk_min ?? 99)) : [];
   const nearCheap = cheaper.filter((s) => (s.walk_min ?? 99) <= 20);
   const pct = quoted && median ? Math.round(((quoted - median) / median) * 100) : null;
+  // far outside what shops list (×4 or more): most likely a dropped/extra zero, in the photo read or in typing
+  const ratio = quoted && median ? quoted / median : null;
+  const suspicious = ratio !== null && (ratio >= 4 || ratio <= 0.25) && !confirmed;
+  const fixes = quoted && median ? [quoted * 10, quoted / 10, quoted * 100, quoted / 100].filter((v) => v / median > 0.4 && v / median < 2.5) : [];
+  const needConfirm = fromPhoto && !confirmed;
+  const showVerdict = !!quoted && pct !== null && !suspicious && !needConfirm;
+  const edit = (v: string) => { setText(v); setConfirmed(false); };
   const ask = (ids: string[]) => { setPicks(p.product_id, ids.slice(0, 5)); router.push(`/p/${p.product_id}/ask`); };
 
   return (
@@ -160,10 +170,10 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
       <div className="stack" style={{ gap: 6 }}>
         <label htmlFor="quoted" className="sm b">قیمتی که این فروشگاه گفته (تومان)</label>
         <div className="field" style={{ minHeight: 52 }}>
-          <input id="quoted" inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)} placeholder="مثلاً ۳٬۲۰۰٬۰۰۰" style={{ fontSize: 18, fontWeight: 800 }} />
+          <input id="quoted" inputMode="numeric" value={text} onChange={(e) => edit(e.target.value)} placeholder="مثلاً ۳٬۲۰۰٬۰۰۰" style={{ fontSize: 18, fontWeight: 800 }} />
           <span className="xs faint">تومان</span>
         </div>
-        {seen && <span className="xs faint">از برچسب قیمت در عکس خوانده شد؛ اگر فرق دارد اصلاح کنید.</span>}
+        {fromPhoto && <span className="xs faint">از برچسب قیمت در عکس خوانده شد{confirmed ? "" : "؛ با برچسب مقایسه کنید"}.</span>}
       </div>
       {shops.isLoading && <div className="sk" style={{ height: 60 }} />}
       {shops.data && !prices.length && <Note tone="unk" icon="q">هیچ فروشگاه نزدیکی برای این کالا قیمت ثبت نکرده؛ مقایسه ممکن نیست.</Note>}
@@ -174,7 +184,25 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
             <span className="center"><b>{mil(median!)}</b><br /><span className="faint">میانه</span></span>
             <span style={{ textAlign: "left" }}><b>{fa(prices.length)}</b><br /><span className="faint">فروشگاه با قیمت</span></span>
           </div>
-          {quoted && pct !== null && (
+          {suspicious && (
+            <Note tone="warn" icon="alert">
+              <b>احتمالاً اشتباه {fromPhoto ? "خوانده شد" : "نوشته شد"}:</b> {money(quoted!)} تومان با قیمت‌های ثبت‌شده (میانه {mil(median!)}) خیلی فاصله دارد؛ شاید یک صفر کم یا زیاد شده.
+              <span className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                {fixes.map((v) => <button key={v} type="button" className="btn sec" onClick={() => edit(money(v))}>{money(v)} تومان</button>)}
+                <button type="button" className="btn ghost" onClick={() => setConfirmed(true)}>همین درست است</button>
+              </span>
+            </Note>
+          )}
+          {!suspicious && needConfirm && quoted && (
+            <Note tone="unk" icon="q">
+              قیمت روی برچسب <b>{money(quoted)} تومان</b> است؟
+              <span className="row" style={{ gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                <button type="button" className="btn pri" onClick={() => setConfirmed(true)}><Icon n="check" s />بله، درست است</button>
+                <button type="button" className="btn ghost" onClick={() => document.getElementById("quoted")?.focus()}>اصلاح می‌کنم</button>
+              </span>
+            </Note>
+          )}
+          {showVerdict && (
             pct > 5
               ? <Note tone="warn" icon="alert"><b>{fa(pct)}٪ بالاتر از میانهٔ قیمت‌های ثبت‌شده.</b>{nearCheap.length ? ` ${fa(nearCheap.length)} فروشگاه تا ۲۰ دقیقه پیاده ارزان‌تر ثبت کرده‌اند.` : ""}</Note>
               : pct < -5
@@ -184,7 +212,7 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
                 : <Note tone="info" icon="spark"><b>نزدیک به میانهٔ قیمت‌های ثبت‌شده.</b>{nearCheap.length ? ` ${fa(nearCheap.length)} فروشگاه نزدیک کمی ارزان‌تر ثبت کرده‌اند.` : ""}</Note>
           )}
           {!quoted && <span className="xs muted">قیمتی که فروشنده گفت را بنویسید تا مقایسه کنیم.</span>}
-          {nearCheap.length > 0 && (
+          {showVerdict && nearCheap.length > 0 && (
             <div className="stack" style={{ gap: 8 }}>
               <div className="sm b">ارزان‌تر در نزدیکی</div>
               {nearCheap.slice(0, 3).map((s) => <ShopCard key={s.shop_id} s={s} href={`/shop/${s.shop_id}?product=${p.product_id}`} />)}
@@ -193,7 +221,7 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
               </button>
             </div>
           )}
-          {quoted && !nearCheap.length && <Note tone="ok" icon="check">ارزان‌تر از این قیمت، تا ۲۰ دقیقه پیاده ثبت نشده است{cheaper.length ? ` (دورتر: ${fa(cheaper.length)} فروشگاه، نزدیک‌ترین ${walk(cheaper[0].walk_min)})` : ""}.</Note>}
+          {showVerdict && !nearCheap.length && <Note tone="ok" icon="check">ارزان‌تر از این قیمت، تا ۲۰ دقیقه پیاده ثبت نشده است{cheaper.length ? ` (دورتر: ${fa(cheaper.length)} فروشگاه، نزدیک‌ترین ${walk(cheaper[0].walk_min)})` : ""}.</Note>}
           <span className="xs faint">قیمت‌ها همان ثبت‌شده در ترب‌اند و تأیید نشده‌اند؛ برای قیمت قطعی استعلام بگیرید.</span>
         </>
       )}

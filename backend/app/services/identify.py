@@ -21,12 +21,13 @@ _spent = {"day": "", "n": 0}
 
 PROMPT = (
     "You identify a retail product from a shopper's photo taken inside a shop in Tehran. Read only what is visible. "
-    "Return JSON with keys: brand, brand_fa, model, product_type_fa, search_query_fa, price_seen_toman, price_text, visible_text, confidence. "
+    "Return JSON with keys: brand, brand_fa, model, product_type_fa, search_query_fa, price_text, visible_text, confidence. "
     "brand/model: Latin, exactly as printed on the product or box; null when not visible. Never invent or complete a model number. "
     "brand_fa: the common Persian name of the brand (e.g. Anker → انکر) or null. product_type_fa: a short Persian noun phrase "
     "(e.g. «هندزفری گردنی»). search_query_fa: what to type into a Persian product search (type + brand + model). "
-    "price_seen_toman: integer in toman only if a price tag or label is visible (convert rial to toman by /10 only when the tag says ریال), "
-    "else null. price_text: the price exactly as written, or null. visible_text: up to 200 characters of the important printed text. "
+    "price_text: only if a price tag or label is visible, copy it character by character exactly as printed: every digit and every "
+    "separator, plus the unit word if one is printed (تومان, ریال, هزار). Do not convert, round, drop zeros or change the unit; "
+    "count the digit groups carefully. null when no price is visible. visible_text: up to 200 characters of the important printed text. "
     "confidence: high (brand and model clearly visible), medium (brand or type clear, model partial), low (only the kind of product)."
 )
 
@@ -88,12 +89,9 @@ async def read_photo(llm, data_url: str) -> dict:
     except json.JSONDecodeError:
         raw = {}
     s = lambda k: (str(raw.get(k)).strip() or None) if raw.get(k) not in (None, "", "null") else None
-    price = _price_from_text(s("price_text"))  # parse what was read on the tag ourselves; the model's arithmetic is not trusted
-    if price is None:
-        try:
-            price = int(raw.get("price_seen_toman")) if raw.get("price_seen_toman") not in (None, "", "null") else None
-        except (TypeError, ValueError):
-            price = None
+    # the model only transcribes the tag; unit conversion happens here (it once turned a ۳٬۲۰۰٬۰۰۰ تومان tag into ۳۲۰٬۰۰۰).
+    # The shopper still confirms the price before any verdict (SnapView).
+    price = _price_from_text(s("price_text"))
     conf = raw.get("confidence") if raw.get("confidence") in ("high", "medium", "low") else "low"
     return {"brand": s("brand"), "brand_fa": s("brand_fa"), "model": s("model"), "product_type": s("product_type_fa"),
             "search_query": s("search_query_fa"), "price_seen": price if price and price > 0 else None,
