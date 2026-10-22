@@ -103,6 +103,11 @@ ACCESSORY = [normalize_fa(w) for w in ("کیف", "قاب", "کاور", "محاف
     "دوربین گوشی", "آنتن", "فلت", "برد گوشی", "قطعات", "اسپیکر گوشی", "میکروفون گوشی", "سوکت", "دکمه", "تعمیر")]
 
 
+# marketing words that appear in many unrelated model names; matching only these proves nothing
+GENERIC = {"nano", "pro", "max", "plus", "mini", "lite", "smart", "tech", "ultra", "air", "neo", "prime", "super", "power",
+           "classic", "digital", "wireless", "sport", "go", "one", "x", "s", "se", "hd", "+"}
+
+
 def _model_tokens(model: str | None) -> list[str]:
     """«Life U2i (Upgraded)» → ['life', 'u2i']: bracketed qualifiers and edition words are not part of catalogue titles."""
     m = re.sub(r"[\(\[].*?[\)\]]", " ", model or "")
@@ -145,6 +150,11 @@ def candidates(con, r: dict, k: int = 4) -> tuple[list[dict], str | None, str]:
     # whole words only: «tech» must not match inside «Audio-Technica»
     pats = [re.compile(rf"(?<![0-9a-z\u0600-\u06ff]){re.escape(t)}(?![0-9a-z\u0600-\u06ff])") for t in toks]
     hits = lambda p: sum(bool(x.search(normalize_fa(p["title"]))) for x in pats)
+    # the distinctive part of the model must match: all of it for 1-2 words, most of it for longer model names
+    strong = [x for t, x in zip(toks, pats) if t.strip("+") not in GENERIC] or pats
+    need = len(strong) if len(strong) <= 2 else math.ceil(len(strong) * 0.6)
+    model_ok = lambda p: sum(bool(x.search(normalize_fa(p["title"]))) for x in strong) >= need
+    has_brand = lambda p: not brands or any(b in normalize_fa(p["title"]) for b in brands)
 
     def is_accessory(p) -> bool:
         c, t = normalize_fa(p.get("category") or ""), normalize_fa(p["title"])
@@ -159,22 +169,24 @@ def candidates(con, r: dict, k: int = 4) -> tuple[list[dict], str | None, str]:
     def rank(p):
         t = normalize_fa(p["title"])
         weight = 3 * any(b in t for b in brands) + math.log2((p.get("shop_count") or 0) + 1)  # brand and availability together
-        return (-hits(p), -same_kind(p), -weight)  # model match, then «is it the product itself», then brand/availability
+        leads = bool(ptype) and t.startswith(ptype)  # «خودکار پنتر …» is a pen; «اپراتور خودکار» is not
+        return (-hits(p), -same_kind(p), -leads, -weight)  # model match, «is it the product itself», then brand/availability
 
     for i, q in enumerate(qs):
         items = catalog.search_products(con, q, None, None, None, None, True, 24, 0)["items"]
         if not items:
             continue
         items = sorted(items, key=rank)
-        # a model was read: accept only results that contain most of it; otherwise try the next, broader query
-        if toks and hits(items[0]) < max(1, round(len(toks) * 0.6)) and i < len(qs) - 1:
+        # a model was read: accept only results that contain its distinctive part; otherwise try the next, broader query
+        if toks and not any(model_ok(p) for p in items) and i < len(qs) - 1:
             continue
-        if toks and hits(items[0]):
-            items = [p for p in items if hits(p)] or items  # keep listings of this model only
+        if toks and any(model_ok(p) for p in items):
+            items = [p for p in items if model_ok(p)]  # keep listings of this model only
             if same_kind(items[0]):
                 match = "exact"
-            elif not accessory_photo and any(is_accessory(p) for p in items):
-                items, match = [p for p in items if is_accessory(p)], "related"  # only cases/parts of this model are listed
+            elif not accessory_photo and any(is_accessory(p) and has_brand(p) for p in items):
+                # only cases/parts of this model are listed (and they name the brand: «Nano» alone fits DJI and Anker too)
+                items, match = [p for p in items if is_accessory(p) and has_brand(p)], "related"
             elif i < len(qs) - 1:
                 continue  # same words, different kind of product (a «SMART TECH» pen vs Audio-Technica mics): try broader
             else:

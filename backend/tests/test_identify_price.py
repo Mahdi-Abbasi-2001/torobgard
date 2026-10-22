@@ -37,3 +37,12 @@ def test_exact_and_parts_still_work():
     assert m == "exact"
     _, _, m = candidates(con, {"brand": "Samsung", "brand_fa": "سامسونگ", "model": "Galaxy A15", "product_type": "گوشی موبایل"})
     assert m == "related"  # only cases and parts of the A15 are listed, not the phone
+
+
+def test_generic_model_word_alone_is_not_a_match():
+    """«NANO BACTERIOBOD+» pen: «nano» alone must not pull DJI Osmo Nano / Anker Nano accessories; and «اپراتور خودکار»
+    (automatic telephone operator) is not a pen."""
+    items, _, match = candidates(db.connect(), {"brand": "Dr. Penker", "brand_fa": "دکتر پنکر", "model": "NANO BACTERIOBOD+",
+                                                "product_type": "خودکار", "search_query": "خودکار دکتر پنکر NANO BACTERIOBOD+"})
+    assert match == "type_only" and items
+    assert all(p["title"].startswith("خودکار") for p in items)
