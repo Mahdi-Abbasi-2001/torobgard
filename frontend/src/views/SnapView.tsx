@@ -52,7 +52,7 @@ export default function SnapView({ t }: { t?: string }) {
                 <SnapButton className="btn ghost" label="عکس دیگر" onError={setErr}><Icon n="cam" s />عکس دیگر</SnapButton>
               </div>
             </div>
-            {q.data && <Refine initial={q.data.read.model ? q.data.read.model.replace(/[(\[].*?[)\]]/g, "").trim() : q.data.query ?? q.data.read.search_query ?? ""} />}
+            {q.data && <Refine initial={refineText(q.data)} />}
             <p className="xs faint" style={{ margin: 0 }}>عکس فقط برای همین خواندن به سرور فرستاده می‌شود و ذخیره نمی‌شود.</p>
           </div>
           <div className="lay snap-result">
@@ -64,6 +64,13 @@ export default function SnapView({ t }: { t?: string }) {
       )}
     </main>
   );
+}
+
+/** What to prefill in «درست نخواند؟»: the model when it matched; otherwise type + brand (a printed slogan like «SMART TECH» is not a model). */
+function refineText(r: IdentifyResult) {
+  const x = r.read;
+  if (x.model && r.match !== "type_only" && r.match !== "none") return x.model.replace(/[(\[].*?[)\]]/g, "").trim();
+  return [x.product_type, x.brand_fa ?? x.brand].filter(Boolean).join(" ") || x.search_query || r.query || "";
 }
 
 function ReadSummary({ r }: { r: IdentifyResult }) {

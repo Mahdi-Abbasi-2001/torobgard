@@ -142,11 +142,17 @@ def candidates(con, r: dict, k: int = 4) -> tuple[list[dict], str | None, str]:
     ptype = normalize_fa(r.get("product_type") or "")
     type_words = [w for w in ptype.split() if len(w) > 2]
     accessory_photo = any(w in ptype for w in ACCESSORY)
-    hits = lambda p: sum(t in normalize_fa(p["title"]) for t in toks)
+    # whole words only: «tech» must not match inside «Audio-Technica»
+    pats = [re.compile(rf"(?<![0-9a-z\u0600-\u06ff]){re.escape(t)}(?![0-9a-z\u0600-\u06ff])") for t in toks]
+    hits = lambda p: sum(bool(x.search(normalize_fa(p["title"]))) for x in pats)
+
+    def is_accessory(p) -> bool:
+        c, t = normalize_fa(p.get("category") or ""), normalize_fa(p["title"])
+        return any(w in c for w in ACCESSORY) or any(t.startswith(w) for w in ACCESSORY)
 
     def same_kind(p) -> bool:
         c, t = normalize_fa(p.get("category") or ""), normalize_fa(p["title"])
-        if not accessory_photo and (any(w in c for w in ACCESSORY) or any(t.startswith(w) for w in ACCESSORY)):
+        if not accessory_photo and is_accessory(p):
             return False  # a case or a spare part, while the photo shows the product itself
         return any(w in c or w in t for w in type_words) if type_words else True
 
@@ -165,7 +171,14 @@ def candidates(con, r: dict, k: int = 4) -> tuple[list[dict], str | None, str]:
             continue
         if toks and hits(items[0]):
             items = [p for p in items if hits(p)] or items  # keep listings of this model only
-            match = "exact" if same_kind(items[0]) else "related"
+            if same_kind(items[0]):
+                match = "exact"
+            elif not accessory_photo and any(is_accessory(p) for p in items):
+                items, match = [p for p in items if is_accessory(p)], "related"  # only cases/parts of this model are listed
+            elif i < len(qs) - 1:
+                continue  # same words, different kind of product (a «SMART TECH» pen vs Audio-Technica mics): try broader
+            else:
+                return [], None, "none"
         else:
             match = "type_only"
         return items[:k], q, match
