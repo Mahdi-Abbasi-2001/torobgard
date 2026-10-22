@@ -201,13 +201,13 @@ def request_hold(con, parent_id: str, until: str, timeout_s: int = 180) -> dict 
     return view(con, made[0]["id"])
 
 
-def request_recheck(con, parent_id: str, eta_min: int | None = None, timeout_s: int = 180) -> dict | None:
+def request_recheck(con, parent_id: str, eta_min: int | None = None, timeout_s: int = 180, demo_gone: bool = False) -> dict | None:
     p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
     if not p:
         return None
     price = (json.loads(p["answer"]) or {}).get("price") if p["answer"] else None
     made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], [], timeout_s, kind="recheck", parent_id=parent_id,
-                  extra={"eta_min": eta_min, "price": price})
+                  extra={"eta_min": eta_min, "price": price, **({"demo_gone": True} if demo_gone else {})})
     return view(con, made[0]["id"])
 
 
@@ -512,6 +512,8 @@ def _sim_text(con, r, meta: dict, rnd: random.Random, first: bool) -> str | None
         return (f"باشه، تا ساعت {_fa(meta.get('hold_until') or '')} براتون کنار می‌ذارم. به اسم ترب‌گرد." if rnd.random() < 0.8
                 else "شرمنده، نگه نمی‌داریم؛ ولی هنوز داریم، زود تشریف بیارید.")
     if kind == "recheck":
+        if meta.get("demo_gone"):  # the demo's "what if it sold out on the way" button
+            return "همین الان آخریش فروخته شد، شرمنده."
         return "آره هنوز هست، تشریف بیارید." if rnd.random() < 0.85 else "همین الان آخریش فروخته شد، شرمنده."
     weights = {"full": 30, "changed": 15, "vague": 15, "variant": 10 if (meta.get("note") or "color" in keys) else 0,
                "alt": 10, "restock": 5, "silent": 15}

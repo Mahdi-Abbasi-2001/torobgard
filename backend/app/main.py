@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from . import db
 from .agent.agent import run_chat
 from .agent.llm import OpenAICompatLLM
-from .services import campaigns, catalog, converse, discover, inquiries as inq, verify, visit_plan
+from .services import campaigns, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
 from .services.hours import now_tehran
 from .services.text import split_budget
 
@@ -129,6 +129,16 @@ def search(con: Con, q: str | None = None, category: str | None = None, brand: s
     res["applied"] = {"relaxed": res.get("relaxed", False), "price_min": pmin, "price_max": pmax, "budget_from_query": bool(b),
                       "prefs": cons, "spec": [list(x) for x in specs_eq], "conditions": cond, "sort": sort, "when": at_label}
     return res
+
+
+class MissionParseIn(BaseModel):
+    text: str = Field(max_length=300)
+
+
+@app.post("/api/mission/parse", tags=["products"])
+def mission_parse(b: MissionParseIn, con: Con):
+    """One sentence -> mission slots (what, need, budget, place, when, travel mode, installment). Rule-based; unread slots are null."""
+    return mission_svc.parse(con, b.text)
 
 
 @app.get("/api/category-presets", tags=["products"])
@@ -530,6 +540,7 @@ def hold(inquiry_id: str, body: HoldIn, request: Request, con: Con):
 class RecheckIn(BaseModel):
     session_id: str
     eta_min: int | None = Field(None, ge=1, le=600)
+    demo_gone: bool = Field(False, description="demo only: a simulated seller answers «sold out just now» (ignored for live sellers)")
 
 
 @app.post("/api/inquiries/{inquiry_id}/recheck", tags=["inquiries"])
@@ -537,7 +548,7 @@ def recheck(inquiry_id: str, body: RecheckIn, request: Request, con: Con):
     """"I'm leaving now — still there?" One more short question to the same shop."""
     _guard(con, body.session_id, request)
     _own_inquiry(con, inquiry_id, body.session_id)
-    return inq.request_recheck(con, inquiry_id, body.eta_min)
+    return inq.request_recheck(con, inquiry_id, body.eta_min, demo_gone=body.demo_gone and os.environ.get("TOROB_DEMO_SOLDOUT", "1") != "0")
 
 
 class ReportIn(BaseModel):
