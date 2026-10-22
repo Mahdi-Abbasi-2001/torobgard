@@ -551,6 +551,18 @@ def recheck(inquiry_id: str, body: RecheckIn, request: Request, con: Con):
     return inq.request_recheck(con, inquiry_id, body.eta_min, demo_gone=body.demo_gone and os.environ.get("TOROB_DEMO_SOLDOUT", "1") != "0")
 
 
+class ArriveIn(BaseModel):
+    session_id: str
+
+
+@app.post("/api/inquiries/{inquiry_id}/arrive", tags=["inquiries"])
+def arrive(inquiry_id: str, body: ArriveIn, request: Request, con: Con):
+    """«I'm here»: the shopper taps the button (nothing is tracked); the seller is told, with the hold code if there is one."""
+    _guard(con, body.session_id, request)
+    _own_inquiry(con, inquiry_id, body.session_id)
+    return inq.request_arrival(con, inquiry_id)
+
+
 class ReportIn(BaseModel):
     session_id: str
     shop_id: str

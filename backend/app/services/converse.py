@@ -31,6 +31,9 @@ def compose(kind: str, title: str | None, questions: list[str], note: str | None
     if kind == "hold":
         return (f"سلام، وقت بخیر. همان مشتری {t} است. لطفاً تا ساعت {fa(meta.get('hold_until') or '')} یکی برایش کنار بگذارید؛ "
                 "خودش می‌آید و حضوری می‌خرد. امکانش هست؟")
+    if kind == "arrive":
+        code = f" کد نگه‌داری: {fa(meta['hold_code'])}." if meta.get("hold_code") else ""
+        return f"سلام. مشتری {t} الان رسیده و دم فروشگاه است.{code} لطفاً آمادهٔ تحویل باشید."
     if kind == "recheck":
         eta = meta.get("eta_min")
         p = meta.get("price")
@@ -160,7 +163,10 @@ def rule_parse(text: str, ctx: dict) -> dict:
         out["alt_suggestion"] = alt.group(1).strip()[:80]
         pos = _any(_POS, stripped.replace(alt.group(0), " "))
         priced = t.replace(alt.group(0), " ")  # «ردمی بادز ۵» is a model name, not a price
-    if kind == "hold":
+    if kind == "arrive":  # any reply that is not a refusal means «come, I am ready»
+        out["available"] = False if neg else True
+        out["closes_at"] = None
+    elif kind == "hold":
         no, yes = _any(_HOLD_NO, t), _any(_HOLD_YES, t)
         out["hold_accepted"] = False if no else True if yes else None
         out["closes_at"] = None  # «تا ساعت ۶ نگه می‌دارم» is the hold time, not closing time
@@ -253,7 +259,7 @@ def _clean(raw: dict, ctx: dict) -> dict:
 async def parse_reply(text: str, ctx: dict, llm=None) -> dict:
     """ctx: kind, title, keys, questions (texts), note, listed, hold_until, thread [(role, text)]."""
     rules = rule_parse(text, ctx)
-    if not (llm and getattr(llm, "configured", False)):
+    if ctx.get("kind") == "arrive" or not (llm and getattr(llm, "configured", False)):
         return rules
     user = json.dumps({"kind": ctx.get("kind", "ask"), "product": ctx.get("title"), "listed_price_toman": ctx.get("listed"),
                        "questions": dict(zip(ctx.get("keys") or [], ctx.get("questions") or [])), "buyer_note": ctx.get("note"),
@@ -314,6 +320,8 @@ def follow_up(parsed: dict, ctx: dict, turns: int) -> str | None:
 
 
 def summary(p: dict, kind: str = "ask") -> str:
+    if kind == "arrive":
+        return "فروشنده منتظر شماست" if p.get("available") is not False else "فروشنده الان نمی‌تواند پاسخ بدهد"
     if kind == "hold":
         return "قبول کرد نگه دارد" if p.get("hold_accepted") else "نمی‌تواند نگه دارد" if p.get("hold_accepted") is False else "پاسخ نامشخص"
     parts = ["موجود است" if p.get("available") else "موجود نیست" if p.get("available") is False else "نامشخص"]

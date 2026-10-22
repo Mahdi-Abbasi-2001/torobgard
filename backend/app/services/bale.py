@@ -107,7 +107,7 @@ HELP = ("سلام! من ربات استعلام ترب‌گرد هستم.\n"
 def _inquiry_text(con, iid: str) -> str:
     v = inq.view(con, iid)
     kind = v["kind"]
-    head = {"ask": "📩 استعلام جدید", "hold": "📌 درخواست نگه‌داشتن کالا", "recheck": "🚶 مشتری در راه است"}[kind]
+    head = {"ask": "📩 استعلام جدید", "hold": "📌 درخواست نگه‌داشتن کالا", "recheck": "🚶 مشتری در راه است", "arrive": "📍 مشتری رسید"}[kind]
     lines = [head, f"فروشگاه: {v['shop']['name']}", ""]
     first = next((m["text"] for m in v["thread"] if m["role"] == "buyer"), None)
     lines.append(first or f"کالا: {v['product']['title'] if v['product'] else '—'}")
@@ -124,6 +124,8 @@ def _buttons(v: dict) -> list[list[tuple[str, str]]]:
         return [[("✅ نگه می‌دارم", f"h:{iid}:1"), ("❌ نمی‌توانم", f"h:{iid}:0")]]
     if v["kind"] == "recheck":
         return [[("✅ هنوز هست", f"r:{iid}:1"), ("❌ تمام شد", f"r:{iid}:0")]]
+    if v["kind"] == "arrive":
+        return [[("✅ بیایید، منتظرم", f"r:{iid}:1"), ("⏳ الان نمی‌توانم", f"r:{iid}:0")]]
     first = [("✅ همان قیمت ثبت‌شده", f"a:{iid}:same"), ("✏️ قیمت جدید", f"a:{iid}:1")] if v["listed_price"] else [("✅ موجود است", f"a:{iid}:1")]
     return [first, [("❌ ناموجود است", f"a:{iid}:0"), ("⏰ فردا موجود می‌شود", f"a:{iid}:tom")]]
 
@@ -331,7 +333,9 @@ async def _on_callback(con, client, cb):
                        extra={"hold_accepted": opt == "1"})
         return await client.send(chat, (done + (f"\nکد نگه‌داری: {v['answer']['hold_code']}" if opt == "1" else "")) if v else "قبلاً پاسخ داده شده.")
     if typ == "r":
-        v = inq.answer(con, iid, opt == "1", message="هنوز هست" if opt == "1" else "تمام شد", channel="bale")
+        arriving = (inq.view(con, iid) or {}).get("kind") == "arrive"
+        msg = ("بفرمایید، منتظرم" if opt == "1" else "الان نمی‌توانم") if arriving else ("هنوز هست" if opt == "1" else "تمام شد")
+        v = inq.answer(con, iid, opt == "1", message=msg, channel="bale")
         return await client.send(chat, done if v else "قبلاً پاسخ داده شده.")
     if opt == "0":
         v = inq.answer(con, iid, False, message="ناموجود است", channel="bale")
@@ -374,6 +378,8 @@ async def _notify_buyer(session_id: str, v: dict):
         title = ((v.get("product") or {}).get("title") or "")[:50]
         if v["kind"] == "hold":
             txt = f"📌 {shop}: " + (f"تا ساعت {a.get('hold_until')} برایتان نگه می‌دارد. کد: {a.get('hold_code')}" if a.get("hold_accepted") else "نمی‌تواند نگه دارد.")
+        elif v["kind"] == "arrive":
+            txt = f"📍 {shop}: " + ("منتظر شماست." if v["status"] == "answered" else "الان نمی‌تواند پاسخ بدهد." if v["status"] == "unavailable" else "جواب نداد.")
         elif v["status"] == "no_reply":
             txt = f"⌛ {shop} دربارهٔ «{title}» جواب نداد. گزینه‌های دیگر در ترب‌گرد آماده است."
         else:

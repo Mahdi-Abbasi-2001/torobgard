@@ -285,3 +285,9 @@ html { scroll-behavior: smooth; }
 .scrub-fill.glide { transition: width .32s cubic-bezier(.3, .8, .3, 1); }
 .scrub-now { transition: color .2s ease; }
 .scrub-steps button { white-space: nowrap; }
+
+/* ---------- arrival, last 100 metres ---------- */
+.arrive-card { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--info-soft); color: var(--info-ink); font-size: 14px; line-height: 1.6; animation: pop .3s ease both; }
+.arrive-card.ok { background: var(--ok-soft); color: var(--ok); }
+.show-guard { display: flex; flex-direction: column; gap: 2px; padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.show-guard b { font-size: 19px; font-weight: 800; line-height: 1.5; }

@@ -69,6 +69,11 @@ export function AnswerDetails({ q }: { q: Inquiry }) {
 export function KidRow({ k }: { k: Inquiry }) {
   const a = k.answer;
   const waiting = k.status === "sent" || k.status === "delivered";
+  if (k.kind === "arrive") {
+    if (waiting) return <div className="kid"><span className="spin" /><span>به فروشنده خبر دادیم که رسیده‌اید…</span></div>;
+    if (k.status === "answered") return <div className="kid" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}><Icon n="check" s /><span>فروشنده منتظر شماست.</span></div>;
+    return <div className="kid"><Icon n="clock" s /><span>{k.status === "unavailable" ? "فروشنده الان نمی‌تواند پاسخ بدهد؛ چند دقیقه صبر کنید." : "فروشنده جواب نداد؛ مستقیم سراغ فروشگاه بروید."}</span></div>;
+  }
   if (k.kind === "hold") {
     if (waiting) return <div className="kid"><span className="spin" /><span>درخواست «تا ساعت {fa(k.hold_until ?? "")} نگه دارید» فرستاده شد…</span></div>;
     if (a?.hold_accepted) return (

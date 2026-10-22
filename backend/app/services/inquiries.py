@@ -3,6 +3,7 @@
 An inquiry is one conversation with one shop about one product. Kinds:
   ask      the first question (stock, price, ... and product-specific custom questions)
   hold     "please keep one for me until 18:00" (child of an ask)
+  arrive   "I am here" (child of an ask; carries the hold code if there is one). The seller only acknowledges.
   recheck  "I'm on my way, still there?" (child of an ask)
 Sellers answer with buttons (web inbox, Bale) or free text; free text is parsed (services.converse) and the agent asks a
 follow-up when something important is missing. Every answer also feeds the shared confirmation layer (services.verify).
@@ -34,11 +35,13 @@ QUESTIONS = {
     "original": "اصل و آکبند است؟",
     "tomorrow": "فردا از چه ساعتی باز هستید و این کالا را دارید؟",
 }
-KINDS = ("ask", "hold", "recheck")
+KINDS = ("ask", "hold", "recheck", "arrive")
 LABELS = {
     "ask": {"sent": "ارسال شد", "delivered": "دیده شد", "answered": "پاسخ داد", "unavailable": "ناموجود است", "no_reply": "پاسخی نداد"},
     "hold": {"sent": "درخواست نگه‌داشتن رفت", "delivered": "دیده شد", "answered": "پاسخ داد", "unavailable": "نگه نمی‌دارد",
              "no_reply": "پاسخی نداد"},
+    "arrive": {"sent": "به فروشنده خبر دادیم", "delivered": "دیده شد", "answered": "فروشنده منتظر شماست", "unavailable": "الان نمی‌تواند پاسخ بدهد",
+               "no_reply": "پاسخی نداد"},
     "recheck": {"sent": "دوباره پرسیدیم", "delivered": "دیده شد", "answered": "هنوز موجود است", "unavailable": "دیگر موجود نیست",
                 "no_reply": "پاسخی نداد"},
 }
@@ -201,6 +204,20 @@ def request_hold(con, parent_id: str, until: str, timeout_s: int = 180) -> dict 
     return view(con, made[0]["id"])
 
 
+def request_arrival(con, parent_id: str, timeout_s: int = 180) -> dict | None:
+    """The shopper tapped «I'm here». The seller is told (with the hold code, if one was given) and acknowledges."""
+    p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
+    if not p:
+        return None
+    code = None
+    for k in list_for_session(con, p["session_id"]):
+        if k["kind"] == "hold" and k["parent_id"] == parent_id and (k["answer"] or {}).get("hold_accepted"):
+            code = k["answer"].get("hold_code")
+    made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], [], timeout_s, kind="arrive", parent_id=parent_id,
+                  extra={"hold_code": code})
+    return view(con, made[0]["id"])
+
+
 def request_recheck(con, parent_id: str, eta_min: int | None = None, timeout_s: int = 180, demo_gone: bool = False) -> dict | None:
     p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
     if not p:
@@ -245,7 +262,7 @@ def answer(con, inquiry_id: str, available: bool | None, price: int | None = Non
         ans["listing_updated"] = True
     con.execute("UPDATE inquiries SET status=?, answer=?, answered_at=? WHERE id=?",
                 (status, json.dumps(ans, ensure_ascii=False), iso(now()), inquiry_id))
-    if kind != "hold" or ans.get("available"):
+    if kind != "arrive" and (kind != "hold" or ans.get("available")):  # an «I'm here» acknowledgement says nothing about stock
         verify.record(con, r["shop_id"], r["product_id"], ans.get("available"), price if ans.get("available") is not False else None,
                       "seller", inquiry_id, simulated, commit=False)
     if log_message:
@@ -316,14 +333,14 @@ def view(con, inquiry_id: str, with_alternatives: bool = False) -> dict | None:
          "campaign_id": q.get("campaign"), "auto_from": q.get("auto_from"),
          "created_at": r["created_at"], "delivered_at": r["delivered_at"], "answered_at": r["answered_at"],
          "deadline_at": r["deadline_at"], "questions": question_texts(q), "note": q.get("note"),
-         "hold_until": q.get("hold_until"), "eta_min": q.get("eta_min"),
+         "hold_until": q.get("hold_until"), "hold_code": q.get("hold_code"), "eta_min": q.get("eta_min"),
          "answer": json.loads(r["answer"]) if r["answer"] else None, "partial": q.get("partial"),
          "thread": th, "awaiting_seller": awaiting, "simulated_seller": bool(q.get("sim")),
          "listed_price": _listed(con, r["shop_id"], r["product_id"]),
          "shop": {k: shop[k] for k in ("shop_id", "name", "mall", "floor_label", "unit", "area", "address", "lat", "lon")} if shop else None,
          "product": {"product_id": prod["product_id"], "title": prod["title"], "image": prod["image"]} if prod else None,
          "label": "در حال گفتگو" if awaiting else LABELS[kind][r["status"]]}
-    if with_alternatives and r["status"] in ("unavailable", "no_reply") and r["product_id"] and kind != "hold":
+    if with_alternatives and r["status"] in ("unavailable", "no_reply") and r["product_id"] and kind not in ("hold", "arrive"):
         d["alternatives"] = alternatives(con, r["session_id"], r["product_id"])
     return d
 
@@ -372,7 +389,7 @@ def _ctx(con, r, meta: dict) -> dict:
     qt = question_texts(meta)
     return {"kind": meta.get("kind", "ask"), "title": prod and prod["title"], "keys": [q["key"] for q in qt],
             "questions": [q["text"] for q in qt], "note": meta.get("note"), "listed": _listed(con, r["shop_id"], r["product_id"]),
-            "hold_until": meta.get("hold_until"), "thread": [(m["role"], m["text"]) for m in thread(con, r["id"])]}
+            "hold_until": meta.get("hold_until"), "hold_code": meta.get("hold_code"), "thread": [(m["role"], m["text"]) for m in thread(con, r["id"])]}
 
 
 async def seller_says(inquiry_id: str, text: str, channel: str = "web", simulated: bool = False, llm=None) -> dict:
@@ -511,6 +528,8 @@ def _sim_text(con, r, meta: dict, rnd: random.Random, first: bool) -> str | None
     if kind == "hold":
         return (f"باشه، تا ساعت {_fa(meta.get('hold_until') or '')} براتون کنار می‌ذارم. به اسم ترب‌گرد." if rnd.random() < 0.8
                 else "شرمنده، نگه نمی‌داریم؛ ولی هنوز داریم، زود تشریف بیارید.")
+    if kind == "arrive":
+        return "بفرمایید، منتظرتون هستم. کد رو که بگید تحویل می‌دم."
     if kind == "recheck":
         if meta.get("demo_gone"):  # the demo's "what if it sold out on the way" button
             return "همین الان آخریش فروخته شد، شرمنده."

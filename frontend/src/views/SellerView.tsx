@@ -81,7 +81,8 @@ function Answerable({ i, shop, token, onSent }: { i: Inquiry; shop: string; toke
   const priceVal = price ? parseNum(price) : listed;
   const done = () => qc.invalidateQueries({ queryKey: ["seller", shop, token] });
   const m = useMutation({
-    mutationFn: (over?: { same?: boolean; tomorrow?: boolean; hold?: boolean; still?: boolean }) => {
+    mutationFn: (over?: { same?: boolean; tomorrow?: boolean; hold?: boolean; still?: boolean; here?: boolean }) => {
+      if (over?.here !== undefined) return api.sellerAnswer(shop, token, i.id, { available: over.here, message: over.here ? "بفرمایید، منتظرم" : "الان نمی‌توانم" });
       if (over?.hold !== undefined) return api.sellerAnswer(shop, token, i.id, { hold_accepted: over.hold, message: over.hold ? "نگه می‌دارم" : "نمی‌توانم نگه دارم" });
       if (over?.still !== undefined) return api.sellerAnswer(shop, token, i.id, { available: over.still, message: over.still ? "هنوز هست" : "تمام شد" });
       if (over?.same) return api.sellerAnswer(shop, token, i.id, { available: true, same_as_listed: true, closes_at: closes, message: "موجود است، به همان قیمت ثبت‌شده" });
@@ -93,7 +94,7 @@ function Answerable({ i, shop, token, onSent }: { i: Inquiry; shop: string; toke
         message: avail ? (changed ? "موجوده ولی قیمت عوض شده." : "موجوده، تشریف بیارید.") : "متأسفانه موجود نیست.",
       });
     },
-    onSuccess: (v) => onSent(v.kind === "hold"
+    onSuccess: (v) => onSent(v.kind === "arrive" ? (v.status === "answered" ? "به مشتری گفتیم منتظرش هستید." : "به مشتری گفتیم الان نمی‌توانید.") : v.kind === "hold"
       ? (v.answer?.hold_accepted ? `کد نگه‌داری ${fa(v.answer.hold_code ?? "")} برای مشتری فرستاده شد.` : "به مشتری گفتیم نمی‌توانید نگه دارید.")
       : v.status === "answered"
         ? `مشتری همین الان ${v.answer?.price ? `قیمت ${money(v.answer.price)} تومان را` : "موجود بودن را"} با برچسب «تأیید شده توسط فروشنده» می‌بیند.${v.answer?.listing_updated ? " قیمت ثبت‌شده‌تان هم به‌روز شد." : ""}`
@@ -111,7 +112,7 @@ function Answerable({ i, shop, token, onSent }: { i: Inquiry; shop: string; toke
 
   const header = (
     <div className="card" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 10 }}>
-      <div className="row between xs muted"><span>{i.kind === "hold" ? "درخواست نگه‌داشتن" : i.kind === "recheck" ? "مشتری در راه است" : "استعلام"} · {minutesAgo(i.created_at, now)}</span><span className="num">{left ? `مهلت ${fa(Math.floor(left / 60))}:${fa(String(left % 60).padStart(2, "0"))}` : "مهلت تمام شد"}</span></div>
+      <div className="row between xs muted"><span>{i.kind === "hold" ? "درخواست نگه‌داشتن" : i.kind === "recheck" ? "مشتری در راه است" : i.kind === "arrive" ? "مشتری رسید" : "استعلام"} · {minutesAgo(i.created_at, now)}</span><span className="num">{left ? `مهلت ${fa(Math.floor(left / 60))}:${fa(String(left % 60).padStart(2, "0"))}` : "مهلت تمام شد"}</span></div>
       <div className="b" style={{ lineHeight: 1.6 }}><Bidi text={i.product?.title} /></div>
       <div className="qa" style={{ whiteSpace: "pre-line" }}>{firstMsg ?? i.questions.map((x) => x.text).join("\n")}</div>
       {i.awaiting_seller && lastAgent && <Note tone="info" icon="chat"><span><b>سؤال تکمیلی:</b> {lastAgent.text}</span></Note>}
@@ -133,6 +134,18 @@ function Answerable({ i, shop, token, onSent }: { i: Inquiry; shop: string; toke
       {m.isError && !(m.error instanceof ApiError && m.error.status === 409) && <Note tone="bad" icon="alert">{(m.error as Error).message}</Note>}
       {reply.isError && <Note tone="bad" icon="alert">{(reply.error as Error).message}</Note>}
     </>
+  );
+
+  if (i.kind === "arrive") return (
+    <div className="stack" style={{ gap: 14 }}>
+      {header}
+      <div className="note ok" style={{ fontSize: 15 }}><Icon n="pin" s /><span>مشتری همین الان رسیده و دم فروشگاه شماست{i.hold_code ? <>؛ کد نگه‌داری: <b className="num">{fa(i.hold_code)}</b></> : ""}.</span></div>
+      <div className="row" style={{ gap: 10 }}>
+        <button type="button" className="bigbtn ok" disabled={m.isPending} onClick={() => m.mutate({ here: true })}><Icon n="check" />بفرمایید، منتظرم</button>
+        <button type="button" className="bigbtn no" disabled={m.isPending} onClick={() => m.mutate({ here: false })}><Icon n="x" />الان نمی‌توانم</button>
+      </div>
+      {errors}
+    </div>
   );
 
   if (i.kind === "hold" || i.kind === "recheck") return (

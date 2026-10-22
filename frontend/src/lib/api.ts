@@ -96,7 +96,7 @@ export interface MallDirectory extends Mall {
   floors: { floor: number | null; label: string; shops: { shop_id: string; name: string; unit: string | null; plaque: string | null; offer_count: number; categories: string[] }[] }[];
 }
 export type InquiryStatus = "sent" | "delivered" | "answered" | "unavailable" | "no_reply";
-export type InquiryKind = "ask" | "hold" | "recheck";
+export type InquiryKind = "ask" | "hold" | "recheck" | "arrive";
 export interface Drift {
   price: number; listed: number | null; vs_listed_pct: number | null; market_median: number | null; vs_market_pct: number | null;
   cheaper_nearby: { shop_id: string; name: string; price: number; confirmed: boolean; distance_km: number | null; mall: string | null }[];
@@ -112,7 +112,7 @@ export interface Answer {
 export interface ThreadMsg { role: "buyer" | "seller" | "agent" | "system"; text: string; channel: string; simulated: boolean; at: string }
 export interface Inquiry {
   id: string; session_id: string; status: InquiryStatus; label: string; kind: InquiryKind; parent_id: string | null;
-  campaign_id: string | null; auto_from: string | null; hold_until: string | null; eta_min: number | null;
+  campaign_id: string | null; auto_from: string | null; hold_until: string | null; hold_code?: string | null; eta_min: number | null;
   created_at: string; delivered_at: string | null; answered_at: string | null; deadline_at: string;
   questions: { key: string; text: string; custom?: boolean }[]; note: string | null; answer: Answer | null;
   thread: ThreadMsg[]; awaiting_seller: boolean; simulated_seller: boolean; listed_price: number | null;
@@ -261,6 +261,7 @@ export const api = {
   stopCampaign: (sid: string, id: string) => req<Campaign>(`/campaigns/${id}/stop`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   hold: (sid: string, id: string, until: string) => req<Inquiry>(`/inquiries/${id}/hold`, { method: "POST", body: JSON.stringify({ session_id: sid, until }) }),
   recheck: (sid: string, id: string, eta_min?: number | null, demo_gone = false) => req<Inquiry>(`/inquiries/${id}/recheck`, { method: "POST", body: JSON.stringify({ session_id: sid, eta_min, demo_gone }) }),
+  arrive: (sid: string, id: string) => req<Inquiry>(`/inquiries/${id}/arrive`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   visitPlan: (b: { session_id: string; product_id: string; lat?: number; lon?: number; order?: string[] }) => req<VisitPlan>(`/visit-plan`, { method: "POST", body: JSON.stringify(b) }),
   report: (b: { session_id: string; shop_id: string; product_id: string; kind: "visit" | "call"; available: boolean | null; price?: number | null; price_matched?: boolean | null; inquiry_id?: string | null; note?: string | null }) =>
     req<Report>(`/reports`, { method: "POST", body: JSON.stringify(b) }),

@@ -19,7 +19,7 @@ as sellers answer. Every screen shows the same four-stage rail and the same **ri
 | `/m/[id]` `?s=decide` | duel: two models, rows for the need, winner per row, verdict; details in a sheet | details docked on the left |
 | `?s=find` / `compare` | map (price pins, one-trip hub, time scrubber, travel mode) then shortlist (priority chips, list/table) | map in the middle, shortlist left |
 | `?s=confirm` | rows ripen as sellers answer; conversation, hold, re-check, alternatives, call script | pins ripen on the map |
-| `?s=go` | trip line, live reroute when the main shop sold out, checklist | route on the map |
+| `?s=go` | trip line, live reroute when the main shop sold out, last 100 metres (floor, neighbours, card to show a guard), «I'm here» (tap only: tells the seller, with the hold code), counter photo check, checklist | route on the map |
 | `?s=done` | «was it there, same price?» one tap; summary | |
 | `/missions` | active / finished, latest answer, notifications | |
 
@@ -33,4 +33,6 @@ Old links (`/p/[id]/shops`, `/ask`, `/track`, `/plan`, `/mine`, chat proposals) 
 4. «از فروشنده‌ها بپرس»: rows ripen, one says no and the next is asked. Open «گفتگو و جزئیات».
 5. «برایم نگه دار»: code appears. «شروع مسیر».
 6. Trip: «نمایشی: اگر تمام شده بود» (demo only; `NEXT_PUBLIC_DEMO_MODE=0` hides it, backend `TOROB_DEMO_SOLDOUT=0` ignores it): the line reroutes.
-7. «رسیدم و خریدم» → «بله، همان قیمت».
+7. In the mall: «آخرین ۱۰۰ متر» card, then «رسیدم؛ به فروشنده خبر بده» (the seller's second phone shows «مشتری رسید» with the code; the simulated seller answers by itself).
+8. «بررسی کالا با عکس، قبل از پرداخت»: photo of the item; model and tag price are checked against what the seller confirmed, a mismatch can be reported.
+9. «خریدم؛ ثبت نتیجه» → «بله، همان قیمت».

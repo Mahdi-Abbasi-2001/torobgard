@@ -12,6 +12,8 @@ import { useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
 import { ShopMap } from "@/components/ShopMap";
 import { Note } from "@/components/ui";
+import { CounterCheck } from "./CounterCheck";
+import { FinalSteps } from "./FinalSteps";
 import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 
@@ -24,6 +26,7 @@ export default function GoStage(sp: StageProps) {
   const qc = useQueryClient();
   const pid = m.productId!;
   const [ticks, setTicks] = useState<Record<number, boolean>>({});
+  const [counter, setCounter] = useState(false);
   const now = useNow(15_000);
 
   // who goes first: the shop that holds it, else the cheapest confirmed one; the rest follow as backups
@@ -48,6 +51,9 @@ export default function GoStage(sp: StageProps) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["inquiries", sid] }),
   });
   const kid = mainP?.kids.filter((k) => k.kind === "recheck").sort((a, b) => (b.created_at > a.created_at ? 1 : -1))[0];
+  const arriveMut = useMutation({ mutationFn: () => api.arrive(sid, mainP!.q.id), onSuccess: () => qc.invalidateQueries({ queryKey: ["inquiries", sid] }) });
+  const here = mainP?.kids.filter((k) => k.kind === "arrive").sort((a, b) => (b.created_at > a.created_at ? 1 : -1))[0];
+  const hereWaiting = !!here && (here.status === "sent" || here.status === "delivered");
   const checking = !!kid && (kid.status === "sent" || kid.status === "delivered");
   const okAgain = !!kid && kid.status === "answered" && now - new Date(kid.answered_at ?? kid.created_at).getTime() < 3 * 60_000;
   const rerouted = gone.some((x) => x.gone);
@@ -98,10 +104,19 @@ export default function GoStage(sp: StageProps) {
 
   const actions = (
     <div className="stack" style={{ gap: 8 }}>
+      {here && (
+        <div className={`arrive-card ${here.status === "answered" ? "ok" : ""}`} role="status">
+          {hereWaiting ? <><span className="spin" /><span>به فروشنده خبر دادیم که رسیده‌اید؛ منتظر جواب…</span></>
+            : here.status === "answered" ? <><Icon n="check" /><span className="grow"><b>فروشنده منتظر شماست.</b>{main?.hold ? <> کد <b className="num">{fa(main.hold.code)}</b> را بگویید.</> : null}</span></>
+            : <><Icon n="clock" /><span>{here.status === "unavailable" ? "فروشنده الان نمی‌تواند پاسخ بدهد؛ چند دقیقه صبر کنید یا سراغ فروشگاه بروید." : "فروشنده جواب نداد؛ مستقیم سراغ فروشگاه بروید."}</span></>}
+        </div>
+      )}
       <div className="trip-actions">
+        <button className="btn pri" disabled={!mainP || hereWaiting || arriveMut.isPending || here?.status === "answered"} onClick={() => arriveMut.mutate()}><Icon n="pin" s />رسیدم؛ به فروشنده خبر بده</button>
         <button className="btn sec" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: false })}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>
         {DEMO && <button className="btn ghost demo-btn" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: true })} title="فقط در حالت نمایشی">نمایشی: اگر تمام شده بود</button>}
       </div>
+      {arriveMut.isError && <Note tone="bad" icon="alert">{(arriveMut.error as Error).message}</Note>}
       {recheck.isError && <Note tone="bad" icon="alert">{(recheck.error as Error).message}</Note>}
       {plan.data?.deep_links && main && (
         <div className="row" style={{ gap: 8 }}>
@@ -136,7 +151,8 @@ export default function GoStage(sp: StageProps) {
 
   const cta = main ? (
     <>
-      <button className="btn pri" onClick={finish}>رسیدم و خریدم</button>
+      <button className="btn sec" disabled={!main} onClick={() => setCounter(true)}><Icon n="cam" s />بررسی کالا با عکس، قبل از پرداخت</button>
+      <button className="btn pri" onClick={finish}>خریدم؛ ثبت نتیجه</button>
       <div className="hint">بعد از خرید می‌پرسیم بود یا نه؛ جوابتان برای همه قیمت را به‌روز می‌کند.</div>
     </>
   ) : <button className="btn pri" onClick={() => go("confirm")}>برگشت به جواب فروشنده‌ها</button>;
@@ -147,13 +163,14 @@ export default function GoStage(sp: StageProps) {
         <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops.length)} فروشگاه، ${fa(plan.data!.total_walk_min)} دقیقه راه` : "مسیری نداریم"}</h2></div>
       {banner && <Note tone={banner.tone} icon={banner.icon}>{banner.t}</Note>}
       {plan.isError && <Note tone="unk" icon="store">هنوز هیچ فروشگاهی نگفته که کالا موجود است؛ به مرحلهٔ تأیید برگردید.</Note>}
-      {line}{actions}{check}
+      {line}{main && <FinalSteps stop={main} card={cardOf(main.shop_id)} />}{actions}{check}
     </div>
   );
 
+  const counterSheet = <CounterCheck open={counter} onClose={() => setCounter(false)} m={m} shopId={main?.shop_id ?? null} shopName={main?.name ?? ""} inquiryId={mainP?.q.id ?? null} confirmed={main?.confirmed_price ?? null} />;
   if (desk) {
-    return <Shell {...sp} patch={patchSlots} mapStage center={<div className="map-fill">{map ?? <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>} panel={body} cta={cta} />;
+    return <><Shell {...sp} patch={patchSlots} mapStage center={<div className="map-fill">{map ?? <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>} panel={body} cta={cta} />{counterSheet}</>;
   }
-  return <Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{body}{map && <div className="stack">{map}</div>}</div></div>} cta={cta} />;
+  return <><Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{body}{map && <div className="stack">{map}</div>}</div></div>} cta={cta} />{counterSheet}</>;
   void set;
 }
