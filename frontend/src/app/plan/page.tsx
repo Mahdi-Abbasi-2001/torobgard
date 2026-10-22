@@ -1,5 +1,5 @@
-import PlanView from "@/views/PlanView";
-export default async function Page({ searchParams }: PageProps<"/plan">) {
+import GoMission from "@/views/GoMission";
+export default async function Page({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { product } = await searchParams;
-  return <PlanView product={typeof product === "string" ? product : undefined} />;
+  return <GoMission productId={typeof product === "string" ? product : null} view="go" />;
 }

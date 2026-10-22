@@ -1,5 +1,5 @@
-import ShopsView from "@/views/ShopsView";
-export default async function Page({ params }: PageProps<"/p/[id]/shops">) {
+import GoMission from "@/views/GoMission";
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ShopsView id={decodeURIComponent(id)} />;
+  return <GoMission productId={decodeURIComponent(id)} view="find" />;
 }

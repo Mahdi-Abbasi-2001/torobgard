@@ -3,10 +3,12 @@
 // pane keeps its size with the map background.
 import dynamic from "next/dynamic";
 import type { ShopCard } from "@/lib/api";
+import type { Hub } from "./LeafletMap";
 import { useIsDesktop } from "@/lib/media";
 
 type MapProps = {
-  origin: { lat: number; lon: number; label?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[]; height?: number;
+  origin: { lat: number; lon: number; label?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[]; height?: number | string;
+  hubs?: Hub[]; onHub?: (key: string) => void; labels?: Record<string, string>; states?: Record<string, string>; routes?: { pts: [number, number][]; alt?: boolean }[];
   onPick?: (id: string) => void; hover?: string | null; onHover?: (id: string | null) => void; className?: string;
 };
 

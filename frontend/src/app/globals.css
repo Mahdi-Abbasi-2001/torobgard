@@ -1,6 +1,7 @@
 /* ترب‌گرد — ported from design/canvas.src.html.
    Torob family (ترب = radish): radish red + white cards on pale slate; red for actions/selection, blue for info,
-   danger is a darker brick red always paired with an alert icon. Status colours own meaning. */
+   danger is a darker brick red always paired with an alert icon. Status colours own meaning.
+   Light is the default; dark applies only when the shopper picks it with the toggle (data-theme="dark"). */
 :root {
   --paper: #F1F5F9; --card: #FFFFFF; --sunk: #E9EEF5;
   --ink: #1E293B; --ink-2: #475569; --ink-3: #64748B; --line: #E2E8F0; --line-2: #CBD5E1;
@@ -16,21 +17,6 @@
   --f-body: "Vazirmatn Variable", "Vazirmatn", Tahoma, "Segoe UI", system-ui, sans-serif;
   --frame: 480px;
   color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #1A212C; --card: #232B38; --sunk: #1E2631;
-    --ink: #E5E9F0; --ink-2: #AEB8C7; --ink-3: #8592A6; --line: #2E3746; --line-2: #3C4757;
-    --accent: #F0606E; --accent-ink: #FF9AA4; --accent-soft: #3A1F27; --on-accent: #FFFFFF;
-    --brand: #E5505E; --brand-soft: #3D1E24; --leaf: #5DBB68;
-    --info: #6EA0FA; --info-ink: #A3C3FF; --info-soft: #1E2E4E;
-    --ok: #4ACB85; --ok-soft: #14301F; --warn: #F1B44E; --warn-soft: #352812; --bad: #FF8F6E; --bad-soft: #3B1E16;
-    --unk: #8A96A9; --unk-soft: #212A36;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px rgba(0, 0, 0, .45);
-    --scrim: rgba(0, 0, 0, .55);
-    --map-bg: #1B2330; --map-road: #2E3848; --map-block: #222B38; --map-major: #4A4228;
-    color-scheme: dark;
-  }
 }
 :root[data-theme="dark"] {
   --paper: #1A212C; --card: #232B38; --sunk: #1E2631;

@@ -19,6 +19,8 @@ Production: `npm run build && npm start`.
   gzips responses, which buffers events until the connection closes; keep this route.
 - The anonymous session id lives in `localStorage` and is mirrored to `PUT /api/sessions/{id}` (location, filters, shortlist).
 
+> The step-by-step pages below (`/p/[id]/shops`, `/ask`, `/track`, `/plan`, `/mine`) are now redirects into missions; see `docs/UX.md`.
+
 ## Screens (routes)
 | Route | Screen |
 |---|---|

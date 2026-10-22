@@ -10,6 +10,7 @@ import { api, type IdentifyResult, type Product } from "@/lib/api";
 import { fa, mil, money, parseNum, walk } from "@/lib/fa";
 import { takePhoto } from "@/lib/photo";
 import { useSession } from "@/lib/session";
+import { useStartMission } from "@/lib/useStartMission";
 import { Icon } from "@/components/Icon";
 import { ProductCard, ShopCard } from "@/components/cards";
 import { ProductReview } from "@/components/ReviewCard";
@@ -148,8 +149,8 @@ function Result({ r }: { r: IdentifyResult }) {
 
 /** Compare the price the shopper was quoted with prices other shops nearby have listed (listed ≠ confirmed). */
 function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
-  const router = useRouter();
-  const { state, setPicks } = useSession();
+  const { state } = useSession();
+  const startMission = useStartMission();
   const [text, setText] = useState(seen ? money(seen) : "");
   // a price read from the photo is only a guess (BoxAPI once read ۳٬۲۰۰٬۰۰۰ as ۳۲۰٬۰۰۰): no verdict until the shopper confirms it
   const [confirmed, setConfirmed] = useState(false);
@@ -169,7 +170,8 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
   const needConfirm = fromPhoto && !confirmed;
   const showVerdict = !!quoted && pct !== null && !suspicious && !needConfirm;
   const edit = (v: string) => { setText(v); setConfirmed(false); };
-  const ask = (ids: string[]) => { setPicks(p.product_id, ids.slice(0, 5)); router.push(`/p/${p.product_id}/ask`); };
+  // the photo becomes a mission: the cheaper shops are already shortlisted, the next screen asks them
+  const ask = (ids: string[]) => startMission(p, { picks: ids.slice(0, 5), view: "compare", fresh: true });
 
   return (
     <section className="card" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 12 }} aria-label="سنجش قیمت">
@@ -234,7 +236,7 @@ function PriceCheck({ p, seen }: { p: Product; seen: number | null }) {
       )}
       <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
         <Link className="btn sec" href={`/p/${p.product_id}`}>صفحهٔ کالا</Link>
-        <Link className="btn sec" href={`/p/${p.product_id}/shops`}><Icon n="map" s />همهٔ فروشگاه‌ها</Link>
+        <button type="button" className="btn sec" onClick={() => startMission(p, { view: "find", fresh: true })}><Icon n="map" s />مأموریت برای این کالا</button>
       </div>
       <ProductReview id={p.product_id} />
     </section>

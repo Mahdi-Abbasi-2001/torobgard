@@ -1,0 +1,107 @@
+"use client";
+// A mission is one errand: what to buy, what it is for, budget, where / when / how, and everything that happens until the
+// shopper is at the counter. It lives on this device (localStorage); the product's inquiries, holds and reports live on the
+// server under the session, so a mission's stage is derived from them (see useMissionStatus), never stored twice.
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { Priority } from "./api";
+import { DEFAULT_PLACE, type Place } from "./geo";
+
+export type Mode = "walk" | "taxi" | "car";
+export type Stage = 0 | 1 | 2 | 3;
+/** the screens of a mission: decide → find (map, then compare) → confirm → go → done */
+export type View = "decide" | "find" | "compare" | "confirm" | "go" | "done";
+export const STAGE_OF: Record<View, Stage> = { decide: 0, find: 1, compare: 1, confirm: 2, go: 3, done: 3 };
+export const STAGE_VIEW: View[] = ["decide", "find", "confirm", "go"];
+export const STAGE_LABEL = ["انتخاب", "پیدا کردن", "تأیید", "رفتن"];
+
+export interface MissionProduct {
+  product_id: string; title: string; image: string | null; brand: string | null; category: string | null;
+  price_min: number | null; price_median: number | null; price_max: number | null; shop_count: number;
+}
+export interface Mission {
+  id: string; createdAt: number; updatedAt: number;
+  /** the shopper's own words */
+  text: string;
+  /** product words to search, and the category they resolved to */
+  query: string; category: string | null;
+  /** what it is for («ورزش») and the need preset chosen for it */
+  need: string | null; presetId: string | null;
+  budgetMin: number | null; budgetMax: number | null;
+  cond: { installment: boolean; open: boolean; near: boolean };
+  place: Place; when: string; mode: Mode;
+  productId: string | null; product: MissionProduct | null;
+  /** duel state: the model currently leading and the ones already beaten */
+  champion: string | null; beaten: string[];
+  /** models the assistant suggested: they join the duel next */
+  extras: string[];
+  picks: string[]; priority: Priority;
+  /** the shopper pressed «start the trip» */
+  going: boolean;
+  /** visit reported: bought (shop id) or not */
+  done: { shopId: string | null; paid: number | null; found: boolean | null; at: number } | null;
+}
+
+const KEY = "tg-missions-v1";
+const newId = () => `m${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+export const blankMission = (over: Partial<Mission> = {}): Mission => ({
+  id: newId(), createdAt: Date.now(), updatedAt: Date.now(), text: "", query: "", category: null, need: null, presetId: null,
+  budgetMin: null, budgetMax: null, cond: { installment: false, open: false, near: false },
+  place: DEFAULT_PLACE, when: "now", mode: "walk", productId: null, product: null, champion: null, beaten: [], extras: [], picks: [], priority: "balanced",
+  going: false, done: null, ...over,
+});
+
+interface Ctx {
+  missions: Mission[]; ready: boolean;
+  create: (init: Partial<Mission>) => Mission;
+  patch: (id: string, p: Partial<Mission> | ((m: Mission) => Partial<Mission>)) => void;
+  remove: (id: string) => void;
+}
+const MissionCtx = createContext<Ctx | null>(null);
+
+export function MissionProvider({ children }: { children: React.ReactNode }) {
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Hydrate from localStorage after mount: the server render has no storage, so this cannot be initial state.
+    try {
+      const raw = localStorage.getItem(KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (raw) setMissions((JSON.parse(raw) as Mission[]).map((m) => ({ ...blankMission(), ...m })));
+    } catch {}
+    setReady(true);
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    try { localStorage.setItem(KEY, JSON.stringify(missions)); } catch {}
+  }, [missions, ready]);
+
+  const create = useCallback((init: Partial<Mission>) => {
+    const { id: _i, createdAt: _c, updatedAt: _u, ...rest } = init; // a new mission always gets its own id and times
+    void _i; void _c; void _u;
+    const m = blankMission(rest);
+    setMissions((l) => [m, ...l]);
+    return m;
+  }, []);
+  const patch = useCallback((id: string, p: Partial<Mission> | ((m: Mission) => Partial<Mission>)) =>
+    setMissions((l) => l.map((m) => (m.id === id ? { ...m, ...(typeof p === "function" ? p(m) : p), updatedAt: Date.now() } : m))), []);
+  const remove = useCallback((id: string) => setMissions((l) => l.filter((m) => m.id !== id)), []);
+
+  const value = useMemo(() => ({ missions: [...missions].sort((a, b) => b.updatedAt - a.updatedAt), ready, create, patch, remove }), [missions, ready, create, patch, remove]);
+  return <MissionCtx.Provider value={value}>{children}</MissionCtx.Provider>;
+}
+
+export function useMissions() {
+  const c = useContext(MissionCtx);
+  if (!c) throw new Error("useMissions outside MissionProvider");
+  return c;
+}
+
+/** One mission by id with a patch helper bound to it. `m` is undefined until storage is read, or when the id is unknown. */
+export function useMission(id: string) {
+  const { missions, ready, patch } = useMissions();
+  const m = missions.find((x) => x.id === id);
+  const set = useCallback((p: Partial<Mission> | ((m: Mission) => Partial<Mission>)) => patch(id, p), [patch, id]);
+  return { m, ready, set };
+}

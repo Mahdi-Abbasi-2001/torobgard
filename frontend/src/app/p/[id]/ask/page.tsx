@@ -1,5 +1,5 @@
-import AskView from "@/views/AskView";
-export default async function Page({ params }: PageProps<"/p/[id]/ask">) {
+import GoMission from "@/views/GoMission";
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <AskView id={decodeURIComponent(id)} />;
+  return <GoMission productId={decodeURIComponent(id)} view="compare" />;
 }

@@ -10,7 +10,7 @@ export function PriceBadge({ offer, confirmed }: { offer?: Offer | null; confirm
     return (
       <div className="pb is-confirmed">
         <span className="price">{money(confirmed.price)}<small>تومان</small></span>
-        <span className="confirmed"><Icon n="check" s />قیمت تأییدشده · {confirmed.ago}{confirmed.sim ? " (نمایشی)" : ""}</span>
+        <span className="confirmed"><Icon n="check" s />قیمت تأییدشده، {confirmed.ago}{confirmed.sim ? " (نمایشی)" : ""}</span>
         {offer?.price && offer.price !== confirmed.price ? <span className="xs faint">ثبت‌شده: <span className="strike num">{money(offer.price)}</span></span> : null}
       </div>
     );
@@ -112,7 +112,7 @@ export const liveConfirmation = (c?: Confirmation | null) => (c && c.state !== "
 /** The confirmed price as PriceBadge's `confirmed` prop, when a recent confirmation carries one. */
 export function confirmedPrice(c?: Confirmation | null) {
   const l = liveConfirmation(c);
-  return l?.price ? { price: l.price, ago: agoMin(l.age_min) + (l.source !== "seller" ? ` · ${SOURCE[l.source]}` : ""), sim: l.simulated } : null;
+  return l?.price ? { price: l.price, ago: agoMin(l.age_min) + (l.source !== "seller" ? `، ${SOURCE[l.source]}` : ""), sim: l.simulated } : null;
 }
 
 /** Three facts the brief says must never be merged: listed price age · seller confirmation · stock. */

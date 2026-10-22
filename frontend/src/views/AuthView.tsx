@@ -17,7 +17,7 @@ export default function AuthView({ mode: initial = "login", next }: { mode?: "lo
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/mine";
+  const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/missions";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function AuthView({ mode: initial = "login", next }: { mode?: "lo
           <div className="row" style={{ gap: 10 }}><span className="auth-avatar">{user.username.slice(0, 1).toUpperCase()}</span>
             <div className="grow"><div className="b">{user.username}</div><div className="xs muted">خریدها و پاسخ فروشنده‌ها روی هر دستگاهی که وارد شوید همراه شماست.</div></div></div>
           <div className="row" style={{ gap: 8 }}>
-            <Link className="btn pri grow" href="/mine"><Icon n="bag" s />خریدهای من</Link>
+            <Link className="btn pri grow" href="/missions"><Icon n="bag" s />مأموریت‌های من</Link>
             <button className="btn sec" onClick={async () => { await signOut(); router.push("/"); }}>خروج</button>
           </div>
         </div>

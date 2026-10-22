@@ -20,10 +20,10 @@ const themeSub = (cb: () => void) => {
 };
 const effectiveDark = () => {
   const t = document.documentElement.getAttribute("data-theme");
-  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return t === "dark"; // light unless the shopper chose dark
 };
 
-function ThemeToggle() {
+export function ThemeToggle() {
   const dark = useSyncExternalStore(themeSub, effectiveDark, () => false);
   const flip = () => {
     const next = dark ? "light" : "dark";
@@ -52,7 +52,7 @@ export function TopBar() {
   // badge only matters where the bar is visible; phones keep their single bottom-nav request
   const inq = useInquiries(desk ? sid : "", { live: false });
   const answered = inq.items.filter((i) => i.status === "answered").length;
-  if (path.startsWith("/seller")) return null; // seller pages are a separate, narrow tool
+  if (path.startsWith("/seller") || path === "/" || path.startsWith("/m/") || path.startsWith("/missions")) return null; // seller pages and the mission screens have their own bar
 
   return (
     <header className="topbar">
@@ -69,8 +69,8 @@ export function TopBar() {
       <CompareChip />
       <nav className="tb-links" aria-label="ناوبری اصلی">
         <Link href="/chat" className={path.startsWith("/chat") ? "on" : ""} aria-current={path.startsWith("/chat") ? "page" : undefined}><Icon n="chat" s />گفتگو</Link>
-        <Link href="/mine" className={path.startsWith("/mine") || path.startsWith("/track") ? "on" : ""} aria-current={path.startsWith("/mine") ? "page" : undefined}>
-          <Icon n="bag" s />خریدهای من{answered > 0 && <span className="dot" aria-label={`${fa(answered)} پاسخ تازه`}>{fa(answered)}</span>}
+        <Link href="/missions" className={path.startsWith("/missions") ? "on" : ""} aria-current={path.startsWith("/missions") ? "page" : undefined}>
+          <Icon n="bag" s />مأموریت‌ها{answered > 0 && <span className="dot" aria-label={`${fa(answered)} پاسخ تازه`}>{fa(answered)}</span>}
         </Link>
       </nav>
       {user

@@ -197,13 +197,14 @@ export function CampaignBanner({ c, onStop, stopping }: { c: Campaign; onStop: (
 /** Get told when a seller answers: browser notification (this device) and/or a Bale message. */
 export function NotifyOptIn({ sid }: { sid: string }) {
   const [perm, setPerm] = useState<string>("default");
+  const [mounted, setMounted] = useState(false); // the server render has no Notification API: draw nothing until the client has looked
   // Read after mount: the server render has no Notification API, so this cannot be initial state.
   // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { if (typeof Notification !== "undefined") setPerm(Notification.permission); }, []);
+  useEffect(() => { setMounted(true); if (typeof Notification !== "undefined") setPerm(Notification.permission); }, []);
   const bale = useQuery({ queryKey: ["bale-follow", sid], queryFn: () => api.baleFollow(sid), enabled: !!sid, staleTime: 60_000 });
   const [copied, setCopied] = useState(false);
-  const canBrowser = typeof Notification !== "undefined" && perm !== "granted" && perm !== "denied";
-  if (!canBrowser && !(bale.data?.enabled && !bale.data.linked)) return null;
+  const canBrowser = mounted && typeof Notification !== "undefined" && perm !== "granted" && perm !== "denied";
+  if (!mounted || (!canBrowser && !(bale.data?.enabled && !bale.data.linked))) return null;
   return (
     <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
       <div className="row" style={{ gap: 8 }}><Icon n="bell" s /><b className="sm grow">لازم نیست صفحه را باز نگه دارید</b></div>

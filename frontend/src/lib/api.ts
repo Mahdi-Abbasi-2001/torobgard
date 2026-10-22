@@ -156,6 +156,25 @@ export interface IdentifyResult {
   match: "exact" | "related" | "type_only" | "none";
 }
 
+export interface ParsedMission {
+  text: string; query: string | null; need: string | null; category: string | null;
+  budget: { min: number | null; max: number | null } | null;
+  place: { kind: "mall" | "area"; label: string; lat: number; lon: number; mall_key?: string; area?: string } | null;
+  when: string | null; mode: "walk" | "taxi" | "car" | null; conditions: { installment: boolean; open: boolean };
+  understood: ("product" | "need" | "budget" | "place" | "when" | "mode" | "installment")[];
+}
+
+export interface PlanStop {
+  order: number; shop_id: string; name: string; mall: string | null; floor_label: string | null; unit: string | null; plaque: string | null; area: string | null;
+  lat: number; lon: number; arrive_at: string; closes_at: string | null; walk_min_from_previous: number; confirmed_by_seller: boolean; confirmed_price: number | null;
+  inquiry_id: string | null; hold: { code: string; until: string | null } | null; rechecked_at: string | null; late: boolean; tight: boolean;
+  warnings: { level: "bad" | "warn"; text: string }[]; in_traffic_zone: boolean;
+}
+export interface VisitPlan {
+  start: { label: string; lat: number; lon: number; time: string }; stops: PlanStop[]; total_walk_min: number; same_mall: string | null;
+  transport: { in_traffic_zone: boolean; suggestion: string | null }; deep_links: { neshan: string; balad: string; google: string } | null; checklist: string[];
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
@@ -209,6 +228,7 @@ export const api = {
     return req<SearchResult>(`/search/products${qs({ limit: 20, ...p, ...at(loc), prefs: x.prefs?.length ? JSON.stringify(x.prefs) : null, near_only: x.near_only,
       installment_only: x.installment_only, open_only: x.open_only, sort: x.sort, when: x.when && x.when !== "now" ? x.when : null })}${spec}`);
   },
+  missionParse: (text: string) => req<ParsedMission>(`/mission/parse`, { method: "POST", body: JSON.stringify({ text }) }),
   presets: (category: string) => req<{ category: string; presets: Preset[]; source: "llm" | "rules" }>(`/category-presets${qs({ category })}`),
   specFacets: (category: string) => req<{ items: SpecFacet[] }>(`/spec-facets${qs({ category })}`),
   areas: () => req<{ items: Area[] }>(`/areas`),
@@ -240,7 +260,8 @@ export const api = {
   campaigns: (sid: string) => req<{ items: Campaign[] }>(`/sessions/${sid}/campaigns`),
   stopCampaign: (sid: string, id: string) => req<Campaign>(`/campaigns/${id}/stop`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   hold: (sid: string, id: string, until: string) => req<Inquiry>(`/inquiries/${id}/hold`, { method: "POST", body: JSON.stringify({ session_id: sid, until }) }),
-  recheck: (sid: string, id: string, eta_min?: number | null) => req<Inquiry>(`/inquiries/${id}/recheck`, { method: "POST", body: JSON.stringify({ session_id: sid, eta_min }) }),
+  recheck: (sid: string, id: string, eta_min?: number | null, demo_gone = false) => req<Inquiry>(`/inquiries/${id}/recheck`, { method: "POST", body: JSON.stringify({ session_id: sid, eta_min, demo_gone }) }),
+  visitPlan: (b: { session_id: string; product_id: string; lat?: number; lon?: number; order?: string[] }) => req<VisitPlan>(`/visit-plan`, { method: "POST", body: JSON.stringify(b) }),
   report: (b: { session_id: string; shop_id: string; product_id: string; kind: "visit" | "call"; available: boolean | null; price?: number | null; price_matched?: boolean | null; inquiry_id?: string | null; note?: string | null }) =>
     req<Report>(`/reports`, { method: "POST", body: JSON.stringify(b) }),
   reports: (sid: string) => req<{ items: Report[] }>(`/sessions/${sid}/reports`),

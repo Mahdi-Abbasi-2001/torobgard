@@ -1,2 +1,2 @@
-import MineView from "@/views/MineView";
-export default function Page() { return <MineView />; }
+import { redirect } from "next/navigation";
+export default function Page() { redirect("/missions"); }

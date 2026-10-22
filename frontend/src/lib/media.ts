@@ -19,6 +19,6 @@ const themeSub = (cb: () => void) => {
 };
 const isDark = () => {
   const t = document.documentElement.getAttribute("data-theme");
-  return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return t === "dark"; // light unless the shopper chose dark
 };
 export const useDarkTheme = () => useSyncExternalStore(themeSub, isDark, () => false);

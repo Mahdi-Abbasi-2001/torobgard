@@ -3,41 +3,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { api, type DayHours, type Weekday } from "@/lib/api";
-import { fa, hm } from "@/lib/fa";
+import { api } from "@/lib/api";
+import { fa } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
+import { Hours, looksWrong } from "@/components/hours";
 import { MallLocator } from "@/components/cards";
 import { FastChip, InstallmentChips, NoCallNote, OpenChip, PriceBadge, ReliabilityLine, ShopName, SourceNote, TruthRow, confirmedPrice } from "@/components/honesty";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards } from "@/components/ui";
-
-const DAYS: [Weekday, string][] = [["sat", "شنبه"], ["sun", "یکشنبه"], ["mon", "دوشنبه"], ["tue", "سه‌شنبه"], ["wed", "چهارشنبه"], ["thu", "پنجشنبه"], ["fri", "جمعه"]];
-const todayKey = (): Weekday => {
-  const d = new Date().toLocaleDateString("en-US", { weekday: "short", timeZone: "Asia/Tehran" }).toLowerCase().slice(0, 3);
-  return d as Weekday;
-};
-const realShifts = (d: DayHours) => d.shifts.filter((x) => !(x.start_time === "00:00:00" && x.end_time === "00:00:00"));
-const looksWrong = (d: DayHours) => d.status === "unsupported" || (d.status === "declared" && realShifts(d).some((x) => x.start_time < "06:00:00" || x.start_time === x.end_time));
-
-function Hours({ wh }: { wh: Record<Weekday, DayHours> }) {
-  const today = todayKey();
-  return (
-    <table className="hours"><tbody>
-      {DAYS.map(([k, l]) => {
-        const d = wh[k];
-        const sh = d ? realShifts(d) : [];
-        const bad = d && looksWrong(d);
-        const v = !d ? "نامشخص" : d.status === "closed" ? "تعطیل" : d.status === "unsupported" ? "نامعتبر" : sh.map((x) => `${hm(x.start_time)}–${hm(x.end_time)}`).join("، ") || "تعطیل";
-        return (
-          <tr key={k} className={`${k === today ? "today" : ""} ${k === "fri" ? "fri" : ""}`}>
-            <td>{l}{k === today ? " · امروز" : ""}</td>
-            <td>{bad ? <span className="bad">{v} ⚠</span> : v}</td>
-          </tr>
-        );
-      })}
-    </tbody></table>
-  );
-}
 
 export default function ShopView({ id, product }: { id: string; product?: string }) {
   const router = useRouter();

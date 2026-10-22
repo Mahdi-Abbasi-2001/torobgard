@@ -12,8 +12,15 @@ import { useDarkTheme } from "@/lib/media";
 export type LeafletMapProps = {
   origin: { lat: number; lon: number; label?: string }; listed: ShopCard[]; cat: ShopCard[]; selected: string[];
   onPick?: (id: string) => void; hover?: string | null; onHover?: (id: string | null) => void;
-  className?: string; height: number; desk: boolean;
+  className?: string; height: number | string; desk: boolean;
+  /** one-trip hubs (a mall where several shops that list the product sit together), drawn as a glowing pill */
+  hubs?: Hub[]; onHub?: (key: string) => void;
+  /** a pin's text instead of the listed price (the seller-confirmed price, «…» while asking) and its state (asked / confirmed / held / gone) */
+  labels?: Record<string, string>; states?: Record<string, string>;
+  /** the walk to take: a dashed line through these points; `alt` draws the fallback route fainter */
+  routes?: { pts: [number, number][]; alt?: boolean }[];
 };
+export type Hub = { key: string; lat: number; lon: number; title: string; sub: string; dim?: boolean; shopIds?: string[] };
 
 // CARTO's basemaps now need an API key; OSM's own tiles don't (usage policy: attribution, no bulk downloading)
 const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
@@ -22,10 +29,11 @@ const RINGS = [5, 10, 15, 20]; // minutes on foot: 4.5 km/h with +30% for detour
 const ringM = (min: number) => ((min / 60) * 4500) / 1.3;
 const esc = (s: string | null | undefined) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 const priceLabel = (s: ShopCard) => (s.offer?.price ? mil(s.offer.price) : "بپرسید");
+const ST = ["asked", "confirmed", "held", "gone"];
 
 type Group = { shops: ShopCard[]; lat: number; lon: number; px: L.Point };
 
-export default function LeafletMap({ origin, listed, cat, selected, onPick, hover, onHover, className, height, desk }: LeafletMapProps) {
+export default function LeafletMap({ origin, listed, cat, selected, onPick, hover, onHover, className, height, desk, hubs, onHub, labels, states, routes }: LeafletMapProps) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const pins = useRef<L.LayerGroup | null>(null);
@@ -34,8 +42,10 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
   const [zoom, setZoom] = useState(0);
   const [tick, setTick] = useState(0);
   const dark = useDarkTheme();
-  const cbs = useRef({ onPick, onHover });
-  useEffect(() => { cbs.current = { onPick, onHover }; }, [onPick, onHover]);
+  const labelKey = JSON.stringify(labels ?? {}) + JSON.stringify(routes ?? []);
+  const stateKey = JSON.stringify(states ?? {});
+  const cbs = useRef({ onPick, onHover, onHub });
+  useEffect(() => { cbs.current = { onPick, onHover, onHub }; }, [onPick, onHover, onHub]);
 
   // the map itself, once
   useEffect(() => {
@@ -95,7 +105,12 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
 
     // group listed shops whose pills would overlap at this zoom (cheapest first, so a group shows its lowest price)
     const groups: Group[] = [];
-    [...listed].sort((a, b) => (a.offer?.price ?? 9e15) - (b.offer?.price ?? 9e15)).forEach((s) => {
+    const inHub = new Set((hubs ?? []).flatMap((h) => h.shopIds ?? []));
+    listed.filter((s) => inHub.has(s.shop_id)).forEach((s) => { // shops covered by a hub: a dot, the hub carries the story
+      const mk = L.marker([s.lat, s.lon], { icon: L.divIcon({ className: "lm-hubdot", html: "<i></i>", iconSize: [10, 10] }), interactive: false, keyboard: false }).addTo(layer);
+      const e = mk.getElement(); if (e) track(s.shop_id, e);
+    });
+    [...listed].filter((s) => !inHub.has(s.shop_id)).sort((a, b) => (a.offer?.price ?? 9e15) - (b.offer?.price ?? 9e15)).forEach((s) => {
       const px = m.project([s.lat, s.lon], z);
       const g = groups.find((o) => Math.abs(o.px.x - px.x) < 120 && Math.abs(o.px.y - px.y) < 36); // a group pill is ~150 px wide
       if (g) g.shops.push(s); else groups.push({ shops: [s], lat: s.lat, lon: s.lon, px });
@@ -103,8 +118,10 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
     groups.forEach((g) => {
       const one = g.shops.length === 1, s0 = g.shops[0];
       const html = one
-        ? `<div class="lm-pin" dir="rtl">${esc(priceLabel(s0))}</div>`
-        : `<div class="lm-pin lm-grp" dir="rtl"><b>${fa(g.shops.length)}</b> فروشگاه${s0.offer?.price ? ` · از ${esc(mil(s0.offer.price))}` : ""}</div>`;
+        ? `<div class="lm-pin${s0.offer?.flags?.length ? " lm-warn" : ""}" dir="rtl">${s0.offer?.flags?.length ? "⚠ " : ""}${esc(labels?.[s0.shop_id] ?? priceLabel(s0))}</div>`
+        : states && g.shops.some((x) => states[x.shop_id] === "confirmed" || states[x.shop_id] === "held")
+          ? `<div class="lm-pin lm-grp" dir="rtl"><b>${fa(g.shops.length)}</b> فروشگاه، ${fa(g.shops.filter((x) => states[x.shop_id] === "confirmed" || states[x.shop_id] === "held").length)} تأیید</div>`
+          : `<div class="lm-pin lm-grp" dir="rtl"><b>${fa(g.shops.length)}</b> فروشگاه${s0.offer?.price ? ` · از ${esc(mil(s0.offer.price))}` : ""}</div>`;
       const mk = L.marker([g.lat, g.lon], { riseOnHover: true, icon: L.divIcon({ className: "lm-pin-wrap", html, iconSize: [0, 0] }), title: one ? s0.name : `${g.shops.length} فروشگاه` }).addTo(layer);
       if (one) {
         if (desk) mk.bindTooltip(`<div dir="rtl"><b>${esc(s0.name)}</b><br><span class="faint">${esc(s0.mall ?? "بدون پاساژ")} · ${esc(walk(s0.walk_min))} پیاده</span><br>${s0.offer?.price ? `<b>${esc(money(s0.offer.price))}</b> تومان <span class="faint">· ثبت ${esc(daysAgo(s0.offer.age_days))}</span>` : `<span class="faint">قیمت نامشخص؛ بپرسید</span>`}</div>`, { direction: "top", offset: [0, -40], className: "lm-tip" });
@@ -120,6 +137,13 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
       }
       const e = mk.getElement();
       if (e) g.shops.forEach((s) => track(s.shop_id, e));
+    });
+
+    (routes ?? []).forEach((r) => L.polyline(r.pts, { className: r.alt ? "lm-route alt" : "lm-route", interactive: false }).addTo(layer));
+    (hubs ?? []).forEach((h) => {
+      L.circle([h.lat, h.lon], { radius: 120, className: `lm-glow${h.dim ? " dim" : ""}`, interactive: false }).addTo(layer);
+      const mk = L.marker([h.lat, h.lon], { zIndexOffset: 800, icon: L.divIcon({ className: "lm-hub-wrap", html: `<div class="lm-hub${h.dim ? " dim" : ""}" dir="rtl"><b>${esc(h.title)}</b><span>${esc(h.sub)}</span></div>`, iconSize: [0, 0] }) }).addTo(layer);
+      mk.on("click", () => cbs.current.onHub?.(h.key));
     });
 
     L.marker([origin.lat, origin.lon], { keyboard: false, zIndexOffset: 1000, icon: L.divIcon({ className: "lm-me", html: "<i></i>", iconSize: [18, 18] }) })
@@ -139,13 +163,21 @@ export default function LeafletMap({ origin, listed, cat, selected, onPick, hove
       });
       return box;
     }
-  }, [listed, cat, zoom, origin.lat, origin.lon, origin.label, desk]);
+  }, [listed, cat, zoom, origin.lat, origin.lon, origin.label, desk, hubs, labelKey, stateKey]); // eslint-disable-line react-hooks/exhaustive-deps -- the keys cover labels, routes and states
 
-  // hover (from the list or the map) and selection: classes only, so the pin under the mouse is never rebuilt
+  // hover (from the list or the map) and selection: classes only, so the pin under the mouse is never rebuilt.
+  // A grouped pin stands for several shops: it takes the most advanced state among them (held > confirmed > asked > gone).
   useEffect(() => {
+    const RANK = ["held", "confirmed", "asked", "gone"];
+    const best = new Map<HTMLElement, string>();
+    els.current.forEach((list, id) => list.forEach((e) => {
+      const st = states?.[id];
+      if (st && (!best.has(e) || RANK.indexOf(st) < RANK.indexOf(best.get(e)!))) best.set(e, st);
+    }));
     els.current.forEach((list, id) => list.forEach((e) => {
       e.classList.toggle("on", selected.includes(id));
       e.classList.toggle("h", hover === id);
+      ST.forEach((k) => e.classList.toggle(`st-${k}`, best.get(e) === k));
       if (hover === id) e.style.zIndex = "2000"; else if (e.classList.contains("lm-pin-wrap")) e.style.zIndex = "";
     }));
     document.querySelectorAll<HTMLButtonElement>(".lm-list button").forEach((b) => b.classList.toggle("on", selected.includes(b.dataset.id!)));

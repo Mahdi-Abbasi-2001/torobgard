@@ -38,7 +38,7 @@ export function Steps({ at }: { at: 0 | 1 | 2 | 3 }) {
 
 export function BottomNav({ badge = 0 }: { badge?: number }) {
   const path = usePathname();
-  const items: [string, IconName, string][] = [["/", "home", "خانه"], ["/chat", "chat", "گفتگو"], ["/mine", "bag", "خریدهای من"]];
+  const items: [string, IconName, string][] = [["/", "home", "خانه"], ["/chat", "chat", "گفتگو"], ["/missions", "bag", "مأموریت‌ها"]];
   return (
     <nav className="nav" aria-label="ناوبری اصلی">
       {items.map(([href, ic, label]) => {
@@ -46,7 +46,7 @@ export function BottomNav({ badge = 0 }: { badge?: number }) {
         return (
           <Link key={href} href={href} className={on ? "on" : ""} aria-current={on ? "page" : undefined}>
             <Icon n={ic} />{label}
-            {href === "/mine" && badge > 0 && <span className="dot">{fa(badge)}</span>}
+            {href === "/missions" && badge > 0 && <span className="dot">{fa(badge)}</span>}
           </Link>
         );
       })}
@@ -54,7 +54,7 @@ export function BottomNav({ badge = 0 }: { badge?: number }) {
   );
 }
 
-export function Sheet({ open, onClose, children, label }: { open: boolean; onClose: () => void; children: ReactNode; label: string }) {
+export function Sheet({ open, onClose, children, label, className = "" }: { open: boolean; onClose: () => void; children: ReactNode; label: string; className?: string }) {
   useEffect(() => {
     if (!open) return;
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -66,7 +66,7 @@ export function Sheet({ open, onClose, children, label }: { open: boolean; onClo
   return (
     <>
       <div className="scrim" onClick={onClose} />
-      <div className="sheet" role="dialog" aria-modal="true" aria-label={label}>{children}</div>
+      <div className={`sheet ${className}`} role="dialog" aria-modal="true" aria-label={label}>{children}</div>
     </>
   );
 }
