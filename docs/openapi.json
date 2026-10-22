@@ -5,10 +5,42 @@
   "version": "0.1.0"
  },
  "paths": {
+  "/api/healthz": {
+   "get": {
+    "summary": "Healthz",
+    "operationId": "healthz_api_healthz_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
   "/healthz": {
    "get": {
     "summary": "Healthz",
     "operationId": "healthz_healthz_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/readyz": {
+   "get": {
+    "summary": "Readyz",
+    "operationId": "readyz_api_readyz_get",
     "responses": {
      "200": {
       "description": "Successful Response",
@@ -43,7 +75,7 @@
      "products"
     ],
     "summary": "Search",
-    "description": "Search products. If the query itself contains a budget ('زیر ۳ میلیون') it is parsed and applied.",
+    "description": "Search products. If the query itself contains a budget ('زیر ۳ میلیون') it is parsed and applied.\nEach item carries `near` (shops listing it, within 15 min walk, open at `when`, with installments). Purchase conditions\n(near_only / installment_only / open_only), spec filters, need presets and sort are applied over the top candidates.",
     "operationId": "search_api_search_products_get",
     "parameters": [
      {
@@ -156,6 +188,136 @@
        "default": 0,
        "title": "Offset"
       }
+     },
+     {
+      "name": "lat",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lat"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lon"
+      }
+     },
+     {
+      "name": "when",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "now | 1h | evening | tomorrow | HH:MM: for 'open' availability",
+       "title": "When"
+      },
+      "description": "now | 1h | evening | tomorrow | HH:MM: for 'open' availability"
+     },
+     {
+      "name": "prefs",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "need-preset constraints (JSON list); soft: best fits first, with reasons",
+       "title": "Prefs"
+      },
+      "description": "need-preset constraints (JSON list); soft: best fits first, with reasons"
+     },
+     {
+      "name": "spec",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       },
+       "description": "hard spec filters 'key=value' (values from /api/spec-facets)",
+       "default": [],
+       "title": "Spec"
+      },
+      "description": "hard spec filters 'key=value' (values from /api/spec-facets)"
+     },
+     {
+      "name": "near_only",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Near Only"
+      }
+     },
+     {
+      "name": "installment_only",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Installment Only"
+      }
+     },
+     {
+      "name": "open_only",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "boolean",
+       "default": false,
+       "title": "Open Only"
+      }
+     },
+     {
+      "name": "sort",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "pattern": "^(price|near)$"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Sort"
+      }
      }
     ],
     "responses": {
@@ -174,6 +336,107 @@
         "schema": {
          "$ref": "#/components/schemas/HTTPValidationError"
         }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/category-presets": {
+   "get": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Category Presets",
+    "description": "Need presets for a category («باتری قوی», «حذف نویز» ...) as spec constraints; LLM-proposed from the category's real\nspecs when configured (keys validated), rules otherwise. Cached per category.",
+    "operationId": "category_presets_api_category_presets_get",
+    "parameters": [
+     {
+      "name": "category",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Category"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/spec-facets": {
+   "get": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Category Spec Facets",
+    "operationId": "category_spec_facets_api_spec_facets_get",
+    "parameters": [
+     {
+      "name": "category",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Category"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/areas": {
+   "get": {
+    "tags": [
+     "shops"
+    ],
+    "summary": "Areas",
+    "description": "Shopping areas that actually exist in the dataset, with shop counts and a centre point.",
+    "operationId": "areas_api_areas_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
        }
       }
      }
@@ -220,18 +483,229 @@
     }
    }
   },
+  "/api/products/{product_id}/insights": {
+   "get": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Product Insights",
+    "description": "Step 1 helpers for one product: other versions of the same model, a fair-price range from the shops' listings,\nand how available it is near the shopper.",
+    "operationId": "product_insights_api_products__product_id__insights_get",
+    "parameters": [
+     {
+      "name": "product_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Product Id"
+      }
+     },
+     {
+      "name": "lat",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lat"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lon"
+      }
+     },
+     {
+      "name": "when",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "When"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/products/compare": {
    "post": {
     "tags": [
      "products"
     ],
     "summary": "Compare",
+    "description": "Spec rows (differences first) plus insights: the better value per comparable row, per-product strengths,\ncheapest and most available nearby.",
     "operationId": "compare_api_products_compare_post",
     "requestBody": {
      "content": {
       "application/json": {
        "schema": {
-        "$ref": "#/components/schemas/CompareIn"
+        "$ref": "#/components/schemas/CompareBody"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/products/compare/verdict": {
+   "post": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Compare Verdict",
+    "description": "Which one, for this shopper's need. Grounded in the compared specs, prices and nearby availability (LLM when\nconfigured, rules otherwise).",
+    "operationId": "compare_verdict_api_products_compare_verdict_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/VerdictIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/products/{product_id}/review": {
+   "get": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Product Review",
+    "description": "Short grounded review: pros/cons only from real specs; general reputation (if any) is labelled unverified. Cached.",
+    "operationId": "product_review_api_products__product_id__review_get",
+    "parameters": [
+     {
+      "name": "product_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Product Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/identify": {
+   "post": {
+    "tags": [
+     "products"
+    ],
+    "summary": "Identify",
+    "description": "Snap-to-identify: read brand/model/price from a shopper's photo, then return candidate products to confirm.\nThe photo is processed in memory and never stored.",
+    "operationId": "identify_api_identify_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/IdentifyIn"
        }
       }
      },
@@ -315,7 +789,7 @@
      "shops"
     ],
     "summary": "Product Shops",
-    "description": "Shops for a product. `listed` have a registered offer; `category_only` merely work in the category (ask first).",
+    "description": "Shops for a product. `listed` have a registered offer; `category_only` merely work in the category (ask first).\n`zones`: malls/areas where several of these shops sit together (one trip covers them).",
     "operationId": "product_shops_api_products__product_id__shops_get",
     "parameters": [
      {
@@ -466,6 +940,146 @@
        "maximum": 100,
        "default": 40,
        "title": "Limit"
+      }
+     },
+     {
+      "name": "when",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "now | 1h | evening | tomorrow | HH:MM: opening state at arrival",
+       "title": "When"
+      },
+      "description": "now | 1h | evening | tomorrow | HH:MM: opening state at arrival"
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(balanced|price|near|trust|now)$",
+       "default": "balanced",
+       "title": "Priority"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/products/{product_id}/shops/compare": {
+   "get": {
+    "tags": [
+     "shops"
+    ],
+    "summary": "Compare Shops",
+    "description": "Step 3: side by side with winners per row (price, distance, freshness, latest closing, warranty, trust), a score\nbreakdown under the chosen priority, and a verdict per priority.",
+    "operationId": "compare_shops_api_products__product_id__shops_compare_get",
+    "parameters": [
+     {
+      "name": "product_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Product Id"
+      }
+     },
+     {
+      "name": "ids",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "description": "comma-separated shop ids (2-6)",
+       "title": "Ids"
+      },
+      "description": "comma-separated shop ids (2-6)"
+     },
+     {
+      "name": "lat",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lat"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lon"
+      }
+     },
+     {
+      "name": "when",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "When"
+      }
+     },
+     {
+      "name": "priority",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "string",
+       "pattern": "^(balanced|price|near|trust|now)$",
+       "default": "balanced",
+       "title": "Priority"
       }
      }
     ],
@@ -644,6 +1258,114 @@
     }
    }
   },
+  "/api/where-to-look": {
+   "get": {
+    "tags": [
+     "shops"
+    ],
+    "summary": "Where To Look",
+    "description": "For a product nobody lists: the malls/areas where shops of that kind concentrate (from the dataset's shop locations).",
+    "operationId": "where_to_look_api_where_to_look_get",
+    "parameters": [
+     {
+      "name": "q",
+      "in": "query",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Q"
+      }
+     },
+     {
+      "name": "category",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Category"
+      }
+     },
+     {
+      "name": "lat",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lat"
+      }
+     },
+     {
+      "name": "lon",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "title": "Lon"
+      }
+     },
+     {
+      "name": "hint",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "anyOf": [
+        {
+         "type": "string",
+         "maxLength": 120
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "description": "free-text place for a map search link",
+       "title": "Hint"
+      },
+      "description": "free-text place for a map search link"
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/categories/top": {
    "get": {
     "tags": [
@@ -679,6 +1401,122 @@
         "schema": {
          "$ref": "#/components/schemas/HTTPValidationError"
         }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/signup": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Auth Signup",
+    "operationId": "auth_signup_api_auth_signup_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AuthIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/login": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Auth Login",
+    "operationId": "auth_login_api_auth_login_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AuthIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/me": {
+   "get": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Auth Me",
+    "operationId": "auth_me_api_auth_me_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/auth/logout": {
+   "post": {
+    "tags": [
+     "auth"
+    ],
+    "summary": "Auth Logout",
+    "operationId": "auth_logout_api_auth_logout_post",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
        }
       }
      }
@@ -792,6 +1630,47 @@
     }
    }
   },
+  "/api/products/{product_id}/inquiry-questions": {
+   "get": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Product Questions",
+    "description": "Product-aware questions (variant, original vs copy, registered...) from the product's specs. LLM when configured.",
+    "operationId": "product_questions_api_products__product_id__inquiry_questions_get",
+    "parameters": [
+     {
+      "name": "product_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Product Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/inquiries": {
    "post": {
     "tags": [
@@ -809,6 +1688,359 @@
      },
      "required": true
     },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/inquiries/smart": {
+   "post": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Smart Inquiries",
+    "description": "Ask in waves: the best `wave` shops first, the next ones only when someone says no or stays silent.",
+    "operationId": "smart_inquiries_api_inquiries_smart_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SmartIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sessions/{session_id}/campaigns": {
+   "get": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Session Campaigns",
+    "operationId": "session_campaigns_api_sessions__session_id__campaigns_get",
+    "parameters": [
+     {
+      "name": "session_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Session Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/campaigns/{campaign_id}/stop": {
+   "post": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Stop Campaign",
+    "operationId": "stop_campaign_api_campaigns__campaign_id__stop_post",
+    "parameters": [
+     {
+      "name": "campaign_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Campaign Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SessionOnly"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/inquiries/{inquiry_id}/hold": {
+   "post": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Hold",
+    "description": "Ask the shop to keep one aside until `until` (Tehran time). Only after the shop said it has the item.",
+    "operationId": "hold_api_inquiries__inquiry_id__hold_post",
+    "parameters": [
+     {
+      "name": "inquiry_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Inquiry Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/HoldIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/inquiries/{inquiry_id}/recheck": {
+   "post": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Recheck",
+    "description": "\"I'm leaving now — still there?\" One more short question to the same shop.",
+    "operationId": "recheck_api_inquiries__inquiry_id__recheck_post",
+    "parameters": [
+     {
+      "name": "inquiry_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Inquiry Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecheckIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/reports": {
+   "post": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Add Report",
+    "description": "A shopper's own report: after visiting the shop, or after phoning it. Feeds the shared confirmations and the shop's\nreliability.",
+    "operationId": "add_report_api_reports_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReportIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sessions/{session_id}/reports": {
+   "get": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Session Reports",
+    "operationId": "session_reports_api_sessions__session_id__reports_get",
+    "parameters": [
+     {
+      "name": "session_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Session Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/sessions/{session_id}/bale": {
+   "get": {
+    "tags": [
+     "inquiries"
+    ],
+    "summary": "Session Bale",
+    "description": "How a shopper gets answers in Bale: the /follow command for this session (only when the bot is configured).",
+    "operationId": "session_bale_api_sessions__session_id__bale_get",
+    "parameters": [
+     {
+      "name": "session_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Session Id"
+      }
+     }
+    ],
     "responses": {
      "200": {
       "description": "Successful Response",
@@ -877,7 +2109,7 @@
      "inquiries"
     ],
     "summary": "Session Events",
-    "description": "Server-sent events: inquiry status changes in real time.",
+    "description": "Server-sent events: inquiry status changes in real time. Accounts pass their token as ?token= (EventSource has no headers).",
     "operationId": "session_events_api_sessions__session_id__events_get",
     "parameters": [
      {
@@ -1029,6 +2261,133 @@
     }
    }
   },
+  "/api/seller/{shop_id}/{token}/inquiries/{inquiry_id}/reply": {
+   "post": {
+    "tags": [
+     "seller"
+    ],
+    "summary": "Seller Reply",
+    "description": "Free-text answer («داریم، ۲ و ۸۵۰، تا ۸ شب هستیم»). Parsed into fields; the assistant may ask a follow-up.",
+    "operationId": "seller_reply_api_seller__shop_id___token__inquiries__inquiry_id__reply_post",
+    "parameters": [
+     {
+      "name": "shop_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Shop Id"
+      }
+     },
+     {
+      "name": "token",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Token"
+      }
+     },
+     {
+      "name": "inquiry_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Inquiry Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReplyIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/seller/{shop_id}/{token}/inquiries/{inquiry_id}/update-listing": {
+   "post": {
+    "tags": [
+     "seller"
+    ],
+    "summary": "Seller Update Listing",
+    "operationId": "seller_update_listing_api_seller__shop_id___token__inquiries__inquiry_id__update_listing_post",
+    "parameters": [
+     {
+      "name": "shop_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Shop Id"
+      }
+     },
+     {
+      "name": "token",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Token"
+      }
+     },
+     {
+      "name": "inquiry_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Inquiry Id"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/api/demo/seller-link/{shop_id}": {
    "get": {
     "tags": [
@@ -1064,6 +2423,116 @@
         "schema": {
          "$ref": "#/components/schemas/HTTPValidationError"
         }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/visit-plan": {
+   "post": {
+    "tags": [
+     "plan"
+    ],
+    "summary": "Make Visit Plan",
+    "description": "Plan built from sellers' confirmations (\"available\"), newest answer per shop; optional unconfirmed shop_ids.",
+    "operationId": "make_visit_plan_api_visit_plan_post",
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/PlanIn"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chat/{session_id}": {
+   "post": {
+    "tags": [
+     "chat"
+    ],
+    "summary": "Chat",
+    "description": "SSE stream of {type: text|tool_status|block|degraded|done}. Blocks: product_cards, comparison_table, shop_list,\nchips, inquiry_proposal, inquiry_status. Falls back to rule-based search when the LLM is unavailable.",
+    "operationId": "chat_api_chat__session_id__post",
+    "parameters": [
+     {
+      "name": "session_id",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string",
+       "title": "Session Id"
+      }
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ChatIn"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
+       }
+      }
+     },
+     "422": {
+      "description": "Validation Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/HTTPValidationError"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/api/chat-status": {
+   "get": {
+    "tags": [
+     "chat"
+    ],
+    "summary": "Chat Status",
+    "operationId": "chat_status_api_chat_status_get",
+    "responses": {
+     "200": {
+      "description": "Successful Response",
+      "content": {
+       "application/json": {
+        "schema": {}
        }
       }
      }
@@ -1131,12 +2600,110 @@
        }
       ],
       "title": "Installment"
+     },
+     "update_listing": {
+      "type": "boolean",
+      "title": "Update Listing",
+      "description": "also replace this shop's listed price with `price`",
+      "default": false
+     },
+     "same_as_listed": {
+      "type": "boolean",
+      "title": "Same As Listed",
+      "default": false
+     },
+     "restock": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 40
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Restock",
+      "description": "e.g. «فردا» when out of stock for now"
+     },
+     "alt_suggestion": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 100
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Alt Suggestion",
+      "description": "a similar item the shop has instead"
+     },
+     "hold_accepted": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Hold Accepted"
      }
     },
     "type": "object",
     "title": "AnswerIn"
    },
-   "CompareIn": {
+   "AuthIn": {
+    "properties": {
+     "username": {
+      "type": "string",
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Username"
+     },
+     "password": {
+      "type": "string",
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Password"
+     },
+     "session_id": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 64
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Session Id",
+      "description": "this device's anonymous session, adopted/merged into the account"
+     }
+    },
+    "type": "object",
+    "required": [
+     "username",
+     "password"
+    ],
+    "title": "AuthIn"
+   },
+   "ChatIn": {
+    "properties": {
+     "message": {
+      "type": "string",
+      "maxLength": 600,
+      "minLength": 1,
+      "title": "Message"
+     }
+    },
+    "type": "object",
+    "required": [
+     "message"
+    ],
+    "title": "ChatIn"
+   },
+   "CompareBody": {
     "properties": {
      "ids": {
       "items": {
@@ -1146,13 +2713,35 @@
       "maxItems": 4,
       "minItems": 2,
       "title": "Ids"
+     },
+     "lat": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lat"
+     },
+     "lon": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lon"
      }
     },
     "type": "object",
     "required": [
      "ids"
     ],
-    "title": "CompareIn"
+    "title": "CompareBody"
    },
    "HTTPValidationError": {
     "properties": {
@@ -1166,6 +2755,39 @@
     },
     "type": "object",
     "title": "HTTPValidationError"
+   },
+   "HoldIn": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     },
+     "until": {
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$",
+      "title": "Until"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id",
+     "until"
+    ],
+    "title": "HoldIn"
+   },
+   "IdentifyIn": {
+    "properties": {
+     "image": {
+      "type": "string",
+      "maxLength": 4000000,
+      "title": "Image"
+     }
+    },
+    "type": "object",
+    "required": [
+     "image"
+    ],
+    "title": "IdentifyIn"
    },
    "InquiryIn": {
     "properties": {
@@ -1204,10 +2826,26 @@
        "price"
       ]
      },
+     "custom": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Custom",
+      "description": "product-specific questions {c1: text}; list their keys in `questions`"
+     },
      "note": {
       "anyOf": [
        {
-        "type": "string"
+        "type": "string",
+        "maxLength": 200
        },
        {
         "type": "null"
@@ -1236,6 +2874,216 @@
     ],
     "title": "InquiryIn"
    },
+   "PlanIn": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     },
+     "product_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Product Id"
+     },
+     "shop_ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "maxItems": 6,
+      "title": "Shop Ids",
+      "description": "extra shops without a seller answer"
+     },
+     "lat": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lat"
+     },
+     "lon": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lon"
+     },
+     "order": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Order",
+      "description": "shop_ids in the order the user wants"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id"
+    ],
+    "title": "PlanIn"
+   },
+   "RecheckIn": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     },
+     "eta_min": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 600.0,
+        "minimum": 1.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Eta Min"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id"
+    ],
+    "title": "RecheckIn"
+   },
+   "ReplyIn": {
+    "properties": {
+     "text": {
+      "type": "string",
+      "maxLength": 600,
+      "minLength": 1,
+      "title": "Text"
+     }
+    },
+    "type": "object",
+    "required": [
+     "text"
+    ],
+    "title": "ReplyIn"
+   },
+   "ReportIn": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     },
+     "shop_id": {
+      "type": "string",
+      "title": "Shop Id"
+     },
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "kind": {
+      "type": "string",
+      "pattern": "^(visit|call)$",
+      "title": "Kind"
+     },
+     "available": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Available"
+     },
+     "price": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "minimum": 0.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Price"
+     },
+     "price_matched": {
+      "anyOf": [
+       {
+        "type": "boolean"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Price Matched"
+     },
+     "inquiry_id": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Inquiry Id"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id",
+     "shop_id",
+     "product_id",
+     "kind"
+    ],
+    "title": "ReportIn"
+   },
+   "SessionOnly": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id"
+    ],
+    "title": "SessionOnly"
+   },
    "SessionPatch": {
     "properties": {
      "state": {
@@ -1249,6 +3097,113 @@
      "state"
     ],
     "title": "SessionPatch"
+   },
+   "SmartIn": {
+    "properties": {
+     "session_id": {
+      "type": "string",
+      "title": "Session Id"
+     },
+     "product_id": {
+      "type": "string",
+      "title": "Product Id"
+     },
+     "questions": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "title": "Questions",
+      "default": [
+       "stock",
+       "price"
+      ]
+     },
+     "custom": {
+      "anyOf": [
+       {
+        "additionalProperties": {
+         "type": "string"
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Custom"
+     },
+     "note": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Note"
+     },
+     "timeout_s": {
+      "anyOf": [
+       {
+        "type": "integer",
+        "maximum": 3600.0,
+        "minimum": 10.0
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Timeout S"
+     },
+     "wave": {
+      "type": "integer",
+      "maximum": 4.0,
+      "minimum": 1.0,
+      "title": "Wave",
+      "description": "shops asked at the same time",
+      "default": 2
+     },
+     "target": {
+      "type": "integer",
+      "maximum": 3.0,
+      "minimum": 1.0,
+      "title": "Target",
+      "description": "stop when this many shops confirmed",
+      "default": 1
+     },
+     "max_shops": {
+      "type": "integer",
+      "maximum": 12.0,
+      "minimum": 1.0,
+      "title": "Max Shops",
+      "default": 8
+     },
+     "shop_ids": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array",
+        "maxItems": 12
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Shop Ids",
+      "description": "the user's own picks go first, in order"
+     }
+    },
+    "type": "object",
+    "required": [
+     "session_id",
+     "product_id"
+    ],
+    "title": "SmartIn"
    },
    "ValidationError": {
     "properties": {
@@ -1289,6 +3244,58 @@
      "type"
     ],
     "title": "ValidationError"
+   },
+   "VerdictIn": {
+    "properties": {
+     "ids": {
+      "items": {
+       "type": "string"
+      },
+      "type": "array",
+      "maxItems": 4,
+      "minItems": 2,
+      "title": "Ids"
+     },
+     "lat": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lat"
+     },
+     "lon": {
+      "anyOf": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Lon"
+     },
+     "need": {
+      "anyOf": [
+       {
+        "type": "string",
+        "maxLength": 200
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "title": "Need"
+     }
+    },
+    "type": "object",
+    "required": [
+     "ids"
+    ],
+    "title": "VerdictIn"
    }
   }
  }

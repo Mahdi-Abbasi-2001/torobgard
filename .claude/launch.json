@@ -1,6 +1,8 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "frontend", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "-p", "3000"], "port": 3000 }
+    { "name": "frontend", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "-p", "3000"], "port": 3000 },
+    { "name": "frontend-3001", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "-p", "3001"], "port": 3001 },
+    { "name": "backend", "runtimeExecutable": "env", "runtimeArgs": ["TOROB_INQUIRY_TIMEOUT_S=90", "backend/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--app-dir", "backend", "--port", "8765", "--reload", "--reload-dir", "backend/app", "--timeout-graceful-shutdown", "2"], "port": 8765 }
   ]
 }

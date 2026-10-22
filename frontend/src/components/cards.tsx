@@ -3,7 +3,8 @@ import Link from "next/link";
 import type { Product, ShopCard as Shop } from "@/lib/api";
 import { fa, floorLabel, mil } from "@/lib/fa";
 import { Icon } from "./Icon";
-import { FastChip, InstallmentChips, LocLine, OpenChip, PriceBadge, ShopName } from "./honesty";
+import { FairChip, FastChip, FlagChips, InstallmentChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, ShopName, TruthRow, confirmedPrice } from "./honesty";
+import { useSession } from "@/lib/session";
 import { Bidi, Thumb } from "./ui";
 
 export function ShopCard({ s, selected, onSelect, confirmed, href, flash, hovered, onHover }: {
@@ -11,6 +12,9 @@ export function ShopCard({ s, selected, onSelect, confirmed, href, flash, hovere
   hovered?: boolean; onHover?: (id: string | null) => void; // desktop: highlights the shop's pin on the map
 }) {
   const cat = s.tier === "category_only";
+  const conf = confirmed ?? confirmedPrice(s.confirmation);
+  const { state } = useSession();
+  const later = state.when && state.when !== "now";
   return (
     <div className={`card shop ${cat ? "cat" : ""} ${flash ? "flash" : ""}${hovered ? " hov" : ""}`}
       onMouseEnter={onHover && (() => onHover(s.shop_id))} onMouseLeave={onHover && (() => onHover(null))}>
@@ -22,13 +26,18 @@ export function ShopCard({ s, selected, onSelect, confirmed, href, flash, hovere
         )}
         <Link href={href ?? `/shop/${s.shop_id}`} className="grow" style={{ display: "block" }}>
           <ShopName shop={s} />
-          <LocLine s={s} />
+          <LocLine s={s} mode={state.mode} />
         </Link>
       </div>
-      <div>{cat ? <span className="unknown"><Icon n="q" s />موجودی و قیمت نامشخص — بپرسید</span> : <PriceBadge offer={s.offer} confirmed={confirmed} />}</div>
+      <div>{cat && !conf ? <span className="unknown"><Icon n="q" s />موجودی و قیمت نامشخص — بپرسید</span> : <PriceBadge offer={s.offer} confirmed={conf} />}</div>
+      <TruthRow offer={s.offer} c={s.confirmation} cat={cat} listedShown={!cat} />
+      {!cat && s.offer?.fair && <div className="truth"><FairChip fair={s.offer.fair} /></div>}
+      {!cat && <FlagChips flags={s.offer?.flags} />}
       {!cat && s.offer?.seller_title && <div className="xs muted" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}><span className="faint">عنوان فروشنده: </span><Bidi text={s.offer.seller_title} /></div>}
       {!cat && s.offer?.description && <div className="xs faint" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}><Bidi text={s.offer.description} /></div>}
-      <div className="wrapr"><OpenChip open={s.open} /></div>
+      <div className="wrapr">{later && <span className="xs faint">وقتی می‌رسید:</span>}<OpenChip open={s.open} />
+        {state.mode === "car" && s.travel?.car_note && <span className="tb warn"><Icon n="alert" s />{s.travel.car_note}</span>}</div>
+      {s.reliability !== undefined && <ReliabilityLine r={s.reliability} />}
       <div className="wrapr"><InstallmentChips shop={s} /><FastChip v={s.fast_delivery} /></div>
       {(s.instagram || s.website) && (
         <div className="wrapr">
@@ -55,6 +64,19 @@ export function ProductCard({ p, why, inCompare, onCompare }: { p: Product; why?
           <span className="xs faint">{fa(p.shop_count)} فروشگاه</span>
         </div>
         {!same && p.price_max != null && p.price_median != null && <div className="range">تا {mil(p.price_max)} · میانه {mil(p.price_median)}</div>}
+        {p.near && p.near.shops > 0 && (
+          <div className="xs row" style={{ gap: 6, flexWrap: "wrap", color: p.near.near ? "var(--ok)" : "var(--ink-3)" }}>
+            <Icon n="walk" s /><span className="grow">{[p.near.near ? `${fa(p.near.near)} فروشگاه تا ۱۵ دقیقه پیاده` : `نزدیک‌ترین ${fa(p.near.nearest_min ?? 0)} دقیقه پیاده`,
+              p.near.open > 0 ? `${fa(p.near.open)} تا باز` : null, p.near.installment > 0 ? `${fa(p.near.installment)} تا قسطی` : null].filter(Boolean).join("، ")}</span>
+          </div>
+        )}
+        {p.fit && p.fit.length > 0 && (
+          <div className="truth">{p.fit.map((f) => (
+            <span key={f.key} className={`tb ${f.ok ? "ok" : f.ok === false ? "bad" : "unk"}`} title={f.value ?? "ثبت نشده"}>
+              {f.ok ? <Icon n="check" s /> : f.ok === false ? <Icon n="x" s /> : <Icon n="q" s />}{f.key}{f.value ? `: ${fa(f.value.slice(0, 18))}` : " نامشخص"}
+            </span>))}
+          </div>
+        )}
         {why && <div className="why"><b>چرا این؟</b><span>{why}</span></div>}
         {onCompare && (
           <button type="button" className="xs row" style={{ gap: 6, background: "none", border: 0, padding: "4px 0", color: inCompare ? "var(--accent-ink)" : "var(--ink-3)", fontWeight: inCompare ? 650 : 500 }} onClick={onCompare} aria-pressed={inCompare}>

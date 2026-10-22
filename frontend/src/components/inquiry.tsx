@@ -3,6 +3,7 @@ import type { Inquiry } from "@/lib/api";
 import { fa, floorLabel, hm, minutesAgo, mmss, money, daysAgo } from "@/lib/fa";
 import { Icon } from "./Icon";
 import { PriceBadge } from "./honesty";
+import { AnswerDetails, Conversation, KidRow } from "./followup";
 
 export const isWaiting = (q: Inquiry) => q.status === "sent" || q.status === "delivered";
 export const isFailed = (q: Inquiry) => q.status === "unavailable" || q.status === "no_reply";
@@ -24,12 +25,22 @@ function Timeline({ status }: { status: Inquiry["status"] }) {
   );
 }
 
-export function InquiryCard({ q, listed, now, flash, onAlternatives }: {
+export interface CardActions {
+  onHold?: () => void; onRecheck?: () => void; onReport?: () => void; onCall?: () => void;
+}
+
+export function InquiryCard({ q, listed: listedIn, now, flash, onAlternatives, kids = [], actions = {} }: {
   q: Inquiry; listed?: { price: number | null; age_days: number | null } | null; now: number; flash?: boolean; onAlternatives?: () => void;
+  kids?: Inquiry[]; actions?: CardActions;
 }) {
   const s = q.shop, a = q.answer;
   const left = Math.max(0, Math.round((new Date(q.deadline_at).getTime() - now) / 1000));
+  const listed = listedIn ?? (q.listed_price != null ? { price: q.listed_price, age_days: null } : null);
   const pct = diffPct(q, listed?.price);
+  const lastRecheck = kids.find((k) => k.kind === "recheck");
+  const hold = kids.find((k) => k.kind === "hold");
+  const holdOk = hold?.answer?.hold_accepted;
+  const goneNow = lastRecheck?.status === "unavailable";
   return (
     <div className={`card shop ${flash ? "flash" : ""}`}>
       <div className="row between" style={{ alignItems: "flex-start" }}>
@@ -42,7 +53,7 @@ export function InquiryCard({ q, listed, now, flash, onAlternatives }: {
       <Timeline status={q.status} />
       {isWaiting(q) && (
         <>
-          <div className="xs muted row" style={{ gap: 6 }}><Icon n="clock" s />{q.status === "sent" ? "منتظر دیده شدن…" : "فروشنده پیام را دید؛ منتظر پاسخ…"}<span className="num">مهلت {mmss(left)}</span></div>
+          <div className="xs muted row" style={{ gap: 6 }}><Icon n="clock" s />{q.status === "sent" ? "منتظر دیده شدن…" : q.awaiting_seller ? "ترب‌گرد سؤال تکمیلی پرسید؛ منتظر جواب…" : "فروشنده پیام را دید؛ منتظر پاسخ…"}<span className="num">مهلت {mmss(left)}</span></div>
           {listed?.price != null && <div className="xs faint">قیمت ثبت‌شده: {money(listed.price)} تومان · {daysAgo(listed.age_days)}</div>}
         </>
       )}
@@ -57,26 +68,42 @@ export function InquiryCard({ q, listed, now, flash, onAlternatives }: {
               </div>
             )}
           </div>
-          {a.message && <div className="qa">«{a.message}»</div>}
+          {a.parsed_by && a.summary ? <div className="qa"><span className="xs faint">خلاصهٔ گفتگو: </span>{a.summary}</div> : a.message && <div className="qa">«{a.message}»</div>}
           <div className="wrapr">
             {a.closes_at && <span className="oc open">باز تا {hm(a.closes_at)} (طبق گفتهٔ فروشنده)</span>}
             {a.installment === true && <span className="inst conf"><Icon n="card" s />قسط حضوری: بله</span>}
             {a.installment === false && <span className="feat no"><Icon n="card" s />قسطی ندارد</span>}
           </div>
+          <AnswerDetails q={q} />
         </>
       )}
+      {q.status === "answered" && a?.available === null && <div className="xs muted">جواب فروشنده روشن نبود؛ متن گفتگو را ببینید.</div>}
       {q.status === "unavailable" && (
         <>
           <div className="qa bad">ناموجود{a?.message ? ` · «${a.message}»` : ""}</div>
+          <AnswerDetails q={q} />
           {onAlternatives && <button className="btn sec block" style={{ minHeight: 44 }} onClick={onAlternatives}>جایگزین‌ها را ببینید <Icon n="fwd" s /></button>}
         </>
       )}
       {q.status === "no_reply" && (
         <>
           <div className="xs muted">مهلت پاسخ تمام شد و پاسخی نیامد. شاید فروشنده سرش شلوغ است.</div>
-          {onAlternatives && <button className="btn sec block" style={{ minHeight: 44 }} onClick={onAlternatives}>گزینه‌های دیگر <Icon n="fwd" s /></button>}
+          <div className="actions">
+            {onAlternatives && <button className="btn sec" onClick={onAlternatives}>گزینه‌های دیگر <Icon n="fwd" s /></button>}
+            {actions.onCall && <button className="btn ghost" onClick={actions.onCall}><Icon n="phone" s />خودم زنگ می‌زنم</button>}
+          </div>
         </>
       )}
+      {kids.map((k) => <KidRow key={k.id} k={k} />)}
+      {goneNow && onAlternatives && <button className="btn sec block" style={{ minHeight: 44 }} onClick={onAlternatives}>جایگزین‌ها را ببینید <Icon n="fwd" s /></button>}
+      {q.status === "answered" && a?.available !== false && !goneNow && (actions.onHold || actions.onRecheck || actions.onReport) && (
+        <div className="actions">
+          {actions.onHold && !holdOk && !(hold && (hold.status === "sent" || hold.status === "delivered")) && <button className="btn sec" onClick={actions.onHold}><Icon n="hold" s />برایم نگه دارید</button>}
+          {actions.onRecheck && !(lastRecheck && (lastRecheck.status === "sent" || lastRecheck.status === "delivered")) && <button className="btn sec" onClick={actions.onRecheck}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>}
+          {actions.onReport && <button className="btn ghost" onClick={actions.onReport}><Icon n="check" s />رفتم؛ نتیجه را بگویم</button>}
+        </div>
+      )}
+      <Conversation q={q} />
     </div>
   );
 }

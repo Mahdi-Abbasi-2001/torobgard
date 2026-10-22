@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { SessionProvider } from "@/lib/session";
 import { CompareProvider } from "@/components/Compare";
+import { LiveNotifier } from "@/components/LiveNotifier";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [qc] = useState(() => new QueryClient({
@@ -10,7 +11,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   }));
   return (
     <QueryClientProvider client={qc}>
-      <SessionProvider><CompareProvider>{children}</CompareProvider></SessionProvider>
+      <SessionProvider><CompareProvider>{children}</CompareProvider><LiveNotifier /></SessionProvider>
     </QueryClientProvider>
   );
 }

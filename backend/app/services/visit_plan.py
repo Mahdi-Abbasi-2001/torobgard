@@ -58,13 +58,16 @@ def build(con, origin: tuple[float, float], stops_in: list[dict], order: list[st
             warnings.append({"level": "bad", "text": "قبل از رسیدن شما بسته می‌شود." + (" اول اینجا بروید؟" if i else "")})
         elif tight:
             warnings.append({"level": "warn", "text": "کمتر از ۱۵ دقیقه قبل از بسته شدن می‌رسید." + (" اول اینجا بروید؟" if i else "")})
+        hold = s.get("hold")
+        if hold and hold.get("until") and t > _mins(hold["until"]):
+            warnings.append({"level": "warn", "text": f"فروشنده فقط تا {hold['until']} نگه می‌دارد؛ این توقف را جلوتر بیاورید."})
         if d["open"]["state"] == "closed" and not s.get("closes_at"):
             warnings.append({"level": "warn", "text": f"طبق ساعت ثبت‌شده، الان بسته است ({d['open']['label']})."})
         out.append({"order": i + 1, "shop_id": d["shop_id"], "name": d["name"], "mall": d["mall"], "floor_label": d["floor_label"],
                     "unit": d["unit"], "plaque": d["plaque"], "area": d["area"], "lat": d["lat"], "lon": d["lon"],
                     "arrive_at": _fmt(t), "closes_at": closes, "walk_min_from_previous": w,
                     "confirmed_by_seller": bool(s.get("confirmed")), "confirmed_price": s.get("price"),
-                    "inquiry_id": s.get("inquiry_id"), "late": late, "tight": tight, "warnings": warnings,
+                    "inquiry_id": s.get("inquiry_id"), "hold": s.get("hold"), "rechecked_at": s.get("rechecked_at"), "late": late, "tight": tight, "warnings": warnings,
                     "in_traffic_zone": d["in_traffic_zone"]})
         t += STAY_MIN
         cur = (d["lat"], d["lon"])
@@ -73,6 +76,7 @@ def build(con, origin: tuple[float, float], stops_in: list[dict], order: list[st
     first = out[0] if out else None
     tips = ["گارانتی را روی بسته‌بندی چک کنید", "فاکتور رسمی بگیرید"]
     tips += [f"قیمت تأییدشده را نشان دهید: {o['name']}" for o in out if o["confirmed_price"]]
+    tips += [f"کد نگه‌داری {o['hold']['code']} را در {o['name']} بگویید" for o in out if o.get("hold")]
     tips.append("سلامت و اصالت را قبل از پرداخت امتحان کنید")
     return {
         "start": {"label": origin_label, "lat": origin[0], "lon": origin[1], "time": _fmt(now.hour * 60 + now.minute)},

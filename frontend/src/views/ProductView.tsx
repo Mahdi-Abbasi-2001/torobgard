@@ -11,6 +11,7 @@ import { compareHref, pickAlternatives, useCompare } from "@/components/Compare"
 import { PriceBadge, SourceNote } from "@/components/honesty";
 import { ProductReview } from "@/components/ReviewCard";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards, Steps, Thumb } from "@/components/ui";
+import { FairPriceNote, VariantsStrip } from "@/components/discover";
 
 const KEY_SPECS = ["نوع اتصال", "مناسب برای", "قابلیت های مقاومتی", "عمر باتری هدفون در حالت استندبای", "نسخه بلوتوث", "وزن", "حافظه داخلی", "مقدار RAM", "تعداد کانال", "رزولوشن"];
 
@@ -30,6 +31,7 @@ export default function ProductView({ id }: { id: string }) {
   const p = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
   const shops = useQuery({ queryKey: ["pshops", id, state.place.lat, state.place.lon], queryFn: () => api.productShops(id, state.place, { sort: "best" }, 40), enabled: !!p.data });
   const single = (p.data?.shop_count ?? 0) <= 1;
+  const ins = useQuery({ queryKey: ["insights", id, state.place.lat, state.place.lon, state.when], queryFn: () => api.insights(id, state.place, state.when), enabled: !!p.data });
   const sim = useQuery({ queryKey: ["similar", id, 8], queryFn: () => api.similar(id, 8), enabled: !!p.data }); // shared with the compare picker
 
   if (p.isLoading) return <main className="main"><AppBar /><SkeletonCards n={3} /></main>;
@@ -83,10 +85,19 @@ export default function ProductView({ id }: { id: string }) {
                 </div>
               </>
             )}
+            <FairPriceNote fp={ins.data?.fair_price} />
             <SourceNote>منبع: ترب · قیمت‌های ثبت‌شده{ages.length ? `، از ${fa(Math.min(...ages))} تا ${fa(Math.max(...ages))} روز پیش` : ""}؛ هنوز هیچ‌کدام تأیید نشده</SourceNote>
           </div>
         )}
 
+        {ins.data?.availability && ins.data.availability.shops > 0 && (
+          <div className="truth" aria-label="در دسترس بودن نزدیک شما">
+            <span className={`tb ${ins.data.availability.near ? "ok" : "unk"}`}><Icon n="walk" s />{ins.data.availability.near ? `${fa(ins.data.availability.near)} فروشگاه تا ۱۵ دقیقه پیاده` : `نزدیک‌ترین ${fa(ins.data.availability.nearest_min ?? 0)} دقیقه پیاده`}</span>
+            <span className={`tb ${ins.data.availability.open ? "ok" : "warn"}`}><Icon n="clock" s />{fa(ins.data.availability.open)} فروشگاه باز ({ins.data.when})</span>
+            <span className={`tb ${ins.data.availability.installment ? "ok" : "unk"}`}><Icon n="card" s />{ins.data.availability.installment ? `${fa(ins.data.availability.installment)} فروشندهٔ قسطی` : "فروشندهٔ قسطی ندارد"}</span>
+          </div>
+        )}
+        {ins.data && <VariantsStrip items={ins.data.variants} />}
         {!single && near > 0 && (
           <Note tone="info" icon="spark"><b>چرا این؟ </b>{fa(near)} فروشگاه تا ۱۵ دقیقه پیاده از «{state.place.label}» این کالا را ثبت کرده‌اند{d.price_min ? ` و ارزان‌ترینش ${mil(d.price_min)} تومان است` : ""}.</Note>
         )}

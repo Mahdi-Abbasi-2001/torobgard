@@ -48,9 +48,9 @@ def test_link_requires_the_real_token_then_full_conversation():
     assert "نامعتبر" in fb.texts(7)[-1] and not bale.is_linked(db.connect(), shop)
     run(bale.handle_update(fb.client, msg(7, bale.link_command(shop))))
     assert bale.is_linked(db.connect(), shop) and any("متصل شد" in t for t in fb.texts(7))
-    # linking pushes the already-waiting inquiry with two buttons
-    kb = fb.last_keyboard()[0]
-    assert [b["callback_data"] for b in kb] == [f"a:{iid}:1", f"a:{iid}:0"]
+    # linking pushes the already-waiting inquiry with one-tap buttons
+    kb = fb.last_keyboard()
+    assert [b["callback_data"] for row in kb for b in row] == [f"a:{iid}:same", f"a:{iid}:1", f"a:{iid}:0", f"a:{iid}:tom"]
     assert inq.view(db.connect(), iid)["status"] == "delivered"
     # tap "available" -> bot asks for the price -> price answers the inquiry
     run(bale.handle_update(fb.client, tap(7, f"a:{iid}:1")))
@@ -58,7 +58,9 @@ def test_link_requires_the_real_token_then_full_conversation():
     run(bale.handle_update(fb.client, msg(7, "۲٬۸۵۰٬۰۰۰")))
     v = inq.view(db.connect(), iid)
     assert v["status"] == "answered" and v["answer"]["price"] == 2_850_000 and v["answer"]["available"] is True
-    assert "ثبت شد" in fb.texts(7)[-1]
+    assert "ثبت شد" in fb.texts(7)[-2]
+    if v["listed_price"] != 2_850_000:  # a new price: the bot offers to update the shop's listing too
+        assert "ترب هم" in fb.texts(7)[-1] and fb.last_keyboard()[0][0]["callback_data"] == f"u:{iid}:1"
 
 
 def test_unavailable_button_bad_price_and_skip():

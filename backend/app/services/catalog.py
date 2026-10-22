@@ -10,6 +10,7 @@ from .address import floor_display
 from .geo import haversine_km
 from .hours import open_state, parse_hours_json, now_tehran
 from .text import normalize_fa
+from .discover import offer_flags, travel, zones as _zones
 
 DEFAULT_LOC = (35.6955, 51.4130)  # Jomhouri / Hafez, the heart of the electronics bazaar
 MAX_SANE_PRICE = 2_000_000_000  # 2 billion toman; above this a listed price is almost certainly an error
@@ -261,6 +262,7 @@ def shop_card(r: sqlite3.Row, pay: list[dict], origin: tuple[float, float], at: 
         "payments": pay, "installment": bool(pay),
         "fast_delivery": None if r["fast_delivery"] is None else bool(r["fast_delivery"]),
         "in_traffic_zone": bool(r["in_traffic_zone"]), "instagram": _instagram(r["instagram"]), "website": r["website"],
+        "travel": travel(dist, bool(r["in_traffic_zone"])),
         "phone_is_placeholder": True, "phone": phone,
     }
 
@@ -268,9 +270,11 @@ def shop_card(r: sqlite3.Row, pay: list[dict], origin: tuple[float, float], at: 
 def find_shops(con, product_ids: list[str], origin: tuple[float, float] | None = None, radius_km: float | None = None,
                installment: bool = False, provider: str | None = None, open_now: bool = False,
                fast_delivery: bool = False, price_max: int | None = None, include_category_only: bool = True,
-               sort: str = "best", limit: int = 40) -> dict:
+               sort: str = "best", limit: int = 40, at: datetime | None = None, weights: tuple | None = None) -> dict:
+    """`at`: when the shopper will arrive (Tehran time); opening state and the open filter are judged then.
+    `weights`: (price, distance, freshness, open) for the "best" ranking."""
     origin = origin or DEFAULT_LOC
-    now_utc, now_t = datetime.now(timezone.utc), now_tehran()
+    now_utc, now_t = datetime.now(timezone.utc), at or now_tehran()
     q = ",".join("?" * len(product_ids))
     offers = con.execute(
         f"SELECT o.*, p.title AS ptitle, p.price_median FROM offers o JOIN products p USING(product_id) "
@@ -287,7 +291,8 @@ def find_shops(con, product_ids: list[str], origin: tuple[float, float] | None =
                    if r[0] not in by_shop]
     all_ids = listed_ids + cat_ids
     if not all_ids:
-        return {"origin": origin, "listed": [], "category_only": [], "counts": {"listed": 0, "category_only": 0}}
+        return {"origin": origin, "listed": [], "category_only": [], "counts": {"listed": 0, "category_only": 0}, "zones": [],
+                "at": at.isoformat() if at else None}
     shops = {}
     for i in range(0, len(all_ids), 500):
         chunk = all_ids[i:i + 500]
@@ -324,7 +329,8 @@ def find_shops(con, product_ids: list[str], origin: tuple[float, float] | None =
             w = json.loads(o["warranty"]) if o["warranty"] else None
             c["offer"] = {"offer_id": o["offer_id"], "product_id": o["product_id"], "seller_title": o["seller_title"],
                           "description": o["description"], "warranty": w and w.get("description"),
-                          "warranty_months": o["warranty_months"], **pi}
+                          "warranty_months": o["warranty_months"], **pi,
+                          "flags": offer_flags(o["seller_title"], o["description"])}
             c["why"] = _why(c)
         else:
             c["offer"] = None
@@ -333,10 +339,16 @@ def find_shops(con, product_ids: list[str], origin: tuple[float, float] | None =
 
     listed = [x for x in (build(s, "listed") for s in listed_ids) if x]
     cat_only = [x for x in (build(s, "category_only") for s in cat_ids) if x]
-    _rank(listed, sort)
+    from . import verify
+    verify.annotate(con, listed, product_ids, now_utc)  # seller confirmations, listing updates, reliability
+    _rank(listed, sort, weights)
     cat_only.sort(key=lambda c: (c["distance_km"] is None, c["distance_km"] or 0))
-    return {"origin": origin, "listed": listed[:limit], "category_only": cat_only[:limit],
-            "counts": {"listed": len(listed), "category_only": len(cat_only)}}
+    n_cat = len(cat_only)
+    cat_only = cat_only[:limit]
+    verify.annotate(con, cat_only, product_ids, now_utc)
+    return {"origin": origin, "listed": listed[:limit], "category_only": cat_only,
+            "counts": {"listed": len(listed), "category_only": n_cat}, "zones": _zones(listed, later=at is not None),
+            "at": at.isoformat() if at else None}
 
 
 def _why(c: dict) -> str:
@@ -354,7 +366,10 @@ def _why(c: dict) -> str:
     return " · ".join(parts) or "این محصول را ثبت کرده است"
 
 
-def _rank(items: list[dict], sort: str):
+DEFAULT_WEIGHTS = (0.35, 0.30, 0.20, 0.15)
+
+
+def _rank(items: list[dict], sort: str, weights: tuple | None = None):
     prices = [i["offer"]["price"] for i in items if i["offer"]["price"] and not i["offer"]["suspicious"]]
     lo, hi = (min(prices), max(prices)) if prices else (0, 0)
 
@@ -364,7 +379,14 @@ def _rank(items: list[dict], sort: str):
         d = min((i["distance_km"] or 5) / 5, 1)
         f = {"fresh": 0, "recent": 0.2, "stale": 0.6, "very_stale": 0.9}.get(o["freshness"], 1.0)
         op = {"open": 0, "closing_soon": 0.3, "unknown": 0.5, "closed": 1.0}[i["open"]["state"]]
-        i["score"] = round(0.35 * p + 0.30 * d + 0.20 * f + 0.15 * op, 4)
+        from .verify import rank_adjust
+        wp, wd, wf, wo = weights or DEFAULT_WEIGHTS
+        flags = 0.08 * sum(1 for x in o.get("flags") or [] if x["tone"] == "bad")
+        adj = rank_adjust(i) + flags
+        i["score"] = round(wp * p + wd * d + wf * f + wo * op + adj, 4)
+        # lower is better everywhere; the parts let the UI show why one shop beat another
+        i["score_parts"] = {"price": round(wp * p, 3), "distance": round(wd * d, 3), "freshness": round(wf * f, 3),
+                            "open": round(wo * op, 3), "confirmations": round(adj, 3)}
         return i["score"]
 
     for i in items:
@@ -386,9 +408,13 @@ def get_shop(con, shop_id: str, origin=None) -> dict | None:
     c["offer_count"] = r["offer_count"]
     now = datetime.now(timezone.utc)
     c["offers"] = [{"offer_id": o["offer_id"], "product_id": o["product_id"], "seller_title": o["seller_title"],
-                    "title": o["title"], **price_info(o["price"], o["changed_at"], o["outlier"], now)}
+                    "title": o["title"], **price_info(o["price"], o["changed_at"], o["outlier"], now),
+                    "flags": offer_flags(o["seller_title"], o["description"])}
                    for o in con.execute("SELECT o.*, p.title FROM offers o JOIN products p USING(product_id) "
                                         "WHERE o.shop_id=? ORDER BY o.changed_at DESC LIMIT 30", (shop_id,))]
+    from . import verify
+    verify.apply_listing_updates(con, shop_id, c["offers"], now)
+    c["reliability"] = verify.reliability(con, [shop_id]).get(shop_id)
     return c
 
 

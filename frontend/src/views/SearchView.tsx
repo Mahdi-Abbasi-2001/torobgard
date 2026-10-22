@@ -3,17 +3,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { api, type Product, type SearchResult } from "@/lib/api";
+import { api, type Preset, type Product, type SearchResult, type SpecFacet } from "@/lib/api";
 import { fa, mil, money } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductCard } from "@/components/cards";
 import { WhereToLook } from "@/components/WhereToLook";
 import { SnapButton } from "@/components/SnapButton";
+import { WhenChip } from "@/components/discover";
 import { AppBar, Empty, ErrorState, OfflineBanner, Sheet, SkeletonCards, Steps } from "@/components/ui";
 
 const NO_CAP = 999_999_999_999; // explicit "no budget" so the API ignores a budget phrase inside q
-export interface SearchParams { q?: string; category?: string; brand?: string; price_max?: string }
+/** need: preset id · spec: "key=value" joined by SPEC_SEP · near/inst/open: "1" · sort: price | near */
+export interface SearchParams { q?: string; category?: string; brand?: string; price_max?: string; need?: string; spec?: string; near?: string; inst?: string; open?: string; sort?: string }
+const SPEC_SEP = "~~";
 
 function why(p: Product, cap: number | null) {
   const bits: string[] = [];
@@ -34,13 +37,29 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
 
   const priceMax = sp.price_max ? Number(sp.price_max) : null;
   const params = { q: sp.q, category: sp.category, brand: sp.brand, price_max: priceMax };
+  // step 1 needs a category for presets and spec filters: the chosen one, else the dominant one in the results
+  // (the category of the top results: all matches for «گوشی سامسونگ» are mostly phone cases, the top ones are phones)
+  const [topCat, setTopCat] = useState<string | undefined>();
+  const cat = sp.category ?? topCat;
+  const presets = useQuery({ queryKey: ["presets", cat], queryFn: () => api.presets(cat!), enabled: !!cat, staleTime: Infinity });
+  const preset: Preset | undefined = presets.data?.presets.find((x) => x.id === sp.need);
+  const specs = sp.spec ? sp.spec.split(SPEC_SEP).filter(Boolean) : [];
+  const extra = { prefs: preset?.constraints.length ? preset.constraints : null, spec: specs, near_only: sp.near === "1", installment_only: sp.inst === "1",
+    open_only: sp.open === "1", sort: (sp.sort === "price" || sp.sort === "near" ? sp.sort : preset?.sort ?? null) as "price" | "near" | null, when: state.when };
   const res = useInfiniteQuery({
-    queryKey: ["search", params],
-    queryFn: ({ pageParam }) => api.search({ ...params, offset: pageParam, limit: 20 }),
+    queryKey: ["search", params, extra, state.place.lat, state.place.lon],
+    queryFn: ({ pageParam }) => api.search({ ...params, offset: pageParam, limit: 20 }, state.place, extra),
+    enabled: !sp.need || !!presets.data,
     initialPageParam: 0,
     getNextPageParam: (last: SearchResult, all) => { const n = all.reduce((a, p) => a + p.items.length, 0); return n < last.total ? n : undefined; },
   });
   const first = res.data?.pages[0];
+  const leading = (() => {
+    const n = new Map<string, number>();
+    first?.items.slice(0, 8).forEach((p) => p.category && n.set(p.category, (n.get(p.category) ?? 0) + 1));
+    return [...n.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+  })();
+  if (!sp.category && leading && leading !== topCat && !sp.need) setTopCat(leading); // adjust state during render (React docs pattern)
   const items = res.data?.pages.flatMap((p) => p.items) ?? [];
   const cap = first?.applied.price_max && first.applied.price_max < NO_CAP ? first.applied.price_max : null;
 
@@ -50,7 +69,8 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
     Object.entries(next).forEach(([k, v]) => v && u.set(k, v));
     router.replace(`/search?${u.toString()}`, { scroll: false });
   };
-  const nFilters = (cap ? 1 : 0) + (sp.brand ? 1 : 0) + (sp.category ? 1 : 0);
+  const nFilters = (cap ? 1 : 0) + (sp.brand ? 1 : 0) + (sp.category ? 1 : 0) + specs.length;
+  const toggle = (k: "near" | "inst" | "open") => set({ [k]: sp[k] === "1" ? undefined : "1" });
 
   return (
     <main className="main">
@@ -70,7 +90,7 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
       </form>
       <div className="lay lay-search">
       <aside className="dk-only filter-side" aria-label="فیلترها">
-        <FilterPanel id="side" first={first} sp={sp} cap={cap} set={set} />
+        <FilterPanel id="side" first={first} sp={sp} cap={cap} set={set} cat={cat} specs={specs} />
       </aside>
       <div className="lay lay-results">
       <div className="hscroll" style={{ paddingBlock: "10px 4px" }}>
@@ -80,9 +100,31 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
             بودجه: تا {mil(cap)}{first?.applied.budget_from_query && !sp.price_max && <span className="xs" style={{ opacity: .75 }}>· از متن شما</span>}<Icon n="x" s className="x" />
           </button>
         )}
-        {sp.category && <button className="chip on" onClick={() => set({ category: undefined })}>{sp.category}<Icon n="x" s className="x" /></button>}
+        {sp.category && <button className="chip on" onClick={() => set({ category: undefined, need: undefined, spec: undefined })}>{sp.category}<Icon n="x" s className="x" /></button>}
+        {specs.map((x) => <button key={x} className="chip on" onClick={() => set({ spec: specs.filter((y) => y !== x).join(SPEC_SEP) || undefined })}>{x.replace("=", ": ")}<Icon n="x" s className="x" /></button>)}
         {sp.brand && <button className="chip on" onClick={() => set({ brand: undefined })}>{sp.brand}<Icon n="x" s className="x" /></button>}
         {first?.facets.brands.slice(0, 4).filter((b) => b.name !== sp.brand).map((b) => <button key={b.name} className="chip" onClick={() => set({ brand: b.name })}>{b.name}</button>)}
+      </div>
+
+      {presets.data && presets.data.presets.length > 0 && (
+        <div className="pad stack" style={{ gap: 6, paddingTop: 6 }}>
+          <span className="xs faint">برای چه می‌خواهید؟ <span className="faint">{presets.data.source === "llm" ? "· پیشنهاد هوشمند از مشخصات این دسته" : ""}</span></span>
+          <div className="hscroll" style={{ paddingInline: 0 }}>
+            {presets.data.presets.map((x) => (
+              <button key={x.id} className={`chip ${sp.need === x.id ? "on" : ""}`} title={x.why} onClick={() => set({ need: sp.need === x.id ? undefined : x.id, category: sp.category ?? cat })}>
+                {sp.need === x.id && <Icon n="check" s />}{x.label}</button>
+            ))}
+          </div>
+          {preset && <span className="xs muted">{preset.why}{preset.constraints.length ? ` — ${preset.constraints.map((c) => `${c.key} ${c.op === ">=" ? "حداقل" : c.op === "<=" ? "حداکثر" : ""} ${fa(String(c.value))}`).join("، ")}` : ""}. اول کالاهایی که با مشخصات ثبت‌شده‌شان می‌خوانند.</span>}
+        </div>
+      )}
+      <div className="hscroll" style={{ paddingBlock: "6px 4px" }}>
+        <span className="xs faint" style={{ alignSelf: "center" }}>شرایط خرید:</span>
+        <button className={`chip ${sp.near === "1" ? "on" : ""}`} aria-pressed={sp.near === "1"} onClick={() => toggle("near")}><Icon n="walk" s />نزدیک {state.place.label}</button>
+        <button className={`chip ${sp.inst === "1" ? "on" : ""}`} aria-pressed={sp.inst === "1"} onClick={() => toggle("inst")}><Icon n="card" s />فروشندهٔ قسطی</button>
+        <button className={`chip ${sp.open === "1" ? "on" : ""}`} aria-pressed={sp.open === "1"} onClick={() => toggle("open")}>{sp.open === "1" && <Icon n="check" s />}باز وقتی می‌روم</button>
+        <WhenChip />
+        <button className={`chip ${sp.sort ? "on" : ""}`} onClick={() => set({ sort: sp.sort === "price" ? "near" : sp.sort === "near" ? undefined : "price" })}><Icon n="sort" s />{sp.sort === "price" ? "ارزان‌ترین" : sp.sort === "near" ? "در دسترس‌ترین" : "مرتب: مرتبط‌ترین"}</button>
       </div>
 
       {res.isLoading && <SkeletonCards n={5} />}
@@ -91,7 +133,7 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
         <>
           <div className="pad row between" style={{ paddingBlock: 6 }}>
             <span className="sm muted"><b style={{ color: "var(--ink)" }}>{money(first.total)}</b> کالا{cap ? ` تا ${mil(cap)} تومان` : ""}</span>
-            <span className="xs faint">فقط کالاهایی که فروشگاه دارند</span>
+            <span className="xs faint">{first.capped ? "از میان مرتبط‌ترین‌ها" : "فقط کالاهایی که فروشگاه دارند"}</span>
           </div>
           {first.total === 0 ? <NoResults sp={sp} cap={cap} set={set} /> : (
             <div className="pad stack results-grid" style={{ gap: 10 }}>
@@ -105,7 +147,7 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
       </div></div>
 
       <Sheet open={open} onClose={() => setOpen(false)} label="فیلترها">
-        <FilterPanel id="sheet" first={first} sp={sp} cap={cap} set={set} />
+        <FilterPanel id="sheet" first={first} sp={sp} cap={cap} set={set} cat={cat} specs={specs} />
         <button className="btn pri block" onClick={() => setOpen(false)}>نمایش {first ? money(first.total) : ""} کالا</button>
       </Sheet>
     </main>
@@ -113,7 +155,13 @@ export default function SearchView({ sp }: { sp: SearchParams }) {
 }
 
 /** The same filters as a bottom sheet on phones and a permanent sidebar on desktop; changes apply instantly. */
-function FilterPanel({ id, first, sp, cap, set }: { id: string; first?: SearchResult; sp: SearchParams; cap: number | null; set: (p: Partial<SearchParams>) => void }) {
+function FilterPanel({ id, first, sp, cap, set, cat, specs }: { id: string; first?: SearchResult; sp: SearchParams; cap: number | null; set: (p: Partial<SearchParams>) => void; cat?: string; specs: string[] }) {
+  const facets = useQuery({ queryKey: ["specfacets", cat], queryFn: () => api.specFacets(cat!), enabled: !!cat, staleTime: Infinity });
+  const toggleSpec = (k: string, v: string) => {
+    const x = `${k}=${v}`;
+    const next = specs.includes(x) ? specs.filter((y) => y !== x) : [...specs.filter((y) => !y.startsWith(`${k}=`)), x];
+    set({ spec: next.join(SPEC_SEP) || undefined, category: sp.category ?? cat });
+  };
   return (
     <>
       <div className="row between"><h2>فیلترها</h2><button className="btn ghost" onClick={() => set({ price_max: String(NO_CAP), brand: undefined, category: undefined })}>پاک کردن همه</button></div>
@@ -126,7 +174,18 @@ function FilterPanel({ id, first, sp, cap, set }: { id: string; first?: SearchRe
         <div className="stack" style={{ gap: 6 }}><span className="b sm">دسته</span>
           <div className="wrapr">{first.facets.categories.slice(0, 8).map((c) => <button key={c.name} className={`chip ${sp.category === c.name ? "on" : ""}`} onClick={() => set({ category: sp.category === c.name ? undefined : c.name })}>{c.name} <span className="xs faint">{fa(c.count)}</span></button>)}</div></div>
       )}
-      <p className="xs faint" style={{ margin: 0 }}>قسطی، باز بودن، فاصله و ارسال سریع ویژگی فروشگاه‌اند؛ در صفحهٔ فروشگاه‌های هر کالا فیلترشان کنید.</p>
+      {facets.data && facets.data.items.length > 0 && (
+        <div className="stack" style={{ gap: 10 }}>
+          <span className="b sm">مشخصات <span className="xs faint">({cat})</span></span>
+          {facets.data.items.map((f: SpecFacet) => (
+            <div key={f.key} className="stack" style={{ gap: 4 }}><span className="xs muted">{f.key}</span>
+              <div className="wrapr">{f.values.map((v) => { const on = specs.includes(`${f.key}=${v.value}`); return (
+                <button key={v.value} className={`chip ${on ? "on" : ""}`} onClick={() => toggleSpec(f.key, v.value)}>{fa(v.value)} <span className="xs faint">{fa(v.count)}</span></button>); })}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <p className="xs faint" style={{ margin: 0 }}>«نزدیک من»، «قسطی» و «باز وقتی می‌روم» بالای نتایج است؛ فقط کالاهایی می‌مانند که فروشگاهی با آن شرط دارند.</p>
     </>
   );
 }

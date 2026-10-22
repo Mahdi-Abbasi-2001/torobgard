@@ -46,6 +46,34 @@ class OpenAICompatLLM:
             except _UsageRejected:
                 _NO_USAGE.add(self.s["model"])
 
+    async def complete_json(self, messages: list[dict]) -> dict:
+        """One JSON-mode call, returned parsed. Raises LLMUnavailable / ValueError."""
+        out = ""
+        async for kind, val in self.stream(messages, None, json_mode=True):
+            if kind == "text":
+                out += val
+        obj = json.loads(out)
+        if not isinstance(obj, dict):
+            raise ValueError("expected a JSON object")
+        return obj
+
+    async def transcribe(self, audio: bytes, filename: str = "voice.ogg") -> str:
+        """Speech to text through the provider's /audio/transcriptions (Whisper-compatible)."""
+        if not self.configured:
+            raise LLMUnavailable("no API key configured")
+        import os
+        model = os.environ.get("LLM_STT_MODEL") or "whisper-1"
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(60, connect=10)) as c:
+                r = await c.post(f"{self.s['base_url']}/audio/transcriptions",
+                                 headers={"Authorization": f"Bearer {self.s['api_key']}"},
+                                 data={"model": model, "language": "fa"}, files={"file": (filename, audio)})
+        except httpx.HTTPError as e:
+            raise LLMUnavailable(f"STT network error: {e}") from e
+        if r.status_code != 200:
+            raise LLMUnavailable(f"STT HTTP {r.status_code}: {r.text[:200]}")
+        return (r.json().get("text") or "").strip()
+
     async def _once(self, messages, tools, effort, json_mode=False):
         body = {"model": self.s["model"], "messages": messages, "stream": True}
         if effort:

@@ -3,17 +3,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { api, type ShopFilters } from "@/lib/api";
+import { api, type Priority, type ShopFilters } from "@/lib/api";
 import { fa, mil } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ProductMini, ShopCard } from "@/components/cards";
 import { ShopMap } from "@/components/ShopMap";
 import { WhereToLook } from "@/components/WhereToLook";
+import { FairPriceNote, VariantsStrip, WhenChip, ZonesCard, whenLabel } from "@/components/discover";
 import { AppBar, Empty, ErrorState, Note, OfflineBanner, Seg, Sheet, SkeletonCards, Steps } from "@/components/ui";
 
 const RADII: [number | null, string][] = [[0.5, "۵۰۰ متر"], [1, "۱ کیلومتر"], [3, "۳ کیلومتر"], [null, "همه"]];
 const SORTS: [NonNullable<ShopFilters["sort"]>, string][] = [["best", "مناسب‌ترین"], ["price", "ارزان‌ترین"], ["distance", "نزدیک‌ترین"], ["freshness", "تازه‌ترین قیمت"]];
+export const PRIORITIES: [Priority, string][] = [["balanced", "متعادل"], ["price", "قیمت"], ["near", "نزدیکی"], ["trust", "اطلاعات مطمئن"], ["now", "همین الان"]];
 
 export default function ShopsView({ id }: { id: string }) {
   const router = useRouter();
@@ -29,12 +31,14 @@ export default function ShopsView({ id }: { id: string }) {
 
   const p = useQuery({ queryKey: ["product", id], queryFn: () => api.product(id) });
   const q = useQuery({
-    queryKey: ["pshops", id, state.place.lat, state.place.lon, f],
-    queryFn: () => api.productShops(id, state.place, f, 40),
+    queryKey: ["pshops", id, state.place.lat, state.place.lon, f, state.when],
+    queryFn: () => api.productShops(id, state.place, f, 40, state.when),
     placeholderData: keepPreviousData, enabled: ready,
   });
   const picks = state.picks[id];
   const d = q.data;
+  const few = !!d && d.counts.listed < 3;
+  const ins = useQuery({ queryKey: ["insights", id, state.place.lat, state.place.lon], queryFn: () => api.insights(id, state.place), enabled: few });
 
   // Pre-pick the top three open shops the first time this product's shops load
   useEffect(() => {
@@ -56,7 +60,8 @@ export default function ShopsView({ id }: { id: string }) {
       <Steps at={1} />
       </div>
       <div className="lay lay-shops">
-      {p.data && <div className="pad shops-prod"><ProductMini p={p.data} sub={d ? `${fa(d.counts.listed)} فروشگاه${p.data.price_min ? ` · از ${mil(p.data.price_min)} تومان` : ""}` : "…"} /></div>}
+      {p.data && <div className="pad shops-prod stack" style={{ gap: 6 }}><ProductMini p={p.data} sub={d ? `${fa(d.counts.listed)} فروشگاه${p.data.price_min ? ` · از ${mil(p.data.price_min)} تومان` : ""}` : "…"} />
+        <FairPriceNote fp={d?.fair_price} /></div>}
       <div className="shops-spacer" style={{ height: 10 }} />
       {d && (
         <div className="tabs" role="tablist">
@@ -65,11 +70,12 @@ export default function ShopsView({ id }: { id: string }) {
         </div>
       )}
       <div className="hscroll shops-chips" style={{ paddingBlock: 10 }}>
+        <WhenChip />
         <button className={`chip ${f.installment ? "on" : ""}`} aria-pressed={!!f.installment} onClick={() => setF({ installment: !f.installment })}><Icon n={f.installment ? "check" : "card"} s />قسطی</button>
         <button className={`chip ${f.open_now ? "on" : ""}`} aria-pressed={!!f.open_now} onClick={() => setF({ open_now: !f.open_now })}>{f.open_now && <Icon n="check" s />}باز است الان</button>
         <button className={`chip ${f.radius_km != null ? "on" : ""}`} onClick={() => setSheet(true)}>{f.radius_km != null ? `تا ${RADII.find((r) => r[0] === f.radius_km)?.[1]}` : "فاصله: همه"}</button>
         <button className={`chip ${f.fast_delivery ? "on" : ""}`} aria-pressed={!!f.fast_delivery} onClick={() => setF({ fast_delivery: !f.fast_delivery })}>{f.fast_delivery && <Icon n="check" s />}ارسال سریع</button>
-        <button className="chip" onClick={() => setSheet(true)}><Icon n="sort" s />{SORTS.find((s) => s[0] === (f.sort ?? "best"))?.[1]}</button>
+        <button className="chip" onClick={() => setSheet(true)}><Icon n="sort" s />{(f.sort ?? "best") === "best" ? `اولویت: ${PRIORITIES.find((x) => x[0] === (f.priority ?? "balanced"))?.[1]}` : SORTS.find((s) => s[0] === f.sort)?.[1]}</button>
       </div>
 
       {q.isLoading && <SkeletonCards n={4} />}
@@ -84,6 +90,8 @@ export default function ShopsView({ id }: { id: string }) {
             <ZeroListed id={id} f={f} setF={setF} catCount={d.counts.category_only} />
           ) : (
             <>
+              {d.zones && d.zones.length > 0 && <div className="pad"><ZonesCard zones={d.zones} onFocus={(z) => setPicks(id, z.shop_ids.slice(0, 5))} /></div>}
+              {state.when !== "now" && <div className="pad"><Note tone="info" icon="clock">باز و بسته بودن برای <b>{whenLabel(state.when)}</b> حساب شده، نه الان.</Note></div>}
               <div className="pad">
                 <div className="h4"><Icon n="store" s />این کالا را ثبت کرده‌اند <span className="n">{fa(d.listed.length)} از {fa(d.counts.listed)}</span></div>
                 <p className="lede">{f.installment ? "فقط فروشگاه‌هایی که قسط اعلام کرده‌اند. " : ""}قیمت ثبت‌شده توسط خود فروشگاه؛ تاریخ هر قیمت کنارش است.</p>
@@ -93,6 +101,9 @@ export default function ShopsView({ id }: { id: string }) {
                 {d.listed.map((s) => <ShopCard key={s.shop_id} s={s} selected={chosen.includes(s.shop_id)} onSelect={() => pick(s.shop_id)} href={`/shop/${s.shop_id}?product=${id}`} flash={q.isPlaceholderData === false && active > 0} hovered={hov === s.shop_id} onHover={setHov} />)}
               </div>
             </>
+          )}
+          {few && ins.data && ins.data.variants.length > 0 && (
+            <div className="pad"><VariantsStrip items={ins.data.variants} title="نسخه‌های دیگر همین مدل که فروشگاه بیشتری دارند" /></div>
           )}
           {d.category_only.length > 0 && (
             <>
@@ -136,6 +147,11 @@ export default function ShopsView({ id }: { id: string }) {
         <h2>فاصله و مرتب‌سازی</h2>
         <div className="stack" style={{ gap: 6 }}><span className="b sm">فاصله از {state.place.label}</span><Seg label="فاصله" value={f.radius_km ?? null} options={RADII} onChange={(v) => setF({ radius_km: v })} /></div>
         <div className="stack" style={{ gap: 6 }}><span className="b sm">مرتب‌سازی</span><Seg label="مرتب‌سازی" value={f.sort ?? "best"} options={SORTS} onChange={(v) => setF({ sort: v })} /></div>
+        {(f.sort ?? "best") === "best" && (
+          <div className="stack" style={{ gap: 6 }}><span className="b sm">در «مناسب‌ترین»، چه چیزی برایتان مهم‌تر است؟</span>
+            <div className="wrapr">{PRIORITIES.map(([v, l]) => <button key={v} type="button" className={`chip ${(f.priority ?? "balanced") === v ? "on" : ""}`} onClick={() => setF({ priority: v })}>{l}</button>)}</div>
+            <span className="xs faint">رتبه‌بندی از قیمت، فاصله، تازگی قیمت، باز بودن و تأیید فروشنده‌ها ساخته می‌شود؛ این انتخاب وزن‌ها را عوض می‌کند.</span></div>
+        )}
         <button className="btn pri block" onClick={() => setSheet(false)}>نمایش {d ? fa(d.listed.length) : ""} فروشگاه</button>
       </Sheet>
     </main>

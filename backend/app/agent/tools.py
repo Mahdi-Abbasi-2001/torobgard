@@ -23,7 +23,10 @@ TOOLS = [
         "parameters": {"type": "object", "properties": {
             "product_id": {"type": "string"}, "radius_km": {"type": "number"}, "installment": {"type": "boolean"},
             "open_now": {"type": "boolean"}, "fast_delivery": {"type": "boolean"}, "price_max": {"type": "integer"},
-            "sort": {"type": "string", "enum": ["best", "price", "distance", "freshness"]}}, "required": ["product_id"]}}},
+            "sort": {"type": "string", "enum": ["best", "price", "distance", "freshness"]},
+            "when": {"type": "string", "description": "when the user will go: now | 1h | evening | tomorrow | HH:MM (opening state is judged then)"},
+            "priority": {"type": "string", "enum": ["balanced", "price", "near", "trust", "now"], "description": "what matters most to the user"}},
+            "required": ["product_id"]}}},
     {"type": "function", "function": {
         "name": "similar_products",
         "description": "Alternatives to a product (same category, similar price). Use when the user wants other options or when few shops have the product.",
@@ -69,7 +72,17 @@ def _s(s: dict) -> dict:
             # fields the mentor said must not be ignored when present: shop links, the seller's own listing text
             "instagram": (s.get("instagram") or {}).get("profile_url"), "website": s.get("website"),
             "seller_listing_title": (o.get("seller_title") or "")[:90] or None,
-            "seller_note": (o.get("description") or "")[:140] or None}
+            "seller_note": (o.get("description") or "")[:140] or None,
+            "listing_warnings": [f["label"] for f in o.get("flags") or []] or None,
+            "minutes": s.get("travel") and {"walk": s["travel"]["walk"], "taxi": s["travel"]["taxi"]},
+            # what sellers/visitors confirmed recently (shared by all users) and how reliably the shop answers
+            "confirmed": _conf(s.get("confirmation")), "reliability": (s.get("reliability") or {}).get("label")}
+
+
+def _conf(c: dict | None) -> dict | None:
+    if not c or c["state"] == "expired":
+        return None
+    return {"available": c["available"], "price": c["price"], "minutes_ago": c["age_min"], "source": c["source"]}
 
 
 def _remember(ctx, items):
@@ -114,11 +127,18 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
         return {"products": [_p(p) for p in r["products"]], "differing_specs": diff}, {"type": "comparison_table", "products": r["products"], "rows": r["rows"][:14]}
     if name == "find_shops":
         ctx.memo["focus"] = a["product_id"]
+        from ..services import discover
+        when = a.get("when") or "now"
+        at, when_label = discover.arrival_time(when)
         r = catalog.find_shops(con, [a["product_id"]], ctx.origin, a.get("radius_km"), bool(a.get("installment")), None,
-                               bool(a.get("open_now")), bool(a.get("fast_delivery")), a.get("price_max"), True, a.get("sort", "best"), 8)
+                               bool(a.get("open_now")), bool(a.get("fast_delivery")), a.get("price_max"), True, a.get("sort", "best"), 8,
+                               at=None if when == "now" else at, weights=discover.PRIORITIES.get(a.get("priority") or "balanced"))
         prod = catalog.get_product(con, a["product_id"])
+        fp = discover.fair_price(con, a["product_id"])
         out = {"product": prod and prod["title"], "counts": r["counts"], "listed_shops": [_s(s) for s in r["listed"][:5]],
-               "category_only_example_count": r["counts"]["category_only"]}
+               "category_only_example_count": r["counts"]["category_only"], "opening_judged_for": when_label,
+               "best_places_to_go": [{"name": z["name"], "why": z["why"]} for z in r["zones"][:2]],
+               "typical_price": fp and fp["note"]}
         if not r["listed"]:
             out["hint"] = "هیچ فروشگاهی این کالا را ثبت نکرده؛ similar_products یا فروشگاه‌های هم‌دسته (باید پرسید) را پیشنهاد دهید."
         return out, {"type": "shop_list", "product": prod and {k: prod[k] for k in ("product_id", "title", "image")}, "listed": r["listed"][:5],
@@ -151,8 +171,10 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
             "shops": [{k: s[k] for k in ("shop_id", "name", "mall", "floor_label", "unit", "area")} for s in shops],
             "questions": [{"key": k, "text": inq.QUESTIONS[k]} for k in qs]}
     if name == "get_inquiry_status":
-        items = inq.list_for_session(con, ctx.sid)[:6]
-        brief = [{"shop": i["shop"] and i["shop"]["name"], "status": i["label"], "answer": i["answer"],
+        items = [i for i in inq.list_for_session(con, ctx.sid) if i["kind"] == "ask"][:6]
+        brief = [{"shop": i["shop"] and i["shop"]["name"], "kind": i["kind"], "status": i["label"],
+                  "summary": (i["answer"] or {}).get("summary"), "price": (i["answer"] or {}).get("price"),
+                  "hold_code": (i["answer"] or {}).get("hold_code"), "price_note": ((i["answer"] or {}).get("drift") or {}).get("summary"),
                   "alternatives": (i.get("alternatives") or {}).get("kind")} for i in items]
         return {"inquiries": brief}, ({"type": "inquiry_status", "items": items} if items else None)
     return {"error": f"unknown tool {name}"}, None

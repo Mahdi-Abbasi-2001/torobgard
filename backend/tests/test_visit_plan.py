@@ -6,7 +6,7 @@ from app.services.hours import TEHRAN
 def _shops(con):
     items = catalog.search_products(con, "هندزفری", limit=60)["items"]
     pid = next(p for p in items if p["shop_count"] >= 3)["product_id"]
-    return [s for s in catalog.find_shops(con, [pid], include_category_only=False)["listed"]][:3]
+    return [s for s in catalog.find_shops(con, [pid], include_category_only=False, sort="distance")["listed"]][:3]
 
 def test_closing_first_goes_first_and_late_warning():
     con = db.connect()

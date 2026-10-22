@@ -8,7 +8,7 @@ import { fa, hm } from "@/lib/fa";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { MallLocator } from "@/components/cards";
-import { FastChip, InstallmentChips, NoCallNote, OpenChip, PriceBadge, ShopName, SourceNote } from "@/components/honesty";
+import { FastChip, InstallmentChips, NoCallNote, OpenChip, PriceBadge, ReliabilityLine, ShopName, SourceNote, TruthRow, confirmedPrice } from "@/components/honesty";
 import { AppBar, Bidi, ErrorState, Note, SkeletonCards } from "@/components/ui";
 
 const DAYS: [Weekday, string][] = [["sat", "شنبه"], ["sun", "یکشنبه"], ["mon", "دوشنبه"], ["tue", "سه‌شنبه"], ["wed", "چهارشنبه"], ["thu", "پنجشنبه"], ["fri", "جمعه"]];
@@ -61,6 +61,7 @@ export default function ShopView({ id, product }: { id: string; product?: string
           {!s.name_is_verified && <span className="xs faint">نام از داده‌ها نمایش داده می‌شود؛ ممکن است با تابلوی فروشگاه فرق کند.</span>}
           <div className="wrapr"><OpenChip open={s.open} />{s.open.state === "closed" && s.open.opens_at && <span className="xs faint">باز می‌شود: {fa(s.open.opens_at)}</span>}</div>
           <div className="wrapr"><InstallmentChips shop={s} full /><FastChip v={s.fast_delivery} /></div>
+          <ReliabilityLine r={s.reliability} />
         </div>
         <MallLocator s={s} />
         <div className="row" style={{ gap: 8 }}>
@@ -85,7 +86,8 @@ export default function ShopView({ id, product }: { id: string; product?: string
             {s.offers.slice(0, more ? 30 : 3).map((o) => (
               <Link key={o.offer_id} href={`/p/${o.product_id}`} className="card" style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
                 <div className="sm b" style={{ lineHeight: 1.6 }}><Bidi text={o.title ?? o.seller_title} /></div>
-                <PriceBadge offer={o} />
+                <PriceBadge offer={o} confirmed={confirmedPrice(o.confirmation)} />
+                <TruthRow offer={o} c={o.confirmation} listedShown />
               </Link>
             ))}
             {!more && s.offers.length > 3 && <button className="btn ghost" onClick={() => setMore(true)}>نمایش بیشتر</button>}

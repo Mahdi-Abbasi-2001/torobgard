@@ -43,8 +43,29 @@ CREATE TABLE IF NOT EXISTS {p}bale_kv(k TEXT PRIMARY KEY, v TEXT);
 CREATE TABLE IF NOT EXISTS {p}product_reviews(product_id TEXT PRIMARY KEY, data TEXT, model TEXT, created_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}users(id TEXT PRIMARY KEY, username TEXT, username_norm TEXT UNIQUE, pw TEXT, session_id TEXT UNIQUE, created_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}auth_tokens(token_hash TEXT PRIMARY KEY, user_id TEXT, created_at TEXT, expires_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}inquiry_messages(id INTEGER PRIMARY KEY AUTOINCREMENT, inquiry_id TEXT, role TEXT, text TEXT,
+  channel TEXT, simulated INTEGER DEFAULT 0, created_at TEXT);
+-- shared "what sellers/visitors confirmed" layer: newest row per (shop, product) wins and fades with age
+CREATE TABLE IF NOT EXISTS {p}confirmations(id INTEGER PRIMARY KEY AUTOINCREMENT, shop_id TEXT, product_id TEXT, available INTEGER,
+  price INTEGER, source TEXT, inquiry_id TEXT, simulated INTEGER DEFAULT 0, created_at TEXT);
+-- a seller's "update my listing too": overrides the dataset's listed price from then on
+CREATE TABLE IF NOT EXISTS {p}listing_updates(shop_id TEXT, product_id TEXT, price INTEGER, inquiry_id TEXT, created_at TEXT,
+  PRIMARY KEY(shop_id, product_id));
+-- shoppers' own reports: after a visit, or after phoning the shop
+CREATE TABLE IF NOT EXISTS {p}reports(id TEXT PRIMARY KEY, session_id TEXT, shop_id TEXT, product_id TEXT, kind TEXT,
+  available INTEGER, price INTEGER, price_matched INTEGER, inquiry_id TEXT, note TEXT, created_at TEXT);
+-- "ask in waves": a queue of shops asked a few at a time until enough confirm
+CREATE TABLE IF NOT EXISTS {p}campaigns(id TEXT PRIMARY KEY, session_id TEXT, product_id TEXT, data TEXT, status TEXT,
+  created_at TEXT, updated_at TEXT);
 CREATE INDEX IF NOT EXISTS {p}ix_inq_session ON inquiries(session_id);
 CREATE INDEX IF NOT EXISTS {p}ix_inq_token ON inquiries(token);
+CREATE INDEX IF NOT EXISTS {p}ix_inq_shop ON inquiries(shop_id);
+CREATE INDEX IF NOT EXISTS {p}ix_msg_inq ON inquiry_messages(inquiry_id);
+CREATE INDEX IF NOT EXISTS {p}ix_conf_product ON confirmations(product_id);
+CREATE INDEX IF NOT EXISTS {p}ix_conf_shop ON confirmations(shop_id);
+CREATE INDEX IF NOT EXISTS {p}ix_lu_product ON listing_updates(product_id);
+CREATE INDEX IF NOT EXISTS {p}ix_rep_shop ON reports(shop_id);
+CREATE INDEX IF NOT EXISTS {p}ix_camp_session ON campaigns(session_id);
 """
 
 INDEXES = """

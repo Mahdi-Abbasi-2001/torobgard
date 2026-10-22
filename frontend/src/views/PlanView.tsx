@@ -1,7 +1,7 @@
 "use client";
 // Visit plan, built on the client from seller answers until /api/visit-plan exists (see docs/fixtures/visit_plan_SPEC…).
 import Link from "next/link";
-import { useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { api, type Inquiry, type ShopDetail } from "@/lib/api";
 import { clock, fa, floorLabel, hm, walk } from "@/lib/fa";
@@ -11,7 +11,8 @@ import { useInquiries, useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
 import { PriceBadge } from "@/components/honesty";
 import { ShopMap } from "@/components/ShopMap";
-import { AppBar, Bidi, Empty, Note, SkeletonCards, Steps } from "@/components/ui";
+import { AppBar, Bidi, Empty, Note, Sheet, SkeletonCards, Steps } from "@/components/ui";
+import { KidRow, VisitReport } from "@/components/followup";
 
 const toMin = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 const tehranMinutes = (ms: number) => { const [h, m] = new Date(ms).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran" }).split(":").map(Number); return h * 60 + m; };
@@ -21,11 +22,32 @@ interface Stop { q: Inquiry; shop: ShopDetail; closes: string | null; walkFromPr
 export default function PlanView({ product }: { product?: string }) {
   const { sid, state } = useSession();
   const now = useNow(30_000);
-  const inq = useInquiries(sid, { live: false });
+  const inq = useInquiries(sid);
+  const qc = useQueryClient();
+  const [report, setReport] = useState<Inquiry | null>(null);
+  const [reported, setReported] = useState<Record<string, boolean>>({});
+  // holds / rechecks per shop + product (asking a shop again must not lose an earlier hold code)
+  const byShop = useMemo(() => {
+    const byId = new Map(inq.items.map((i) => [i.id, i]));
+    const m = new Map<string, Inquiry[]>();
+    inq.items.forEach((i) => {
+      const p = i.parent_id ? byId.get(i.parent_id) : null;
+      if (!p?.shop) return;
+      const k = `${p.shop.shop_id}:${p.product?.product_id}`;
+      m.set(k, [...(m.get(k) ?? []), i]);
+    });
+    return m;
+  }, [inq.items]);
+  const kidsOf = (q: Inquiry) => (byShop.get(`${q.shop?.shop_id}:${q.product?.product_id}`) ?? [])
+    .filter((k) => k.kind === "hold" || k.created_at >= (q.answered_at ?? q.created_at)); // only rechecks after this answer count
+  const kids = { get: (id: string) => { const q = inq.items.find((x) => x.id === id); return q ? kidsOf(q) : []; } };
   const ok = useMemo(() => {
-    const seen = new Set<string>(); // one stop per shop, newest answer wins
-    return inq.items.filter((i) => i.status === "answered" && i.answer?.available !== false && i.shop && (!product || i.product?.product_id === product) && !seen.has(i.shop.shop_id) && seen.add(i.shop.shop_id));
-  }, [inq.items, product]);
+    const seen = new Set<string>(); // one stop per shop, newest answer wins; a shop that said "sold out" on a later recheck drops out
+    return inq.items.filter((i) => i.kind === "ask" && i.status === "answered" && i.answer?.available !== false && i.shop && (!product || i.product?.product_id === product)
+      && !kidsOf(i).some((k) => k.kind === "recheck" && k.status === "unavailable") && !seen.has(i.shop.shop_id) && seen.add(i.shop.shop_id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inq.items, product, byShop]);
+  const recheck = useMutation({ mutationFn: (s: Stop) => api.recheck(sid, s.q.id, Math.min(600, Math.max(1, s.arrive - tehranMinutes(Date.now())))), onSuccess: () => qc.invalidateQueries({ queryKey: ["inquiries", sid] }) });
   const details = useQueries({ queries: ok.map((i) => ({ queryKey: ["shop", i.shop!.shop_id, state.place.lat, state.place.lon], queryFn: () => api.shop(i.shop!.shop_id, state.place) })) });
   const [userOrder, setOrder] = useState<string[] | null>(null);
   const [done, setDone] = useState<Record<string, boolean>>({});
@@ -69,7 +91,9 @@ export default function PlanView({ product }: { product?: string }) {
   const traffic = stops.some((s) => s.shop.in_traffic_zone);
   const first = stops[0]?.shop;
   const moveFirst = (id: string) => setOrder([id, ...order.filter((x) => x !== id)]);
-  const tips = ["گارانتی را روی بسته‌بندی چک کنید", "فاکتور رسمی بگیرید", ...stops.filter((s) => s.q.answer?.price).map((s) => `قیمت تأییدشده را نشان دهید: ${s.shop.name}`), "سلامت و اصالت را قبل از پرداخت امتحان کنید"];
+  const holdCodes = stops.map((s) => ({ s, h: (kids.get(s.q.id) ?? []).find((k) => k.kind === "hold" && k.answer?.hold_accepted) })).filter((x) => x.h);
+  const tips = ["گارانتی را روی بسته‌بندی چک کنید", "فاکتور رسمی بگیرید", ...stops.filter((s) => s.q.answer?.price).map((s) => `قیمت تأییدشده را نشان دهید: ${s.shop.name}`),
+    ...holdCodes.map(({ s, h }) => `کد نگه‌داری ${fa(h!.answer!.hold_code ?? "")} را در ${s.shop.name} بگویید`), "سلامت و اصالت را قبل از پرداخت امتحان کنید"];
 
   return (
     <main className="main has-cta">
@@ -96,6 +120,22 @@ export default function PlanView({ product }: { product?: string }) {
                 </div>
                 <div className="xs muted">{walk(s.walkFromPrev)} پیاده از {i ? "توقف قبلی" : "شما"}{s.closes ? ` · بسته می‌شود ${hm(s.closes)}` : " · ساعت بسته شدن نامشخص"}</div>
                 {s.q.answer?.price ? <PriceBadge confirmed={{ price: s.q.answer.price, ago: "در استعلام" }} /> : <span className="confirmed"><Icon n="check" s />موجودی تأیید شده</span>}
+                {(kids.get(s.q.id) ?? []).map((k) => <KidRow key={k.id} k={k} />)}
+                {(() => {
+                  const ks = kids.get(s.q.id) ?? [];
+                  const hold = ks.find((k) => k.kind === "hold" && k.answer?.hold_accepted);
+                  const late = hold?.answer?.hold_until && s.arrive > toMin(hold.answer.hold_until);
+                  const waitingRe = ks.some((k) => k.kind === "recheck" && (k.status === "sent" || k.status === "delivered"));
+                  return (
+                    <>
+                      {late && <Note tone="warn" icon="hold">فقط تا {hm(hold!.answer!.hold_until)} نگه می‌دارد؛ این توقف را جلوتر بیاورید.</Note>}
+                      <div className="actions">
+                        {i === 0 && !waitingRe && <button className="btn sec" disabled={recheck.isPending} onClick={() => recheck.mutate(s)}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>}
+                        {!reported[s.q.id] && <button className="btn ghost" onClick={() => setReport(s.q)}><Icon n="check" s />رفتم؛ نتیجه را بگویم</button>}
+                      </div>
+                    </>
+                  );
+                })()}
                 {s.late && <Note tone="bad" icon="clock">قبل از رسیدن شما بسته می‌شود.{i > 0 && " اول اینجا بروید؟"}</Note>}
                 {s.tight && <Note tone="warn" icon="clock">کمتر از ۱۵ دقیقه قبل از بسته شدن می‌رسید.{i > 0 && " اول اینجا بروید؟"}</Note>}
                 {(s.late || s.tight) && i > 0 && <button className="btn sec" style={{ minHeight: 42 }} onClick={() => moveFirst(s.q.id)}>جابه‌جا کن: اول {s.shop.name}</button>}
@@ -130,6 +170,9 @@ export default function PlanView({ product }: { product?: string }) {
         </div>
         </div>
       </div>
+      <Sheet open={!!report} onClose={() => setReport(null)} label="گزارش مراجعه">
+        {report && <VisitReport q={report} sid={sid} onDone={() => { setReported((r) => ({ ...r, [report.id]: true })); setReport(null); }} />}
+      </Sheet>
       {first && (
         <div className="sticky-cta">
           <a className="btn pri block" href={`https://nshn.ir/?lat=${first.lat}&lng=${first.lon}`} target="_blank" rel="noopener"><Icon n="route" s />شروع مسیر</a>

@@ -13,8 +13,12 @@ export interface SessionState {
   picks: Record<string, string[]>;   // product id → shop ids chosen for inquiry, max 5
   filters: ShopFilters;
   locationAsked: boolean;
+  /** when the shopper will go: now | 1h | evening | tomorrow | HH:MM (opening is judged for then) */
+  when: string;
+  /** how they travel: walk | taxi | car (times on cards) */
+  mode: "walk" | "taxi" | "car";
 }
-const INITIAL: SessionState = { place: DEFAULT_PLACE, compare: [], picks: {}, filters: { sort: "best", radius_km: null }, locationAsked: false };
+const INITIAL: SessionState = { place: DEFAULT_PLACE, compare: [], picks: {}, filters: { sort: "best", radius_km: null }, locationAsked: false, when: "now", mode: "walk" };
 const KEY = "hk-session-v1";
 
 interface Ctx {
@@ -65,7 +69,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem(KEY, JSON.stringify({ sid, state })); } catch {}
     if (push.current) clearTimeout(push.current);
     push.current = setTimeout(() => {
-      api.putSession(sid, { location: { lat: state.place.lat, lon: state.place.lon, label: state.place.label }, filters: state.filters, compare: state.compare }).catch(() => {});
+      api.putSession(sid, { location: { lat: state.place.lat, lon: state.place.lon, label: state.place.label }, filters: state.filters, compare: state.compare, when: state.when, mode: state.mode }).catch(() => {});
     }, 600);
   }, [state, sid, ready]);
 

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { fa, mil } from "@/lib/fa";
@@ -24,7 +24,11 @@ export default function CompareView({ ids }: { ids: string[] }) {
     update((s) => ({ ...s, compare: s.compare.filter((i) => i !== x) }));
     router.replace(compareHref(ids.filter((i) => i !== x)));
   };
-  const q = useQuery({ queryKey: ["compare", ids], queryFn: () => api.compare(ids), enabled: ids.length >= 2 });
+  const q = useQuery({ queryKey: ["compare", ids, state.place.lat, state.place.lon], queryFn: () => api.compare(ids, state.place), enabled: ids.length >= 2 });
+  const [need, setNeed] = useState("");
+  const verdict = useMutation({ mutationFn: (n: string | null) => api.compareVerdict(ids, n, state.place) });
+  // a first verdict without a stated need, as soon as the table is there
+  useEffect(() => { if (q.data && ids.length >= 2 && verdict.isIdle) verdict.mutate(null); }, [q.data]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (ids.length < 2) return (
     <main className="main"><AppBar title="مقایسهٔ کالاها" />
@@ -39,8 +43,12 @@ export default function CompareView({ ids }: { ids: string[] }) {
   const sorted = [...rows].sort((a, b) => Number(b.differs) - Number(a.differs) || Number(b.values.every((v) => v != null)) - Number(a.values.every((v) => v != null)));
   const shown = onlyDiff ? sorted.filter((r) => r.differs) : sorted;
   const nDiff = rows.filter((r) => r.differs).length;
-  // pick: most shops near, then cheapest
-  const best = [...products].sort((a, b) => b.shop_count - a.shop_count || (a.price_min ?? 9e12) - (b.price_min ?? 9e12))[0];
+  const ins = q.data.insights;
+  const av = q.data.availability ?? {};
+  // pick: the verdict's choice, else most shops, then cheapest
+  const best = products.find((p) => p.product_id === verdict.data?.pick)
+    ?? [...products].sort((a, b) => b.shop_count - a.shop_count || (a.price_min ?? 9e12) - (b.price_min ?? 9e12))[0];
+  const title = (pid: string) => products.find((p) => p.product_id === pid)?.title ?? "";
   const cols = `30% repeat(${products.length}, 1fr)`;
 
   return (
@@ -59,7 +67,8 @@ export default function CompareView({ ids }: { ids: string[] }) {
                 <Thumb src={p.image} alt={p.title} size="100%" h={110} brand={p.brand} />
                 <div className="xs b" style={{ lineHeight: 1.5 }}><Bidi text={p.title} /></div>
                 <div className="sm b num">{p.price_min != null ? `از ${mil(p.price_min)}` : "قیمت نامشخص"}</div>
-                <div className="xs faint">{fa(p.shop_count)} فروشگاه</div>
+                <div className="xs faint">{fa(p.shop_count)} فروشگاه{av[p.product_id]?.near ? `، ${fa(av[p.product_id].near)} تا نزدیک` : ""}</div>
+                {ins && <div className="xs" style={{ color: "var(--ok)", lineHeight: 1.6 }}>{fa(ins.per_product.find((x) => x.product_id === p.product_id)?.text ?? "")}</div>}
               </Link>
             </div>
           ))}
@@ -67,23 +76,40 @@ export default function CompareView({ ids }: { ids: string[] }) {
         {products.length < MAX_COMPARE && (
           <button type="button" className="btn sec block" onClick={() => openCompare(ids[0])}><Icon n="plus" s />افزودن کالای دیگر <span className="faint">({fa(products.length)} از {fa(MAX_COMPARE)})</span></button>
         )}
-        <Note tone="info" icon="spark">
-          <b>برای شما کدام بهتر است؟ </b><Bidi text={best.title} /> بیشترین فروشنده را دارد ({fa(best.shop_count)} فروشگاه){best.price_min ? ` و از ${mil(best.price_min)} تومان شروع می‌شود` : ""}. برای جزئیات، ردیف‌های رنگی را ببینید.
-        </Note>
+        <section className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }} aria-live="polite">
+          <div className="row" style={{ gap: 8 }}><Icon n="spark" s /><b className="sm grow">کدام برای شما بهتر است؟</b>
+            {verdict.data && <span className="xs faint">{verdict.data.source === "llm" ? "تحلیل هوشمند از همین مشخصات" : "از روی مشخصات و قیمت‌ها"}</span>}</div>
+          <form className="field" onSubmit={(e) => { e.preventDefault(); verdict.mutate(need.trim() || null); }}>
+            <input value={need} onChange={(e) => setNeed(e.target.value)} placeholder="نیازتان را بنویسید، مثلاً «عکاسی و بازی» یا «باتری قوی برای سفر»" maxLength={200} aria-label="نیاز شما" />
+            <button className="iconbtn" aria-label="پرسیدن" disabled={verdict.isPending}>{verdict.isPending ? <span className="spin" /> : <Icon n="send" s />}</button>
+          </form>
+          {verdict.isPending && !verdict.data && <div className="xs muted row" style={{ gap: 6 }}><span className="spin" />در حال سنجیدن…</div>}
+          {verdict.data && (
+            <>
+              <div className="sm b">{verdict.data.headline}</div>
+              <ul style={{ margin: 0, paddingInlineStart: 18 }} className="sm">{verdict.data.reasons.map((r) => <li key={r}>{fa(r)}</li>)}</ul>
+              {verdict.data.tradeoff && <div className="xs muted"><b>در عوض: </b>{fa(verdict.data.tradeoff)}</div>}
+              {verdict.data.per_need.length > 0 && (
+                <div className="wrapr">{verdict.data.per_need.map((x) => <span key={x.need} className="tb info">{x.need}: <Bidi text={title(x.product_id).split("|")[0].slice(0, 30)} /></span>)}</div>
+              )}
+            </>
+          )}
+          {verdict.isError && <Note tone="bad" icon="alert">{(verdict.error as Error).message}</Note>}
+        </section>
         <div className="frow"><span className="b sm">فقط تفاوت‌ها <span className="faint">({fa(nDiff)} از {fa(rows.length)})</span></span><Toggle on={onlyDiff} onChange={setOnlyDiff} label="فقط تفاوت‌ها" /></div>
         {rows.length === 0 ? <Note tone="unk" icon="q">مشخصات فنی این کالاها ثبت نشده است.</Note> : (
           <div className="tablewrap">
             <table className="ctab" style={{ minWidth: 120 + products.length * 110 }}>
               <tbody>{shown.map((r) => (
-                <tr key={r.key} className={r.differs ? "d" : ""}><th>{r.key}</th>{r.values.map((v, i) => <td key={i}>{v == null ? <span className="cell-unk">نامشخص</span> : fa(v)}</td>)}</tr>
+                <tr key={r.key} className={r.differs ? "d" : ""}><th>{r.key}</th>{r.values.map((v, i) => <td key={i} className={r.best?.includes(i) ? "win" : undefined}>{v == null ? <span className="cell-unk">نامشخص</span> : <>{r.best?.includes(i) && <Icon n="check" s />}{fa(v)}</>}</td>)}</tr>
               ))}</tbody>
             </table>
           </div>
         )}
-        <span className="xs faint">داده‌های مشخصات از ترب؛ نام ویژگی‌ها برای همهٔ کالاها یکسان ثبت نشده.</span>
+        <span className="xs faint">داده‌های مشخصات از ترب؛ نام ویژگی‌ها برای همهٔ کالاها یکسان ثبت نشده. خانهٔ سبز: مقدار بهتر (فقط وقتی واحدها یکی است).</span>
       </div>
       <div className="sticky-cta">
-        <Link className="btn pri block" href={`/p/${best.product_id}/shops`}>فروشگاه‌های {state.place.label} برای انتخاب اول <Icon n="fwd" s /></Link>
+        <Link className="btn pri block" href={`/p/${best.product_id}/shops`}>فروشگاه‌های نزدیک برای {verdict.data ? "انتخاب پیشنهادی" : "انتخاب اول"} <Icon n="fwd" s /></Link>
       </div>
     </main>
   );

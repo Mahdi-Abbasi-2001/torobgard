@@ -1,5 +1,5 @@
 // Areas the user can pick when location permission is denied. Coordinates are area centres (approximate).
-export interface Place { lat: number; lon: number; label: string; source: "gps" | "area" | "default" }
+export interface Place { lat: number; lon: number; label: string; source: "gps" | "area" | "default" | "pin" }
 
 export const AREAS: Place[] = [
   { label: "حافظ × جمهوری", lat: 35.6955, lon: 51.413, source: "area" },

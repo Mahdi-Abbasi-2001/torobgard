@@ -24,7 +24,7 @@ def _product(con):
 
 def test_ungrounded_claims_are_dropped_and_reputation_is_labelled(monkeypatch):
     con = db.connect()
-    con.execute("DELETE FROM product_reviews")
+    con.execute("DELETE FROM product_reviews"); con.commit()
     d = _product(con)
     real_key = d["specs"][0]["key"]
     llm = FakeLLM({"pros": [{"text": "grounded", "spec_key": real_key}, {"text": "invented", "spec_key": "کلید ساختگی"}],
@@ -39,7 +39,7 @@ def test_ungrounded_claims_are_dropped_and_reputation_is_labelled(monkeypatch):
 
 def test_low_confidence_reputation_is_removed_and_result_is_cached():
     con = db.connect()
-    con.execute("DELETE FROM product_reviews")
+    con.execute("DELETE FROM product_reviews"); con.commit()
     d = _product(con)
     llm = FakeLLM({"pros": [], "cons": [], "tips": [], "reputation": {"text": "نمی‌دانم", "confidence": "low"}})
     r1 = asyncio.run(review.build(con, d["product_id"], llm))
@@ -50,7 +50,7 @@ def test_low_confidence_reputation_is_removed_and_result_is_cached():
 
 def test_without_llm_still_returns_key_specs_and_is_not_cached():
     con = db.connect()
-    con.execute("DELETE FROM product_reviews")
+    con.execute("DELETE FROM product_reviews"); con.commit()
     d = _product(con)
     class NoLLM: configured = False
     r = asyncio.run(review.build(con, d["product_id"], NoLLM()))
