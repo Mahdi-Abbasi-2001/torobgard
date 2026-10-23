@@ -17,10 +17,12 @@ const PinMap = dynamic(() => import("@/components/PinMap"), { ssr: false, loadin
 const WHEN: [string, string][] = [["now", "الان"], ["1h", "یک ساعت دیگر"], ["evening", "امروز عصر"], ["20:00", "امشب"], ["tomorrow", "فردا صبح"]];
 export type SlotsPatch = Partial<Pick<Mission, "need" | "budgetMin" | "budgetMax" | "cond" | "place" | "when" | "mode">>;
 
-export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta = "نشانم بده" }: {
+export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta = "نشانم بده", only }: {
   open: boolean; onClose: () => void; value: SlotInput; onChange: (p: SlotsPatch) => void; focus?: SlotKey | null;
   /** shops that pass the current conditions (known once a product is chosen) */
   count?: number | null; cta?: string;
+  /** show just one part: «place» is the start-point picker on its own (the first page) */
+  only?: "place";
 }) {
   const [status, setStatus] = useState<"idle" | "asking" | "denied">("idle");
   const [far, setFar] = useState<number | null>(null);
@@ -52,11 +54,11 @@ export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta =
   const num = (v: string) => (v.trim() ? parseNum(v) : null);
 
   return (
-    <Sheet open={open} onClose={onClose} label="محل، زمان و شرایط">
-      <h2>محل، زمان و شرایط</h2>
+    <Sheet open={open} onClose={onClose} label={only ? "از کجا شروع می‌کنید؟" : "محل، زمان و شرایط"}>
+      <h2>{only ? "از کجا شروع می‌کنید؟" : "محل، زمان و شرایط"}</h2>
 
       <section id="slot-place" className="mc-sect" aria-label="کجا">
-        <span className="b sm">از کجا شروع می‌کنید؟</span>
+        {!only && <span className="b sm">از کجا شروع می‌کنید؟</span>}
         {far != null && <Note tone="warn" icon="pin">به نظر می‌رسد در تهران نیستید؛ حدود {fa(far)} کیلومتر با تهران فاصله دارید. ترب‌گرد فقط فروشگاه‌های تهران را دارد؛ محله‌ای را که می‌خواهید در آن خرید کنید انتخاب کنید تا مسیر و زمان رسیدن از همان‌جا حساب شود.</Note>}
         {status === "denied" && <Note tone="warn" icon="pin">به موقعیت شما دسترسی نداریم. محله را انتخاب کنید یا روی نقشه بزنید.</Note>}
         <div className="wrapr">
@@ -78,6 +80,8 @@ export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta =
         <span className="xs faint">الان: <b>{cur.source === "default" ? "مرکز تهران، حافظ × جمهوری (پیش‌فرض)" : cur.label}</b></span>
       </section>
 
+      {!only && (
+        <>
       <section id="slot-when" className="mc-sect" aria-label="کی و چطور">
         <span className="b sm">چه ساعتی می‌رسید؟ باز یا بسته بودن فروشگاه‌ها برای همان ساعت حساب می‌شود</span>
         <div className="wrapr">{WHEN.map(([v, l]) => <button key={v} type="button" className={`chip ${value.when === v ? "on" : ""}`} style={{ minHeight: 42 }} onClick={() => onChange({ when: v })}>{l}</button>)}</div>
@@ -107,6 +111,8 @@ export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta =
           </div>
         ))}
       </section>
+        </>
+      )}
 
       <div className="sheet-foot"><button className="btn pri block" onClick={onClose}>{cta}{count != null ? `، ${fa(count)} فروشگاه` : ""}</button></div>
     </Sheet>

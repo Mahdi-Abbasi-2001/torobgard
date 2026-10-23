@@ -36,6 +36,7 @@ TOOLS = [
      "parameters": {"type": "object", "properties": {
          "query": {"type": "string", "description": "the product words shops list exactly"},
          "category": {"type": ["string", "null"]},
+         "more_items": {"type": "array", "maxItems": 4, "items": {"type": "string"}, "description": "other DIFFERENT products the shopper also wants in the same trip (each a short phrase as shops list it); the first product stays in query"},
          "need": {"type": ["string", "null"], "description": "what it is for / for whom, short (ورزش, بچه, هدیه)"},
          "budget_min": {"type": ["integer", "null"]}, "budget_max": {"type": ["integer", "null"]},
          "place_name": {"type": ["string", "null"], "description": "mall or area the shopper named or chose"},
@@ -67,8 +68,9 @@ SYSTEM = """تو «ترب‌گرد» هستی، دستیار خرید حضوری
 ۳) اگر کاربر به سؤال قبلی جواب داده، جواب را در slot مربوط بگذار و دوباره همان را نپرس.
 ۴) current_slots چیزهایی است که تا اینجا روشن شده؛ همه را بدون تغییر دوباره در submit_mission بگذار مگر آنکه جواب تازهٔ کاربر عوضشان کند. هرگز بودجه یا محلی که قبلاً روشن شده را پاک نکن.
 ۵) اگر «برای چه/چه کسی» معنای کالا را مشخص می‌کند (مثلاً لباس فرم برای بچه یعنی مدرسه، کفش برای کوه، کیف برای لپ‌تاپ)، با search_catalog یک بار query را با همان کلمه دقیق‌تر امتحان کن و اگر examples به نیاز کاربر نزدیک‌تر شد همان را به‌عنوان query بگذار؛ وگرنه query اصلی بماند. نتیجهٔ دیگری که به نیاز مربوط نیست (لباس فرم نگهبانی برای بچه) نباید در فهرست بالا بیاید.
-۶) فارسی بنویس. summary یک جملهٔ کوتاه است: «چه چیزی فهمیدی».
-۷) در پایان submit_mission را دقیقاً یک بار صدا بزن. بدون آن کار تمام نمی‌شود."""
+۶) اگر کاربر چند کالای مختلف خواست («گوشی و قاب و شارژر»)، اولی را در query بگذار و بقیه را در more_items (هر کدام کوتاه، به شکلی که فروشگاه‌ها ثبت کرده‌اند)؛ هر کدام را هم با search_catalog چک کن. برای یک کالای واحد more_items را خالی بگذار.
+۷) فارسی بنویس. summary یک جملهٔ کوتاه است: «چه چیزی فهمیدی».
+۸) در پایان submit_mission را دقیقاً یک بار صدا بزن. بدون آن کار تمام نمی‌شود."""
 
 _STATUS = {"search_catalog": "در کاتالوگ فروشگاه‌ها دنبال «{query}» می‌گردم…", "price_spread": "بازهٔ قیمت‌ها را می‌سنجم…",
            "lookup_place": "محل را در نقشهٔ فروشگاه‌ها پیدا می‌کنم…", "category_needs": "گزینه‌های «برای چه» این دسته را می‌خوانم…",
@@ -140,6 +142,20 @@ def _clean_questions(qs) -> list[dict]:
     return out
 
 
+def _more_items(con, main: str, raw) -> list[dict]:
+    """The other products of a multi-item sentence: only those the catalogue really lists (an exact match), never the main item again."""
+    out, seen = [], {normalize_fa(main)}
+    for x in (raw or [])[:4]:
+        q = re.sub(r"\s+", " ", str(x or "")).strip()[:60]
+        if not q or normalize_fa(q) in seen:
+            continue
+        seen.add(normalize_fa(q))
+        ex = _search(con, q)
+        if ex["exact"]:
+            out.append({"query": q, "category": (ex["top_categories"][0]["name"] if ex["top_categories"] else None)})
+    return out
+
+
 def _result(con, a: dict, trace: list[str], engine: str, text: str, need_opts: list[str] | None = None, budget_known: bool = False) -> dict:
     q = re.sub(r"\s+", " ", str(a.get("query") or "")).strip()[:80]
     questions = _clean_questions(a.get("questions"))
@@ -179,7 +195,7 @@ def _result(con, a: dict, trace: list[str], engine: str, text: str, need_opts: l
     return {
         "slots": {"query": q or None, "category": (str(a["category"])[:60] if a.get("category") else None), "need": (str(a["need"]).strip()[:40] if a.get("need") else None),
                   "budget": {"min": bmin, "max": bmax} if (bmin or bmax) else None, "place": place, "when": when, "mode": mode,
-                  "conditions": {"installment": bool(a.get("installment")), "open": bool(a.get("open_only"))}},
+                  "conditions": {"installment": bool(a.get("installment")), "open": bool(a.get("open_only"))}, "more": _more_items(con, q, a.get("more_items"))},
         "exact": bool(ex["exact"]), "questions": questions,
         "assumed": [s for s in (a.get("assumed") or []) if s in ("place", "when", "mode", "budget", "need")],
         "summary": str(a.get("summary") or "")[:200], "engine": engine, "trace": trace,

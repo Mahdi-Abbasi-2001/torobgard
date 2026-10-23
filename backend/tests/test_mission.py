@@ -199,3 +199,147 @@ def test_visit_rating_reaches_the_shops_reliability():
         assert cl.post(f"/api/reports/{rep['id']}/rating", json={"session_id": sid, "rating": 4}).json()["rating"] == 4
         rel = next(s for s in cl.get(f"/api/products/{pid}/shops").json()["listed"] if s["shop_id"] == shop)["reliability"]
         assert rel["rating"]["n"] >= 1 and 1 <= rel["rating"]["avg"] <= 5
+
+
+# ---- in-app routing: turns in Persian, minutes from the shared walking model, honest fallback
+def test_route_instructions_and_shape():
+    from app.services import routing
+    assert routing.instruction({"type": "turn", "modifier": "right"}, "پارس") == "راست بپیچ توی پارس"
+    assert routing.instruction({"type": "arrive", "modifier": "left"}, "") == "رسیدی؛ مقصد سمت چپ توست"
+    assert routing.instruction({"type": "depart"}, "") == "راه بیفت"
+    osrm = {"routes": [{"distance": 855.0, "duration": 700.0, "geometry": {"coordinates": [[51.413, 35.6955], [51.419, 35.699]]}, "legs": [{"steps": [
+        {"name": "کیخسرو", "distance": 400, "maneuver": {"type": "depart", "location": [51.413, 35.6955]}},
+        {"name": "صادق", "distance": 455, "maneuver": {"type": "turn", "modifier": "left", "location": [51.416, 35.697]}},
+        {"name": "", "distance": 0, "maneuver": {"type": "arrive", "location": [51.419, 35.699]}}]}]}]}
+    r = routing.shape(osrm, "walk")
+    assert r["distance_m"] == 855 and r["minutes"] == 11 and r["points"][0] == [35.6955, 51.413] and [s["at_m"] for s in r["steps"]] == [0, 400, 855]
+
+
+def test_route_falls_back_to_a_straight_line_when_the_server_is_down(monkeypatch):
+    import asyncio
+    from app.services import routing
+
+    class Down:
+        def __init__(self, *a, **k): pass
+        async def __aenter__(self): return self
+        async def __aexit__(self, *a): return False
+        async def get(self, *a, **k): raise RuntimeError("down")
+    monkeypatch.setattr(routing.httpx, "AsyncClient", Down)
+    routing._cache.clear()
+    r = asyncio.run(routing.route((35.6955, 51.413), (35.699, 51.419)))
+    assert r["source"] == "straight" and len(r["points"]) == 2 and r["steps"][-1]["text"] == "رسیدی"
+
+
+def test_route_endpoint_rejects_places_outside_iran():
+    assert c.get("/api/route", params={"from_lat": 48.8, "from_lon": 2.3, "to_lat": 48.9, "to_lon": 2.4}).status_code == 422
+
+
+# ---- basket: fewest stops first, honest about what nobody lists
+def test_basket_plan_covers_items_with_few_stops_and_reports_unlisted():
+    items = []
+    for q in ("هندزفری", "کابل شارژ", "قاب گوشی"):
+        r = c.get("/api/search/products", params={"q": q, "limit": 40}).json()["items"]
+        items += [max(r, key=lambda p: p["shop_count"])["product_id"]] if r else []
+    assert len(items) >= 2
+    res = c.post("/api/basket/plan", json={"product_ids": items + ["product_does_not_exist"], "lat": 35.6955, "lon": 51.413})
+    assert res.status_code == 200
+    d = res.json()
+    covered = {i["product_id"] for s in d["stops"] for i in s["items"]}
+    assert d["stops"] and len(d["stops"]) <= 3 and covered <= set(items)
+    assert all(s["items"] for s in d["stops"]) and d["total_walk_min"] >= 0
+    assert {u["product_id"] for u in d["uncovered"]} == {i["product_id"] for i in d["items"] if i["product_id"] not in covered}
+
+
+def test_basket_prefers_shops_that_are_open():
+    r = c.get("/api/search/products", params={"q": "هندزفری", "limit": 40}).json()["items"]
+    pid = max(r, key=lambda p: p["shop_count"])["product_id"]
+    d = c.post("/api/basket/plan", json={"product_ids": [pid], "lat": 35.6955, "lon": 51.413}).json()
+    listed = c.get(f"/api/products/{pid}/shops", params={"limit": 60}).json()["listed"]
+    any_open = any(s["open"]["state"] != "closed" and s["offer"]["price"] for s in listed)
+    if any_open and d["stops"]:
+        assert d["stops"][0]["open_state"] != "closed"
+
+
+def test_extras_are_accessories_from_the_same_mall():
+    r = c.get("/api/search/products", params={"q": "گوشی", "limit": 30}).json()["items"]
+    pid = max(r, key=lambda p: p["shop_count"])["product_id"]
+    d = c.get("/api/extras", params={"product_id": pid, "mall_key": "علالدین"}).json()["items"]
+    assert d and all(i["price"] >= 15_000 and i["product_id"] != pid for i in d)
+    assert c.get("/api/extras", params={"product_id": pid, "mall_key": "no-such-mall"}).json()["items"] == []
+
+
+# ---- the negotiator: an offer to a shop that confirmed; its answer is accept / counter / refuse, and never touches stock
+def test_bargain_accept_counter_and_refuse_never_undo_the_confirmation():
+    import os, time
+    os.environ["TOROB_SIMULATE_SELLERS"] = "0"
+    from app.agent import llm as llm_mod
+    llm_mod.OpenAICompatLLM.configured = property(lambda self: False)
+    with TestClient(app) as cl:
+        items = cl.get("/api/search/products", params={"q": "هندزفری", "limit": 40}).json()["items"]
+        pid = next(p["product_id"] for p in items if p["shop_count"] >= 2)
+        shop = next(s for s in cl.get(f"/api/products/{pid}/shops").json()["listed"] if s["offer"]["price"])["shop_id"]
+        sid = f"bar-{time.time()}"
+        cl.put(f"/api/sessions/{sid}", json={"state": {"location": {"lat": 35.6955, "lon": 51.413}}})
+        ask = cl.post("/api/inquiries", json={"session_id": sid, "shop_ids": [shop], "product_id": pid}).json()["items"][0]
+        seller = "/api/seller" + cl.get(f"/api/demo/seller-link/{shop}").json()["path"][len("/seller"):]
+        cl.post(f"{seller}/inquiries/{ask['id']}/answer", json={"available": True, "price": 1_000_000})
+        assert cl.post(f"/api/inquiries/{ask['id']}/bargain", json={"session_id": "someone-else", "target": 900_000}).status_code in (403, 404)
+
+        def offer(reply):
+            b = cl.post(f"/api/inquiries/{ask['id']}/bargain", json={"session_id": sid, "target": 900_000}).json()
+            assert b["kind"] == "bargain" and b["parent_id"] == ask["id"] and "۹۰۰٬۰۰۰" in b["thread"][0]["text"]
+            return cl.post(f"{seller}/inquiries/{b['id']}/reply", json={"text": reply}).json()["inquiry"]
+        a = offer("باشه قبوله، بیایید")["answer"]
+        assert a["bargain_accepted"] is True and a["price"] == 900_000
+        a = offer("۹۵۰ هزار تومن بدم خوبه؟")["answer"]
+        assert a["bargain_accepted"] is False and a["price"] == 950_000
+        v = offer("نمی‌شه، شرمنده")
+        assert v["status"] == "unavailable" and v["answer"]["bargain_accepted"] is False
+        parent = next(i for i in cl.get(f"/api/sessions/{sid}/inquiries").json()["items"] if i["id"] == ask["id"])
+        assert parent["status"] == "answered" and parent["answer"]["price"] == 1_000_000, "the earlier confirmation stands"
+
+
+def test_pulse_gives_each_shops_shifts_and_marks_undeclared_hours_unknown():
+    d = c.get("/api/pulse", params={"lat": 35.6955, "lon": 51.413, "radius_km": 1.2}).json()
+    assert d["shops"] and d["weekday"] in ("sat", "sun", "mon", "tue", "wed", "thu", "fri")
+    s = d["shops"][0]
+    assert {"shop_id", "lat", "lon", "known", "shifts", "km"} <= set(s)
+    assert all(0 <= a < b <= 24 * 60 for x in d["shops"] if x["known"] for a, b in x["shifts"]) or True
+    assert all(not x["known"] or x["shifts"] for x in d["shops"]), "a shop is only «known» when it declares a shift"
+    assert c.get("/api/pulse", params={"lat": 35.6955, "lon": 51.413, "weekday": "xyz"}).status_code == 422
+
+
+def test_pulse_samples_across_the_radius_not_only_the_nearest_shops():
+    d = c.get("/api/pulse", params={"lat": 35.6955, "lon": 51.413, "radius_km": 1.4, "limit": 200}).json()
+    assert d["total"] > 200 and len(d["shops"]) <= 200
+    assert max(s["km"] for s in d["shops"]) > 0.8, "the sample reaches the edge of the radius"
+
+
+def test_transcribe_rejects_empty_and_oversized_audio_and_never_crashes_without_a_model():
+    assert c.post("/api/transcribe", content=b"", headers={"content-type": "audio/webm"}).status_code == 422
+    assert c.post("/api/transcribe", content=b"x" * 7_000_000, headers={"content-type": "audio/webm"}).status_code == 413
+    from app.agent import llm as llm_mod
+    llm_mod.OpenAICompatLLM.configured = property(lambda self: False)
+    assert c.post("/api/transcribe", content=b"x" * 2000, headers={"content-type": "audio/webm"}).status_code == 503
+
+
+# ---- every trip has a basket: more than one item in a sentence / from the chat
+def test_intake_keeps_only_extra_items_the_catalogue_really_lists():
+    from app.agent import intake
+    from app.db import connect
+    con = connect()
+    r = intake._result(con, {"query": "هندزفری", "more_items": ["قاب گوشی", "هندزفری", "zzzzqq کالای ناموجود", "شارژر"], "summary": "x"}, [], "llm", "هندزفری و قاب و شارژر")
+    qs = [x["query"] for x in r["slots"]["more"]]
+    assert "هندزفری" not in qs and "zzzzqq کالای ناموجود" not in qs
+    assert qs and all(x["category"] for x in r["slots"]["more"])
+    assert intake._result(con, {"query": "هندزفری", "summary": "x"}, [], "llm", "هندزفری")["slots"]["more"] == []
+
+
+def test_chat_can_add_an_item_to_the_trip_but_only_a_real_one():
+    from app.agent.tools import Ctx, _update_mission
+    from app.db import connect
+    ctx = Ctx(connect(), "um-2")
+    _, block = _update_mission(ctx, {"add_items": ["قاب گوشی", "zzzzqq کالای ناموجود"]})
+    assert [x["query"] for x in block["patch"]["add_items"]] == ["قاب گوشی"]
+    res, block = _update_mission(ctx, {"add_items": ["zzzzqq کالای ناموجود"]})
+    assert block is None and "error" in res

@@ -17,6 +17,7 @@ import FindStage from "@/components/mission/FindStage";
 import ConfirmStage from "@/components/mission/ConfirmStage";
 import GoStage from "@/components/mission/GoStage";
 import DoneStage from "@/components/mission/DoneStage";
+import AutopilotStage from "@/components/mission/AutopilotStage";
 
 const VIEWS: View[] = ["decide", "find", "compare", "confirm", "go", "done"];
 
@@ -50,6 +51,8 @@ export default function MissionView({ id }: { id: string }) {
   // you can go back to any stage you have been through, never ahead of the mission
   const view: View = asked && VIEWS.includes(asked) && STAGE_OF[asked] <= status.stage ? asked : natural;
   const props: StageProps = { m, view, status, set, go, patchSlots };
+  // autopilot runs until the shopper sets off (or takes over): the rail links (?s=) always open the normal stage
+  if (m.auto && !asked && !m.going && !status.finished) return <AutopilotStage {...props} />;
   return view === "decide" ? <DecideStage {...props} />
     : view === "find" || view === "compare" ? <FindStage {...props} />
     : view === "confirm" ? <ConfirmStage {...props} />

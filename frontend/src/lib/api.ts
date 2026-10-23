@@ -82,6 +82,18 @@ export type Weekday = "sat" | "sun" | "mon" | "tue" | "wed" | "thu" | "fri";
 export interface ShopDetail extends ShopCard {
   categories: string[]; weekly_hours: Record<Weekday, DayHours> | null; offer_count: number; offers: Offer[];
 }
+/** Shops near a point with the shifts (minutes since midnight) they declare for a weekday; `known: false` means no declared hours. */
+export interface Pulse { weekday: string; total: number; shops: { shop_id: string; name: string; lat: number; lon: number; mall: string | null; km: number; known: boolean; closed_day: boolean; shifts: [number, number][] }[] }
+/** An accessory of the chosen product, sold in the same mall as the stop. */
+export interface Extra { product_id: string; title: string; price: number; shop_id: string; shop: string; floor_label: string | null; unit: string | null; plaque: string | null; why: string }
+/** One trip for a basket: the fewest stops that cover it, each item at the stop where it is cheapest. */
+export interface BasketStop { shop_id: string; name: string; mall: string | null; area: string | null; floor_label: string | null; unit: string | null; plaque: string | null; lat: number; lon: number;
+  open: string | null; open_state: string | null; walk_min_from_prev: number; items: { product_id: string; title: string; price: number }[] }
+export interface BasketPlan { items: { product_id: string; title: string; image: string | null; listed: boolean }[]; stops: BasketStop[]; uncovered: { product_id: string; title: string }[];
+  total_walk_min: number; total_price: number; when: string }
+/** A route to draw: street geometry, Persian turns, distance and minutes (source "straight": the street server was unreachable). */
+export interface RouteStep { text: string; distance_m: number; at_m: number; lat: number; lon: number; type: string; modifier: string; street: string }
+export interface RoutePlan { source: "osrm" | "straight"; mode: "walk" | "car"; distance_m: number; minutes: number; points: [number, number][]; steps: RouteStep[] }
 /** Which shops to ask first and why: the model's pick over the real candidates (source "rules": the catalogue's own ranking). */
 export interface Advice { picks: { shop_id: string; reason: string }[]; headline: string | null; tip: string | null; source: "llm" | "rules"; when: string }
 export interface ShopsForProduct {
@@ -98,7 +110,7 @@ export interface MallDirectory extends Mall {
   floors: { floor: number | null; label: string; shops: { shop_id: string; name: string; unit: string | null; plaque: string | null; offer_count: number; categories: string[] }[] }[];
 }
 export type InquiryStatus = "sent" | "delivered" | "answered" | "unavailable" | "no_reply";
-export type InquiryKind = "ask" | "hold" | "recheck" | "arrive";
+export type InquiryKind = "ask" | "hold" | "recheck" | "arrive" | "bargain";
 export interface Drift {
   price: number; listed: number | null; vs_listed_pct: number | null; market_median: number | null; vs_market_pct: number | null;
   cheaper_nearby: { shop_id: string; name: string; price: number; confirmed: boolean; distance_km: number | null; mall: string | null }[];
@@ -109,12 +121,12 @@ export interface Answer {
   channel?: "web" | "bale" | "sim"; summary?: string; parsed_by?: "llm" | "rules";
   restock?: string; opens_at?: string; warranty?: string; original?: boolean; variants_available?: string[]; variants_unavailable?: string[];
   alt_suggestion?: string; answers?: Record<string, string>; same_as_listed?: boolean; listing_updated?: boolean; drift?: Drift | null;
-  hold_accepted?: boolean | null; hold_code?: string; hold_until?: string;
+  hold_accepted?: boolean | null; hold_code?: string; hold_until?: string; bargain_accepted?: boolean | null;
 }
 export interface ThreadMsg { role: "buyer" | "seller" | "agent" | "system"; text: string; channel: string; simulated: boolean; at: string }
 export interface Inquiry {
   id: string; session_id: string; status: InquiryStatus; label: string; kind: InquiryKind; parent_id: string | null;
-  campaign_id: string | null; auto_from: string | null; hold_until: string | null; hold_code?: string | null; eta_min: number | null;
+  campaign_id: string | null; auto_from: string | null; hold_until: string | null; hold_code?: string | null; eta_min: number | null; target?: number | null;
   created_at: string; delivered_at: string | null; answered_at: string | null; deadline_at: string;
   questions: { key: string; text: string; custom?: boolean }[]; note: string | null; answer: Answer | null;
   thread: ThreadMsg[]; awaiting_seller: boolean; simulated_seller: boolean; listed_price: number | null;
@@ -183,6 +195,8 @@ export interface IntakeResult {
     query: string | null; category: string | null; need: string | null; budget: { min: number | null; max: number | null } | null;
     place: { kind: "mall" | "area"; label: string; lat: number; lon: number; mall_key?: string; area?: string } | null;
     when: string | null; mode: "walk" | "taxi" | "car" | null; conditions: { installment: boolean; open: boolean };
+    /** other products of the same sentence, each one the catalogue really lists: they join the trip's basket */
+    more?: { query: string; category: string | null }[];
   };
   exact: boolean; questions: IntakeQuestion[]; assumed: string[]; summary: string; engine: "llm" | "rules"; trace: string[];
 }
@@ -241,6 +255,12 @@ export const api = {
     return req<SearchResult>(`/search/products${qs({ limit: 20, ...p, ...at(loc), prefs: x.prefs?.length ? JSON.stringify(x.prefs) : null, near_only: x.near_only,
       installment_only: x.installment_only, open_only: x.open_only, sort: x.sort, when: x.when && x.when !== "now" ? x.when : null })}${spec}`);
   },
+  pulse: (p: { lat: number; lon: number; radius_km?: number; product_id?: string; weekday?: string; limit?: number }) => req<Pulse>(`/pulse${qs(p)}`),
+  extras: (product_id: string, mall_key: string) => req<{ items: Extra[] }>(`/extras${qs({ product_id, mall_key })}`),
+  basketPlan: (b: { product_ids: string[]; lat?: number; lon?: number; when?: string | null }) =>
+    req<BasketPlan>(`/basket/plan`, { method: "POST", body: JSON.stringify({ ...b, when: b.when && b.when !== "now" ? b.when : null }) }),
+  route: (from: { lat: number; lon: number }, to: { lat: number; lon: number }, mode: "walk" | "car") =>
+    req<RoutePlan>(`/route${qs({ from_lat: from.lat, from_lon: from.lon, to_lat: to.lat, to_lon: to.lon, mode })}`),
   advise: (b: { product_id: string; lat?: number; lon?: number; when?: string | null; need?: string | null; priority?: Priority; budget_max?: number | null; installment?: boolean }) =>
     req<Advice>(`/mission/advise`, { method: "POST", body: JSON.stringify({ ...b, when: b.when && b.when !== "now" ? b.when : null }) }),
   missionParse: (text: string) => req<ParsedMission>(`/mission/parse`, { method: "POST", body: JSON.stringify({ text }) }),
@@ -276,6 +296,12 @@ export const api = {
   stopCampaign: (sid: string, id: string) => req<Campaign>(`/campaigns/${id}/stop`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   hold: (sid: string, id: string, until: string) => req<Inquiry>(`/inquiries/${id}/hold`, { method: "POST", body: JSON.stringify({ session_id: sid, until }) }),
   recheck: (sid: string, id: string, eta_min?: number | null, demo_gone = false) => req<Inquiry>(`/inquiries/${id}/recheck`, { method: "POST", body: JSON.stringify({ session_id: sid, eta_min, demo_gone }) }),
+  transcribe: async (audio: Blob): Promise<{ text: string }> => {
+    const r = await fetch(`/api/transcribe`, { method: "POST", headers: { "Content-Type": audio.type || "audio/webm" }, body: audio });
+    if (!r.ok) { let msg = "صدا خوانده نشد؛ بنویسید."; try { const j = await r.json(); if (typeof j.detail === "string") msg = j.detail; } catch { /* keep the default */ } throw new Error(msg); }
+    return r.json();
+  },
+  bargain: (sid: string, id: string, target: number) => req<Inquiry>(`/inquiries/${id}/bargain`, { method: "POST", body: JSON.stringify({ session_id: sid, target }) }),
   arrive: (sid: string, id: string) => req<Inquiry>(`/inquiries/${id}/arrive`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   visitPlan: (b: { session_id: string; product_id: string; lat?: number; lon?: number; order?: string[] }) => req<VisitPlan>(`/visit-plan`, { method: "POST", body: JSON.stringify(b) }),
   report: (b: { session_id: string; shop_id: string; product_id: string; kind: "visit" | "call"; available: boolean | null; price?: number | null; price_matched?: boolean | null; inquiry_id?: string | null; note?: string | null }) =>

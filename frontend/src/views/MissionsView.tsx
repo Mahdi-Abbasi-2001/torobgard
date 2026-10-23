@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { fa, minutesAgo } from "@/lib/fa";
-import { useMissions } from "@/lib/mission";
+import { groupMissions, useMissions } from "@/lib/mission";
 import { useSession } from "@/lib/session";
 import { useInquiries, useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
@@ -19,7 +19,7 @@ export default function MissionsView() {
   const [tab, setTab] = useState<"active" | "done">("active");
   const now = useNow(60_000);
   const active = missions.filter((m) => !m.done), done = missions.filter((m) => m.done);
-  const list = tab === "active" ? active : done;
+  const list = groupMissions(tab === "active" ? active : done);
   const latest = inq.items.filter((i) => i.kind === "ask" && i.status === "answered" && i.answer?.available !== false && i.shop && i.product)
     .sort((a, b) => ((b.answered_at ?? "") > (a.answered_at ?? "") ? 1 : -1))[0];
   const latestMission = latest ? missions.find((m) => m.productId === latest.product!.product_id) : null;
@@ -27,7 +27,7 @@ export default function MissionsView() {
   return (
     <div className="mc">
       <MissionBar />
-      <div className="mc-body two" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div className="mc-body two" style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: 0, overflowY: "auto", paddingBottom: 32 }}>
         <main className="mc-main mc-pad" style={{ width: "100%", maxWidth: 720, paddingTop: 12, gap: 12 }}>
           {latest && latestMission && now - new Date(latest.answered_at ?? 0).getTime() < 6 * 3600_000 && (
             <Link href={missionHref(latestMission.id, "confirm")} className="notif" role="status">
@@ -49,10 +49,10 @@ export default function MissionsView() {
             </Empty>
           )}
           <div className="stack" style={{ gap: 10 }}>
-            {list.map((m) => (
+            {list.map(({ head: m, items }) => (
               <div key={m.id} className="mission-item">
-                <MissionCard m={m} />
-                <button type="button" className="mission-rm" aria-label="حذف خرید" title="حذف از این دستگاه" onClick={() => { if (confirm("این خرید از این دستگاه حذف شود؟")) remove(m.id); }}><Icon n="x" s /></button>
+                <MissionCard m={m} count={items.length} />
+                <button type="button" className="mission-rm" aria-label="حذف خرید" title="حذف از این دستگاه" onClick={() => { if (confirm(items.length > 1 ? "این سفر و همهٔ کالاهایش از این دستگاه حذف شود؟" : "این خرید از این دستگاه حذف شود؟")) items.forEach((x) => remove(x.id)); }}><Icon n="x" s /></button>
               </div>
             ))}
           </div>

@@ -17,7 +17,7 @@ export function Progress({ stage, finished }: { stage: number; finished: boolean
   );
 }
 
-export function MissionCard({ m, compact = false }: { m: Mission; compact?: boolean }) {
+export function MissionCard({ m, compact = false, count = 1 }: { m: Mission; compact?: boolean; count?: number }) {
   const st = useMissionStatus(m, { live: false });
   const line = st.finished ? (m.done?.found === false ? "رفتید؛ کالا نبود" : "خریدید؛ گزارشتان ثبت شد") : st.held ? `نگه داشته${st.held.hold?.until ? ` تا ${fa(st.held.hold.until)}` : ""}، کد ${fa(st.held.hold?.code ?? "")}` : st.headline;
   return (
@@ -25,7 +25,7 @@ export function MissionCard({ m, compact = false }: { m: Mission; compact?: bool
       <div className="row between" style={{ alignItems: "flex-start", gap: 10 }}>
         <div className="row" style={{ gap: 10, minWidth: 0 }}>
           {!compact && m.product && <Thumb src={m.product.image} alt="" size={44} brand={m.product.brand} />}
-          <div style={{ minWidth: 0 }}><div className="b" style={{ fontSize: 15, lineHeight: 1.5 }}><Bidi text={missionTitle(m)} /></div>
+          <div style={{ minWidth: 0 }}><div className="b" style={{ fontSize: 15, lineHeight: 1.5 }}><Bidi text={missionTitle(m)} />{count > 1 && <span className="faint"> +{fa(count - 1)}</span>}</div>
             <div className="xs faint">{slotSummary(m) || whenText(m.when)}</div></div>
         </div>
       </div>

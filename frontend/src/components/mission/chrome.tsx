@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { fa } from "@/lib/fa";
 import { useIsDesktop } from "@/lib/media";
-import { STAGE_LABEL, STAGE_OF, STAGE_VIEW, useMissions, type Mission, type View } from "@/lib/mission";
+import { groupMissions, STAGE_LABEL, STAGE_OF, STAGE_VIEW, useMissions, type Mission, type View } from "@/lib/mission";
 import { useSession } from "@/lib/session";
 import { useMissionStatus, type MissionStatus } from "@/lib/useMissionStatus";
 import { Icon, Radish } from "@/components/Icon";
 import { ThemeToggle } from "@/components/TopBar";
 import { Bidi } from "@/components/ui";
 import { AgentSheet } from "./AgentSheet";
+import { UserMenu } from "@/components/UserMenu";
+import { BasketStrip } from "./BasketStrip";
 import { SlotsSheet, type SlotsPatch } from "./SlotsSheet";
 import { slotsOf, slotSummary, type SlotKey } from "./slots";
 
@@ -28,15 +30,13 @@ export function MissionBar({ activeId }: { activeId?: string }) {
     <header className="mc-bar">
       <Link href="/" className="mc-brand" aria-label="ترب‌گرد، خرید تازه"><Radish size={28} />ترب‌گرد</Link>
       <nav className="mc-tabs" aria-label="خریدها">
-        {missions.slice(0, 6).map((m) => <TabFor key={m.id} m={m} on={m.id === activeId} />)}
+        {groupMissions(missions).slice(0, 6).map((g) => <TabFor key={g.head.id} m={g.head} count={g.items.length} on={g.items.some((x) => x.id === activeId)} />)}
         <Link href="/" className="mc-tab new">+ خرید تازه</Link>
       </nav>
-      {!desk && <><span className="grow" /><Link href="/missions" className="chip" style={{ minHeight: 38 }}>خریدها{missions.length > 0 && <span className="tb-cnt" aria-label={`${fa(missions.length)} خرید`}>{fa(missions.length)}</span>}</Link></>}
+      {!desk && <><span className="grow" />{user && <UserMenu compact style={{ minHeight: 38 }} />}<Link href="/missions" className="chip" style={{ minHeight: 38 }}>خریدها{missions.length > 0 && <span className="tb-cnt" aria-label={`${fa(missions.length)} خرید`}>{fa(missions.length)}</span>}</Link></>}
       {desk && (
         <>
-          {user
-            ? <Link href="/login" className="chip" style={{ minHeight: 40 }} title="حساب کاربری"><span className="auth-avatar" style={{ width: 26, height: 26, fontSize: 12 }}>{user.username.slice(0, 1).toUpperCase()}</span><bdi>{user.username}</bdi></Link>
-            : <Link href="/login" className="btn sec" style={{ minHeight: 40 }}>ورود</Link>}
+          <UserMenu className={user ? "chip" : "btn sec"} style={{ minHeight: 40 }} />
           <ThemeToggle />
         </>
       )}
@@ -44,11 +44,11 @@ export function MissionBar({ activeId }: { activeId?: string }) {
   );
 }
 
-function TabFor({ m, on }: { m: Mission; on: boolean }) {
+function TabFor({ m, on, count }: { m: Mission; on: boolean; count: number }) {
   const st = useMissionStatus(m, { live: false });
   return (
     <Link href={missionHref(m.id)} className={`mc-tab ${on ? "on" : ""}`} aria-current={on ? "page" : undefined}>
-      <span className="d" style={{ opacity: st.stage === 0 ? 0.45 : 1 }} /><span className="t"><Bidi text={missionTitle(m)} /></span>
+      <span className="d" style={{ opacity: st.stage === 0 ? 0.45 : 1 }} /><span className="t"><Bidi text={missionTitle(m)} />{count > 1 ? ` +${fa(count - 1)}` : ""}</span>
     </Link>
   );
 }
@@ -79,6 +79,7 @@ export function MissionHead({ m, view, status, onSlots, onAsk }: { m: Mission; v
         <button type="button" className="iconbtn soft" onClick={onAsk} aria-label="از ترب‌گرد بپرسید"><Icon n="spark" /></button>
       </div>
       <Rail view={view} reached={status.stage} id={m.id} />
+      <BasketStrip m={m} />
     </section>
   );
 }
@@ -106,6 +107,7 @@ export function MissionAside({ m, view, status, onSlots, onAsk, children }: { m:
           return <Link key={l} role="listitem" href={missionHref(m.id, STAGE_VIEW[i])} className={cls} aria-current={i === at ? "step" : undefined}><span className="d" />{l}<span className="n">{notes[i]}</span></Link>;
         })}
       </div>
+      <BasketStrip m={m} />
       {children}
       <div className="grow" />
       <form className="mc-verdict" style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={(e) => { e.preventDefault(); onAsk(q); setQ(""); }}>

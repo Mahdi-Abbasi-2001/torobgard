@@ -35,13 +35,14 @@ QUESTIONS = {
     "original": "اصل و آکبند است؟",
     "tomorrow": "فردا از چه ساعتی باز هستید و این کالا را دارید؟",
 }
-KINDS = ("ask", "hold", "recheck", "arrive")
+KINDS = ("ask", "hold", "recheck", "arrive", "bargain")
 LABELS = {
     "ask": {"sent": "ارسال شد", "delivered": "دیده شد", "answered": "پاسخ داد", "unavailable": "ناموجود است", "no_reply": "پاسخی نداد"},
     "hold": {"sent": "درخواست نگه‌داشتن رفت", "delivered": "دیده شد", "answered": "پاسخ داد", "unavailable": "نگه نمی‌دارد",
              "no_reply": "پاسخی نداد"},
     "arrive": {"sent": "به فروشنده خبر دادیم", "delivered": "دیده شد", "answered": "فروشنده منتظر شماست", "unavailable": "الان نمی‌تواند پاسخ بدهد",
                "no_reply": "پاسخی نداد"},
+    "bargain": {"sent": "پیشنهاد قیمت فرستاده شد", "delivered": "دیده شد", "answered": "پاسخ داد", "unavailable": "قبول نکرد", "no_reply": "پاسخی نداد"},
     "recheck": {"sent": "دوباره پرسیدیم", "delivered": "دیده شد", "answered": "هنوز موجود است", "unavailable": "دیگر موجود نیست",
                 "no_reply": "پاسخی نداد"},
 }
@@ -218,6 +219,18 @@ def request_arrival(con, parent_id: str, timeout_s: int = 180) -> dict | None:
     return view(con, made[0]["id"])
 
 
+def request_bargain(con, parent_id: str, target: int, timeout_s: int = 180) -> dict | None:
+    """The shopper offers a price to a shop that already confirmed the item. The message is composed here, from the shopper's own target;
+    it is a follow-up to the confirmed inquiry, so a refusal or silence never undoes the confirmation."""
+    p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
+    if not p or not p["answer"]:
+        return None
+    price = (json.loads(p["answer"]) or {}).get("price")
+    made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], [], timeout_s, kind="bargain", parent_id=parent_id,
+                  extra={"target": int(target), "price": price})
+    return view(con, made[0]["id"])
+
+
 def request_recheck(con, parent_id: str, eta_min: int | None = None, timeout_s: int = 180, demo_gone: bool = False) -> dict | None:
     p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
     if not p:
@@ -248,9 +261,11 @@ def answer(con, inquiry_id: str, available: bool | None, price: int | None = Non
             ans["hold_code"] = str(int(hashlib.sha256(inquiry_id.encode()).hexdigest(), 16) % 9000 + 1000)
             ans["hold_until"] = meta.get("hold_until")
         status = "answered" if acc else "unavailable"
+    elif kind == "bargain":
+        status = "unavailable" if ans.get("bargain_accepted") is False and not price else "answered"
     else:
         status = "unavailable" if available is False else "answered"
-    if price and r["product_id"]:
+    if price and r["product_id"] and kind != "bargain":
         try:
             sess = get_session(con, r["session_id"]) or {}
             loc = sess.get("location")
@@ -262,7 +277,7 @@ def answer(con, inquiry_id: str, available: bool | None, price: int | None = Non
         ans["listing_updated"] = True
     con.execute("UPDATE inquiries SET status=?, answer=?, answered_at=? WHERE id=?",
                 (status, json.dumps(ans, ensure_ascii=False), iso(now()), inquiry_id))
-    if kind != "arrive" and (kind != "hold" or ans.get("available")):  # an «I'm here» acknowledgement says nothing about stock
+    if kind not in ("arrive", "bargain") and (kind != "hold" or ans.get("available")):  # an «I'm here» or a price talk says nothing about stock
         verify.record(con, r["shop_id"], r["product_id"], ans.get("available"), price if ans.get("available") is not False else None,
                       "seller", inquiry_id, simulated, commit=False)
     if log_message:
@@ -333,7 +348,7 @@ def view(con, inquiry_id: str, with_alternatives: bool = False) -> dict | None:
          "campaign_id": q.get("campaign"), "auto_from": q.get("auto_from"),
          "created_at": r["created_at"], "delivered_at": r["delivered_at"], "answered_at": r["answered_at"],
          "deadline_at": r["deadline_at"], "questions": question_texts(q), "note": q.get("note"),
-         "hold_until": q.get("hold_until"), "hold_code": q.get("hold_code"), "eta_min": q.get("eta_min"),
+         "hold_until": q.get("hold_until"), "hold_code": q.get("hold_code"), "eta_min": q.get("eta_min"), "target": q.get("target"),
          "answer": json.loads(r["answer"]) if r["answer"] else None, "partial": q.get("partial"),
          "thread": th, "awaiting_seller": awaiting, "simulated_seller": bool(q.get("sim")),
          "listed_price": _listed(con, r["shop_id"], r["product_id"]),
@@ -389,7 +404,7 @@ def _ctx(con, r, meta: dict) -> dict:
     qt = question_texts(meta)
     return {"kind": meta.get("kind", "ask"), "title": prod and prod["title"], "keys": [q["key"] for q in qt],
             "questions": [q["text"] for q in qt], "note": meta.get("note"), "listed": _listed(con, r["shop_id"], r["product_id"]),
-            "hold_until": meta.get("hold_until"), "hold_code": meta.get("hold_code"), "thread": [(m["role"], m["text"]) for m in thread(con, r["id"])]}
+            "hold_until": meta.get("hold_until"), "hold_code": meta.get("hold_code"), "target": meta.get("target"), "thread": [(m["role"], m["text"]) for m in thread(con, r["id"])]}
 
 
 async def seller_says(inquiry_id: str, text: str, channel: str = "web", simulated: bool = False, llm=None) -> dict:
@@ -451,6 +466,10 @@ async def seller_says(inquiry_id: str, text: str, channel: str = "web", simulate
             extra["hold_accepted"] = merged.get("hold_accepted")
             extra["available"] = merged.get("available")
             avail = merged.get("hold_accepted")
+        elif kind == "bargain":
+            extra["bargain_accepted"] = merged.get("bargain_accepted")
+            extra["target"] = meta.get("target")
+            avail = None
         else:
             avail = merged.get("available")
         v = answer(con, inquiry_id, avail, merged.get("price") if avail is not False or kind == "hold" else None,
@@ -530,6 +549,15 @@ def _sim_text(con, r, meta: dict, rnd: random.Random, first: bool) -> str | None
                 else "شرمنده، نگه نمی‌داریم؛ ولی هنوز داریم، زود تشریف بیارید.")
     if kind == "arrive":
         return "بفرمایید، منتظرتون هستم. کد رو که بگید تحویل می‌دم."
+    if kind == "bargain":
+        tgt, was = int(meta.get("target") or 0), int(meta.get("price") or 0)
+        roll = rnd.random()
+        if roll < 0.5:
+            return f"باشه، با {tgt:,} حساب می‌کنیم. تشریف بیارید.".replace(",", "٬")
+        if roll < 0.8 and was > tgt:
+            mid = int(round((tgt + was) / 2, -4))
+            return f"{tgt:,} نمی‌شه، ولی {mid:,} تومن بدم خوبه؟".replace(",", "٬")
+        return "شرمنده، پایین‌ترین قیمتم همینه که گفتم."
     if kind == "recheck":
         if meta.get("demo_gone"):  # the demo's "what if it sold out on the way" button
             return "همین الان آخریش فروخته شد، شرمنده."

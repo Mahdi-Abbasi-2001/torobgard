@@ -34,6 +34,10 @@ def compose(kind: str, title: str | None, questions: list[str], note: str | None
     if kind == "arrive":
         code = f" کد نگه‌داری: {fa(meta['hold_code'])}." if meta.get("hold_code") else ""
         return f"سلام. مشتری {t} الان رسیده و دم فروشگاه است.{code} لطفاً آمادهٔ تحویل باشید."
+    if kind == "bargain":
+        was = f" (قیمتی که گفتید {money(meta['price'])} تومان بود)" if meta.get("price") else ""
+        return (f"سلام دوباره. مشتری {t} می‌خواهد همین الان بیاید و حضوری بخرد؛ اگر {money(meta.get('target') or 0)} تومان بدهد، می‌فروشید؟{was} "
+                "اگر نه، پایین‌ترین قیمتتان برای او چقدر است؟")
     if kind == "recheck":
         eta = meta.get("eta_min")
         p = meta.get("price")
@@ -256,9 +260,34 @@ def _clean(raw: dict, ctx: dict) -> dict:
             "follow_up": s(raw.get("follow_up"), 160), "engine": "llm"}
 
 
+_BARG_NO = [r"نمی ?شه", r"نمیشه", r"امکان ندار", r"\bنه\b", r"نمی ?تونم", r"نمی ?دم", r"کمتر ندار", r"پایین ?ترین", r"همین قیمته", r"قیمت ثابت", r"سود ندار"]
+_BARG_YES = [r"باشه", r"قبول", r"اوکی", r"\bok\b", r"می ?دم", r"میدم", r"حله", r"موافق", r"تشریف بیار", r"بیایید"]
+
+
+def _bargain(rules: dict, text: str, ctx: dict) -> dict:
+    """Did the shop take the target, answer with its own number, or refuse? Stock is not judged here: this is a price conversation."""
+    target = ctx.get("target") or 0
+    t = re.sub(r"\s+", " ", (text or "").replace("\u200c", " "))  # «نمی‌شه» is written with a half-space
+    price = rules.get("price")
+    no, yes = _any(_BARG_NO, t), _any(_BARG_YES, t)
+    if price and target and price <= target:
+        accepted, final = True, price
+    elif price and target and price > target:
+        accepted, final = False, price            # a counter-offer
+    elif yes and not no:
+        accepted, final = True, target or None
+    elif no:
+        accepted, final = False, price
+    else:
+        accepted, final = None, price
+    return {**rules, "available": None, "price": final, "bargain_accepted": accepted, "closes_at": None}
+
+
 async def parse_reply(text: str, ctx: dict, llm=None) -> dict:
     """ctx: kind, title, keys, questions (texts), note, listed, hold_until, thread [(role, text)]."""
     rules = rule_parse(text, ctx)
+    if ctx.get("kind") == "bargain":
+        return _bargain(rules, text, ctx)
     if ctx.get("kind") == "arrive" or not (llm and getattr(llm, "configured", False)):
         return rules
     user = json.dumps({"kind": ctx.get("kind", "ask"), "product": ctx.get("title"), "listed_price_toman": ctx.get("listed"),
@@ -306,6 +335,8 @@ def follow_up(parsed: dict, ctx: dict, turns: int) -> str | None:
         if parsed.get("hold_accepted") is None:
             return f"ببخشید، یعنی تا ساعت {fa(ctx.get('hold_until') or '')} برایش نگه می‌دارید؟ (بله / نه)"
         return None
+    if kind in ("bargain", "arrive"):
+        return None  # a price talk or an «I'm here» is never followed by «do you have it?»
     if parsed.get("available") is None:
         return parsed.get("follow_up") or ("ببخشید، یعنی هنوز موجود است؟" if kind == "recheck" else "ببخشید، الان موجود دارید یا نه؟")
     if parsed.get("available") is False:
@@ -320,6 +351,10 @@ def follow_up(parsed: dict, ctx: dict, turns: int) -> str | None:
 
 
 def summary(p: dict, kind: str = "ask") -> str:
+    if kind == "bargain":
+        acc = p.get("bargain_accepted")
+        return (f"قبول کرد: {money(p['price'])} تومان" if acc and p.get("price") else "قبول کرد" if acc
+                else f"قبول نکرد؛ پایین‌ترین قیمتش {money(p['price'])} تومان" if p.get("price") else "قبول نکرد" if acc is False else "پاسخ نامشخص")
     if kind == "arrive":
         return "فروشنده منتظر شماست" if p.get("available") is not False else "فروشنده الان نمی‌تواند پاسخ بدهد"
     if kind == "hold":

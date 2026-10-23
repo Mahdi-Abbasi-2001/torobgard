@@ -14,7 +14,8 @@ TOOLS = [
             "need": {"type": "string", "description": "short: ورزش, پسر بچه, هدیه"}, "query": {"type": "string", "description": "narrower product words that search_products found results for"},
             "budget_min": {"type": "integer"}, "budget_max": {"type": "integer"},
             "place_name": {"type": "string", "description": "mall or area in Tehran"}, "when": {"type": "string", "description": "now | 1h | evening | tomorrow | HH:MM"},
-            "mode": {"type": "string", "enum": ["walk", "taxi", "car"]}, "installment": {"type": "boolean"}, "open_only": {"type": "boolean"}}}}},
+            "mode": {"type": "string", "enum": ["walk", "taxi", "car"]}, "installment": {"type": "boolean"}, "open_only": {"type": "boolean"},
+            "add_items": {"type": "array", "maxItems": 3, "items": {"type": "string"}, "description": "other DIFFERENT products to add to the same trip's basket (short phrases that search_products found exact results for)"}}}}},
     {"type": "function", "function": {
         "name": "search_products",
         "description": "Search the Tehran product catalogue. query = ONLY the product noun/brand/model (1-3 Persian words, e.g. «هندزفری گردنی», «گوشی سامسونگ»). NEVER put the use-case (ورزش، عکاسی، گیمینگ) or the budget in the query: use price_max/price_min (toman) for budget, and judge use-case from the returned titles. If results are in the wrong category, search again with `category` set to one of top_categories. Returns top products that at least one shop sells.",
@@ -235,6 +236,14 @@ def _update_mission(ctx: Ctx, a: dict) -> tuple[Any, dict | None]:
         patch["when"] = a["when"]; labels.append("زمان رفتن عوض شد")
     if a.get("mode") in _MODE_FA:
         patch["mode"] = a["mode"]; labels.append(f"با: {_MODE_FA[a['mode']]}")
+    extra_items = []
+    for x in (a.get("add_items") or [])[:3]:
+        q = re.sub(r"\s+", " ", str(x or "")).strip()[:60]
+        f = catalog.search_products(ctx.con, q, None, None, None, None, True, 3, 0) if q else {"items": []}
+        if f["items"] and not f.get("relaxed"):
+            extra_items.append({"query": q}); labels.append(f"به سبد اضافه شد: {q}")
+    if extra_items:
+        patch["add_items"] = extra_items
     for k, lab in (("installment", "قسطی"), ("open_only", "هنگام رسیدن باز باشد")):
         if a.get(k) is True:
             patch[k] = True; labels.append(lab)

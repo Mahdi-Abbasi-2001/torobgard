@@ -7,7 +7,7 @@ export type Block =
   | { type: "comparison_table"; products: CompareResult["products"]; rows: CompareResult["rows"] }
   | { type: "shop_list"; product: { product_id: string; title: string; image: string | null } | null; listed: ShopCard[]; category_only: ShopCard[]; counts: { listed: number; category_only: number } }
   | { type: "chips"; question: string; options: string[] }
-  | { type: "mission_update"; patch: { need?: string; query?: string; budget?: { min: number | null; max: number | null }; place?: { label: string; lat: number; lon: number }; when?: string; mode?: "walk" | "taxi" | "car"; installment?: boolean; open_only?: boolean }; labels: string[] }
+  | { type: "mission_update"; patch: { need?: string; query?: string; budget?: { min: number | null; max: number | null }; place?: { label: string; lat: number; lon: number }; when?: string; mode?: "walk" | "taxi" | "car"; installment?: boolean; open_only?: boolean; add_items?: { query: string }[] }; labels: string[] }
   | { type: "inquiry_proposal"; product: { product_id: string; title: string; image: string | null } | null; shops: { shop_id: string; name: string; mall: string | null; floor_label: string | null; unit: string | null; area: string | null }[]; questions: { key: string; text: string }[] }
   | { type: "inquiry_status"; items: Inquiry[] }
   | ({ type: "review" } & ProductReview)

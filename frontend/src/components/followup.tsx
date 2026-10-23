@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { api, type Campaign, type Inquiry } from "@/lib/api";
 import { clock, fa, money, parseNum } from "@/lib/fa";
+import { HoldRing } from "./HoldRing";
 import { Icon } from "./Icon";
 import { Bidi, Note, Seg } from "./ui";
 
@@ -74,12 +75,20 @@ export function KidRow({ k }: { k: Inquiry }) {
     if (k.status === "answered") return <div className="kid" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}><Icon n="check" s /><span>فروشنده منتظر شماست.</span></div>;
     return <div className="kid"><Icon n="clock" s /><span>{k.status === "unavailable" ? "فروشنده الان نمی‌تواند پاسخ بدهد؛ چند دقیقه صبر کنید." : "فروشنده جواب نداد؛ مستقیم سراغ فروشگاه بروید."}</span></div>;
   }
+  if (k.kind === "bargain") {
+    const t = k.target ?? a?.price ?? null;
+    if (waiting) return <div className="kid"><span className="spin" /><span>پیشنهاد {t ? money(t) : ""} تومان فرستاده شد…</span></div>;
+    if (a?.bargain_accepted) return <div className="kid" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}><Icon n="check" s /><span className="grow">قبول کرد: {a.price ? money(a.price) : money(t ?? 0)} تومان</span></div>;
+    if (a?.price) return <div className="kid"><Icon n="q" s /><span>قبول نکرد، ولی گفت {money(a.price)} تومان می‌دهد.</span></div>;
+    return <div className="kid"><Icon n="clock" s /><span>{k.status === "no_reply" ? "به پیشنهاد قیمت جواب نداد؛ همان قیمت قبلی سر جایش است." : "قبول نکرد؛ همان قیمت قبلی سر جایش است."}</span></div>;
+  }
   if (k.kind === "hold") {
     if (waiting) return <div className="kid"><span className="spin" /><span>درخواست «تا ساعت {fa(k.hold_until ?? "")} نگه دارید» فرستاده شد…</span></div>;
     if (a?.hold_accepted) return (
       <div className="kid" style={{ background: "var(--ok-soft)", color: "var(--ok)" }}>
         <Icon n="hold" s /><span className="grow">تا ساعت {fa(a.hold_until ?? k.hold_until ?? "")} برایتان نگه می‌دارد. در فروشگاه این کد را بگویید:</span>
         <span className="code num">{fa(a.hold_code ?? "")}</span>
+        <HoldRing until={a.hold_until ?? k.hold_until} size={36} />
       </div>
     );
     return <div className="kid"><Icon n="hold" s /><span>{k.status === "no_reply" ? "به درخواست نگه‌داشتن جواب نداد." : "نمی‌تواند نگه دارد."}{a?.available ? " ولی گفت هنوز موجود است." : ""}</span></div>;

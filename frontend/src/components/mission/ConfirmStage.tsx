@@ -11,18 +11,23 @@ import { useSession } from "@/lib/session";
 import { useNow } from "@/lib/useInquiries";
 import type { ShopProgress } from "@/lib/useMissionStatus";
 import { Icon } from "@/components/Icon";
+import dynamic from "next/dynamic";
 import { ShopMap } from "@/components/ShopMap";
+import type { MarketPin } from "@/components/MarketMap";
+const MarketMap = dynamic(() => import("@/components/MarketMap"), { ssr: false, loading: () => <div className="sk" style={{ height: "100%", minHeight: 240, borderRadius: 22 }} /> });
 import { AltBody } from "@/components/alternatives";
 import { CallScript, CampaignBanner, NotifyOptIn } from "@/components/followup";
 import { Bidi, Note, Sheet, Toggle } from "@/components/ui";
 import { AskSheet } from "./AskSheet";
-import { ChatSheet, HoldSheet } from "./ConfirmSheets";
+import { ChatSheet, HoldSheet, NegotiateSheet } from "./ConfirmSheets";
 import { QueuedRow, RipeLegend, ShopRow } from "./ShopRow";
 import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 import { shortName } from "./DecideStage";
 
 const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE !== "0";
+
+const shortShop = (n: string) => n.split(/\s+/).slice(0, 3).join(" ");
 
 export default function ConfirmStage(sp: StageProps) {
   const { m, status, set, go, patchSlots } = sp;
@@ -33,10 +38,12 @@ export default function ConfirmStage(sp: StageProps) {
   const pid = m.productId!;
   const [chat, setChat] = useState<string | null>(null);
   const [holdId, setHoldId] = useState<string | null>(null);
+  const [bargain, setBargain] = useState(false);
   const [altId, setAltId] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
   const [askOpen, setAskOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [flat, setFlat] = useState(false); // 3D map could not start: the flat one takes over
   const [autoAlt, setAutoAlt] = useState<boolean | null>(null);
   const { items, camp } = status;
   const byId = (id: string | null) => items.find((x) => x.q.id === id) ?? null;
@@ -92,6 +99,17 @@ export default function ConfirmStage(sp: StageProps) {
   Object.keys(labels).forEach((k) => { if (!labels[k]) delete labels[k]; });
   const mapListed = all.filter((s) => items.some((x) => x.q.shop?.shop_id === s.shop_id));
 
+  // the live market (3D): one pin per shop asked, in the state its answer put it in; the camera glides to the best answer once the picture is clear
+  const pins: MarketPin[] = items.flatMap((x) => {
+    const c = cardOf(x.q.shop?.shop_id); const id = x.q.shop?.shop_id;
+    return c && id ? [{ id, name: shortShop(c.name), lat: c.lat, lon: c.lon, label: labels[id] ?? "", state: (states[id] ?? "asked") as MarketPin["state"] }] : [];
+  });
+  const bestShop = status.best?.q.shop?.shop_id ?? null;
+  const settled = status.waiting === 0 || status.confirmed >= 2 || !!status.held;
+  const market = pins.length > 0 && !flat
+    ? <MarketMap origin={m.place} pins={pins} bestId={settled ? bestShop : null} asking={status.waiting > 0 || camp?.status === "running"} height={desk ? "100%" : 320} onUnavailable={() => setFlat(true)} />
+    : null;
+
   const wave = camp ? (camp.status === "done" ? `${fa(camp.confirmed)} فروشگاه تأیید کرد؛ بقیه را نپرسیدیم` : camp.status === "running" ? `هر بار از ${fa(camp.wave)} فروشگاه می‌پرسیم` : "پرسیدن تمام شد") : status.headline;
 
   const rows = (
@@ -140,7 +158,7 @@ export default function ConfirmStage(sp: StageProps) {
   ) : best ? (
     <>
       <button className="btn pri" onClick={() => setHoldId(best.q.id)}><Icon n="hold" s />از {best.q.shop?.name} بخواه نگه دارد</button>
-      <div className="mc-links"><button type="button" onClick={start}>بدون نگه داشتن، مسیر را ببین</button><button type="button" onClick={() => go("compare")}>فروشگاه‌های دیگر</button></div>
+      <div className="mc-links"><button type="button" onClick={() => setBargain(true)}>قیمت بهتر بگیر</button><button type="button" onClick={start}>بدون نگه داشتن، مسیر را ببین</button><button type="button" onClick={() => go("compare")}>فروشگاه‌های دیگر</button></div>
     </>
   ) : (
     <>
@@ -152,6 +170,7 @@ export default function ConfirmStage(sp: StageProps) {
   const sheets = (
     <>
       <ChatSheet item={byId(chat)} onClose={() => setChat(null)} />
+      <NegotiateSheet open={bargain} onClose={() => setBargain(false)} items={items} title={shortName(m.product ?? { title: m.query, brand: null })} />
       <HoldSheet item={byId(holdId)} onClose={() => setHoldId(null)} onGo={() => { setHoldId(null); start(); }} />
       <Sheet open={!!altId} onClose={() => setAltId(null)} label="جایگزین‌ها">
         {altId && (() => { const q = status.items.flatMap((x) => [x.q, ...x.kids]).find((x) => x.id === altId); return q ? <AltBody q={q} onAsk={(ids) => askMore.mutate(ids)} pending={askMore.isPending} /> : null; })()}
@@ -169,7 +188,7 @@ export default function ConfirmStage(sp: StageProps) {
     return (
       <>
         <Shell {...sp} patch={patchSlots} mapStage
-          center={<div className="map-fill">{mapListed.length > 0 ? <ShopMap origin={m.place} listed={mapListed} cat={[]} selected={[]} labels={labels} states={states} height="100%" /> : <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>}
+          center={<div className="map-fill">{market ?? (mapListed.length > 0 ? <ShopMap origin={m.place} listed={mapListed} cat={[]} selected={[]} labels={labels} states={states} height="100%" /> : <div className="sk" style={{ height: "100%", borderRadius: 22 }} />)}</div>}
           panel={<div className="stack" style={{ gap: 12 }}>{head}{rows}{extras}</div>}
           cta={cta} />
         {sheets}
@@ -179,7 +198,7 @@ export default function ConfirmStage(sp: StageProps) {
   return (
     <>
       <Shell {...sp} patch={patchSlots}
-        center={<div className="mc-main">{head}<div className="mc-pad stack" style={{ gap: 12 }}>{rows}{extras}</div></div>}
+        center={<div className="mc-main">{head}{(market || (flat && mapListed.length > 0)) && <div className="mc-pad">{market ?? <ShopMap origin={m.place} listed={mapListed} cat={[]} selected={[]} labels={labels} states={states} height={260} />}</div>}<div className="mc-pad stack" style={{ gap: 12 }}>{rows}{extras}</div></div>}
         cta={cta} />
       {sheets}
     </>

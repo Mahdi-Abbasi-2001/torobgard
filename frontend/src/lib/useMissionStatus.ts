@@ -14,6 +14,8 @@ export type Ripeness = 0 | 1 | 2 | 3 | 4; // 0 sold out / silent · 1 listed · 
 export interface ShopProgress {
   q: Inquiry; kids: Inquiry[]; ripeness: Ripeness; gone: boolean;
   hold: { code: string; until: string | null } | null;
+  /** the price a shop agreed to after the shopper offered one (lower than its first answer), else null */
+  deal: number | null;
 }
 export interface MissionStatus {
   loading: boolean; connected: boolean;
@@ -63,14 +65,16 @@ export function useMissionStatus(m: Pick<Mission, "productId" | "going" | "done"
     const items: ShopProgress[] = asks.map((q) => {
       const kids = kidsOf.get(q.id) ?? [];
       const { r, gone, hold } = ripenessOf(q, kids);
-      return { q, kids, ripeness: r, gone, hold };
+      const deals = kids.filter((k) => k.kind === "bargain" && k.answer?.bargain_accepted && k.answer.price).map((k) => k.answer!.price!);
+      return { q, kids, ripeness: r, gone, hold, deal: deals.length ? Math.min(...deals) : null };
     });
     const waiting = items.filter((x) => isWaitingQ(x.q)).length;
     const confirmed = items.filter((x) => x.ripeness >= 3).length;
     const unavailable = items.filter((x) => x.q.status === "unavailable" || x.gone).length;
     const silent = items.filter((x) => x.q.status === "no_reply").length;
     const held = items.find((x) => x.ripeness === 4);
-    const best = items.filter((x) => x.ripeness >= 3 && x.q.answer?.price).sort((a, b) => a.q.answer!.price! - b.q.answer!.price!)[0] ?? items.find((x) => x.ripeness >= 3) ?? null;
+    const cost = (x: ShopProgress) => Math.min(x.q.answer?.price ?? 9e12, x.deal ?? 9e12);
+    const best = items.filter((x) => x.ripeness >= 3 && x.q.answer?.price).sort((a, b) => cost(a) - cost(b))[0] ?? items.find((x) => x.ripeness >= 3) ?? null;
     const camp = camps.data?.items.find((c) => c.product_id === pid);
     const finished = !!m?.done;
     const stage: Stage = finished || m?.going || held ? 3 : items.length || camp ? 2 : pid ? 1 : 0;

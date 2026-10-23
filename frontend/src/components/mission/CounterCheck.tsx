@@ -30,8 +30,9 @@ export function CounterCheck({ open, onClose, m, shopId, shopName, inquiryId, co
   const qc = useQueryClient();
   const [price, setPrice] = useState("");
   const [sent, setSent] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
   const read = useMutation({
-    mutationFn: async (f: File) => api.identify(await shrinkPhoto(f)),
+    mutationFn: async (f: File) => { setPreview(URL.createObjectURL(f)); return api.identify(await shrinkPhoto(f)); },
     onSuccess: (r) => { setPrice(r.read.price_seen ? money(r.read.price_seen) : ""); setSent(false); },
   });
   const r = read.data;
@@ -62,6 +63,13 @@ export function CounterCheck({ open, onClose, m, shopId, shopName, inquiryId, co
         {read.isPending ? <span className="spin" style={{ borderTopColor: "var(--on-accent)" }} /> : <Icon n="cam" s />}{r ? "عکس دیگر" : "عکس گرفتن"}
         <input id={id} type="file" accept="image/*" capture="environment" className="sr" onChange={(e) => { const f = e.target.files?.[0]; if (f) read.mutate(f); e.target.value = ""; }} />
       </label>
+      {preview && (
+        <div className="scan-box">
+          {/* eslint-disable-next-line @next/next/no-img-element -- a local blob preview of the photo just taken */}
+          <img src={preview} alt="عکسی که گرفتید" />
+          {read.isPending && <span className="scan-line" aria-hidden="true" />}{read.isPending && <span className="scan-tag">دارم می‌خوانم…</span>}
+        </div>
+      )}
       {read.isError && <Note tone="bad" icon="alert">{(read.error as Error).message}</Note>}
       {r && model && (
         <div className="stack" style={{ gap: 10 }}>

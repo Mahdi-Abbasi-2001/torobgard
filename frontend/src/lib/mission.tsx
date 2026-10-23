@@ -2,7 +2,7 @@
 // A mission is one errand: what to buy, what it is for, budget, where / when / how, and everything that happens until the
 // shopper is at the counter. It lives on this device (localStorage); the product's inquiries, holds and reports live on the
 // server under the session, so a mission's stage is derived from them (see useMissionStatus), never stored twice.
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Priority } from "./api";
 import { DEFAULT_PLACE, type Place } from "./geo";
 
@@ -39,6 +39,10 @@ export interface Mission {
   picks: string[]; priority: Priority;
   /** the shopper pressed «start the trip» */
   going: boolean;
+  /** the trip this item belongs to: every shopping trip has a basket, a single item is a basket of one. Empty = its own trip (older missions). */
+  spree: string;
+  /** autopilot: the app runs the errand itself (pick the model, ask the shops, wait) and stops only at your decisions */
+  auto: boolean;
   /** what the start-screen agent understood, and the conversation since */
   brief: string | null; chat: ChatLine[];
   /** visit reported: bought (shop id) or not */
@@ -52,7 +56,7 @@ export const blankMission = (over: Partial<Mission> = {}): Mission => ({
   id: newId(), createdAt: Date.now(), updatedAt: Date.now(), text: "", query: "", category: null, need: null, presetId: null,
   budgetMin: null, budgetMax: null, cond: { installment: false, open: false, near: false },
   place: DEFAULT_PLACE, when: "now", mode: "walk", productId: null, product: null, champion: null, beaten: [], extras: [], picks: [], priority: "balanced",
-  going: false, done: null, brief: null, chat: [], ...over,
+  going: false, auto: false, spree: "", done: null, brief: null, chat: [], ...over,
 });
 
 interface Ctx {
@@ -66,6 +70,7 @@ const MissionCtx = createContext<Ctx | null>(null);
 export function MissionProvider({ children }: { children: React.ReactNode }) {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [ready, setReady] = useState(false);
+  const lastAt = useRef(0);
 
   useEffect(() => {
     // Hydrate from localStorage after mount: the server render has no storage, so this cannot be initial state.
@@ -85,6 +90,7 @@ export function MissionProvider({ children }: { children: React.ReactNode }) {
     const { id: _i, createdAt: _c, updatedAt: _u, ...rest } = init; // a new mission always gets its own id and times
     void _i; void _c; void _u;
     const m = blankMission(rest);
+    m.createdAt = Math.max(m.createdAt, lastAt.current + 1); lastAt.current = m.createdAt; // items made in one go keep the order they were made in
     setMissions((l) => [m, ...l]);
     return m;
   }, []);
@@ -100,6 +106,40 @@ export function useMissions() {
   const c = useContext(MissionCtx);
   if (!c) throw new Error("useMissions outside MissionProvider");
   return c;
+}
+
+/** The trip an item belongs to (its own id when it has not been grouped). */
+export const spreeOf = (m: Pick<Mission, "id" | "spree">) => m.spree || m.id;
+
+/** The basket of a trip: its items, oldest first. */
+export function useSpree(m: Mission | undefined) {
+  const { missions } = useMissions();
+  return useMemo(() => {
+    if (!m) return [] as Mission[];
+    const id = spreeOf(m);
+    return missions.filter((x) => spreeOf(x) === id).sort((a, b) => a.createdAt - b.createdAt);
+  }, [missions, m]);
+}
+
+/** Trips for lists and tabs: one entry per trip (the oldest item heads it), most recently touched first. */
+export function groupMissions(list: Mission[]): { head: Mission; items: Mission[] }[] {
+  const by = new Map<string, Mission[]>();
+  list.forEach((m) => by.set(spreeOf(m), [...(by.get(spreeOf(m)) ?? []), m]));
+  return [...by.values()].map((items) => {
+    const sorted = [...items].sort((a, b) => a.createdAt - b.createdAt);
+    return { head: sorted[0], items: sorted };
+  });
+}
+
+/** Add an item to the trip an existing mission belongs to: same place, time, way and autopilot choice; it starts at the model choice
+ *  unless a product is already known. */
+export function useAddItem() {
+  const { create } = useMissions();
+  return useCallback((from: Mission, item: { query: string; text?: string; category?: string | null; product?: MissionProduct | null }) => create({
+    spree: spreeOf(from), text: item.text ?? item.query, query: item.query, category: item.category ?? item.product?.category ?? null,
+    place: from.place, when: from.when, mode: from.mode, cond: from.cond, priority: from.priority, auto: from.auto,
+    ...(item.product ? { productId: item.product.product_id, product: item.product, champion: item.product.product_id } : {}),
+  }), [create]);
 }
 
 /** One mission by id with a patch helper bound to it. `m` is undefined until storage is read, or when the id is unknown. */

@@ -13,7 +13,7 @@ from . import db
 from .agent.agent import run_chat
 from .agent.intake import run_intake
 from .agent.llm import OpenAICompatLLM
-from .services import advisor, campaigns, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
+from .services import advisor, basket, campaigns, extras, pulse as pulse_svc, routing, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
 from .services.hours import now_tehran
 from .services.text import split_budget
 
@@ -206,6 +206,46 @@ def compare(body: CompareBody, con: Con):
     res["insights"] = discover.compare_insights(res["products"], res["rows"], av)
     res["availability"] = av
     return res
+
+
+@app.get("/api/route", tags=["mission"])
+async def get_route(from_lat: float, from_lon: float, to_lat: float, to_lon: float, mode: str = Query("walk", pattern="^(walk|car)$")):
+    """The route to draw on the map: geometry, Persian turn-by-turn steps, distance and minutes (walking model shared with the cards)."""
+    for la, lo in ((from_lat, from_lon), (to_lat, to_lon)):
+        if not (24 <= la <= 40 and 44 <= lo <= 64):  # Iran only: a public routing server is not ours to spend on the world
+            raise HTTPException(422, "مسیریابی فقط برای ایران است")
+    return await routing.route((from_lat, from_lon), (to_lat, to_lon), mode)
+
+
+@app.get("/api/extras", tags=["mission"])
+def get_extras(product_id: str, mall_key: str, con: Con):
+    """«While you're here»: accessories of this product that the same mall sells, cheapest listing each, with shop, floor and unit."""
+    return {"items": extras.suggest(con, mall_key, product_id)}
+
+
+@app.get("/api/pulse", tags=["shops"])
+def get_pulse(con: Con, lat: float, lon: float, radius_km: float = Query(1.6, gt=0, le=5), product_id: str | None = None,
+              weekday: str | None = Query(None, pattern="^(sat|sun|mon|tue|wed|thu|fri)$"), limit: int = Query(600, le=1000)):
+    """Shops near a point with the shifts they declare for a weekday (today by default): a client slides a clock over them."""
+    return pulse_svc.pulse(con, lat, lon, radius_km, product_id, weekday, limit)
+
+
+class BasketPlanIn(BaseModel):
+    product_ids: list[str] = Field(min_length=1, max_length=6)
+    lat: float | None = None
+    lon: float | None = None
+    when: str | None = None
+
+
+@app.post("/api/basket/plan", tags=["mission"])
+def basket_plan(body: BasketPlanIn):
+    """Several products, one trip: the fewest stops that cover the basket, the shortest walk through them, each item bought where it is
+    cheapest among those stops. Products no shop lists come back under `uncovered`."""
+    con = db.connect()
+    try:
+        return basket.plan(con, body.product_ids, _origin(body.lat, body.lon) or catalog.DEFAULT_LOC, body.when)
+    finally:
+        con.close()
 
 
 class AdviseIn(BaseModel):
@@ -576,6 +616,47 @@ def recheck(inquiry_id: str, body: RecheckIn, request: Request, con: Con):
     return inq.request_recheck(con, inquiry_id, body.eta_min, demo_gone=body.demo_gone and os.environ.get("TOROB_DEMO_SOLDOUT", "1") != "0")
 
 
+@app.post("/api/transcribe", tags=["chat"])
+async def transcribe(request: Request):
+    """Speech to text for the microphone button: the body is the raw recording (webm / ogg / mp4 / wav), the answer is {text}. The audio is
+    read and dropped; nothing is stored."""
+    if not _rate_ok("stt:" + (request.client.host if request.client else "?"), limit=12):
+        raise HTTPException(429, "کمی صبر کنید و دوباره بگویید.")
+    audio = await request.body()
+    if not audio or len(audio) < 800:
+        raise HTTPException(422, "صدایی ضبط نشد.")
+    if len(audio) > 6_000_000:
+        raise HTTPException(413, "فایل صدا خیلی بزرگ است؛ کوتاه‌تر بگویید.")
+    ct = request.headers.get("content-type", "")
+    ext = "mp4" if "mp4" in ct else "ogg" if "ogg" in ct else "wav" if "wav" in ct else "webm"
+    llm = OpenAICompatLLM()
+    if not llm.configured:
+        raise HTTPException(503, "تشخیص صدا الان در دسترس نیست؛ بنویسید.")
+    try:
+        text = await llm.transcribe(audio, f"voice.{ext}")
+    except Exception:
+        raise HTTPException(502, "صدا خوانده نشد؛ دوباره بگویید یا بنویسید.")
+    if not text:
+        raise HTTPException(422, "چیزی نشنیدم؛ دوباره بگویید.")
+    return {"text": text[:600]}
+
+
+class BargainIn(BaseModel):
+    session_id: str
+    target: int = Field(gt=0, le=2_000_000_000)
+
+
+@app.post("/api/inquiries/{inquiry_id}/bargain", tags=["inquiries"])
+def bargain(inquiry_id: str, body: BargainIn, request: Request, con: Con):
+    """Offer a price to a shop that already confirmed the item. Sent as a follow-up, so a refusal never undoes the confirmation."""
+    _guard(con, body.session_id, request)
+    _own_inquiry(con, inquiry_id, body.session_id)
+    v = inq.request_bargain(con, inquiry_id, body.target)
+    if not v:
+        raise HTTPException(409, "این فروشگاه هنوز قیمتی تأیید نکرده")
+    return v
+
+
 class ArriveIn(BaseModel):
     session_id: str
 
@@ -804,7 +885,9 @@ def make_visit_plan(body: PlanIn, request: Request, con: Con):
         seen.add(sid)
         a = i["answer"] or {}
         held = next((k for k in mine if k["kind"] == "hold" and (k["answer"] or {}).get("hold_accepted")), None)
-        stops.append({"shop_id": sid, "confirmed": True, "price": a.get("price"), "closes_at": a.get("closes_at"), "inquiry_id": i["id"],
+        deals = [k for k in mine if k["kind"] == "bargain" and (k["answer"] or {}).get("bargain_accepted") and (k["answer"] or {}).get("price")]
+        deal = min((k["answer"]["price"] for k in deals), default=None)  # a price the shop agreed to beats the one it first quoted
+        stops.append({"shop_id": sid, "confirmed": True, "price": min(x for x in (a.get("price"), deal) if x) if (a.get("price") or deal) else None, "closes_at": a.get("closes_at"), "inquiry_id": i["id"],
                       "hold": {"code": held["answer"]["hold_code"], "until": held["answer"].get("hold_until")} if held else None,
                       "rechecked_at": recheck and recheck["answered_at"]})
     for sid in body.shop_ids:

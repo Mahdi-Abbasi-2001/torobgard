@@ -3,14 +3,19 @@
 // «On my way, ask again» re-confirms the main stop; if it sold out meanwhile, the line reroutes to the next confirmed shop by itself.
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { keepPreviousData } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, type PlanStop, type ShopCard } from "@/lib/api";
 import { clock, fa, floorLabel, money } from "@/lib/fa";
 import { useIsDesktop } from "@/lib/media";
 import { useSession } from "@/lib/session";
 import { useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
+import dynamic from "next/dynamic";
 import { ShopMap } from "@/components/ShopMap";
+import { RouteSteps } from "@/components/RouteMap";
+import { ArrivalSheet } from "./MallStack";
+import { Extras } from "./Extras";
+const RouteMap = dynamic(() => import("@/components/RouteMap"), { ssr: false, loading: () => <div className="sk" style={{ height: "100%", minHeight: 220, borderRadius: 22 }} /> });
 import { Note } from "@/components/ui";
 import { CounterCheck } from "./CounterCheck";
 import { FinalSteps } from "./FinalSteps";
@@ -27,6 +32,9 @@ export default function GoStage(sp: StageProps) {
   const pid = m.productId!;
   const [ticks, setTicks] = useState<Record<number, boolean>>({});
   const [counter, setCounter] = useState(false);
+  const [arrived, setArrived] = useState(false);
+  const [stack, setStack] = useState(false);
+  const [view3d, setView3d] = useState(true); // the 3D route is the default; the flat map is one tap away (and takes over if 3D cannot start)
   const now = useNow(15_000);
 
   // who goes first: the shop that holds it, else the cheapest confirmed one; the rest follow as backups
@@ -147,7 +155,18 @@ export default function GoStage(sp: StageProps) {
   gone.forEach((x) => { labels[x.q.shop!.shop_id] = "تمام شد"; states[x.q.shop!.shop_id] = "gone"; });
   const mapShops = [...stops.map((s) => cardOf(s.shop_id)), ...gone.map((x) => cardOf(x.q.shop!.shop_id))].filter((s): s is ShopCard => !!s);
   const routes = stops.length ? [{ pts: [[m.place.lat, m.place.lon], ...stops.slice(0, 1).map((s) => [s.lat, s.lon])] as [number, number][] }, ...(stops.length > 1 ? [{ pts: stops.slice(0, 2).map((s) => [s.lat, s.lon]) as [number, number][], alt: true }] : [])] : [];
-  const map = mapShops.length > 0 ? <ShopMap origin={m.place} listed={mapShops} cat={[]} selected={[]} labels={labels} states={states} routes={routes} height={desk ? "100%" : 220} /> : null;
+  const flat = mapShops.length > 0 ? <ShopMap origin={m.place} listed={mapShops} cat={[]} selected={[]} labels={labels} states={states} routes={routes} height={desk ? "100%" : 220} /> : null;
+  // a tilted 3D view of the walk to the first stop (prototype): same trip, seen from above the streets
+  const target = stops[0];
+  const map = flat && (
+    <div className="map3d">
+      {target && <div className="map3d-toggle" role="group" aria-label="نوع نقشه">
+        <button type="button" className={`chip ${!view3d ? "on" : ""}`} aria-pressed={!view3d} onClick={() => setView3d(false)}>نقشه</button>
+        <button type="button" className={`chip ${view3d ? "on" : ""}`} aria-pressed={view3d} onClick={() => setView3d(true)}><Icon n="spark" s />سه‌بعدی</button>
+      </div>}
+      {view3d && target ? <RouteMap from={{ lat: m.place.lat, lon: m.place.lon }} to={{ lat: target.lat, lon: target.lon }} label={target.name} mode={m.mode} height={desk ? "100%" : 360} onUnavailable={() => setView3d(false)} onArrive={() => setArrived(true)} /> : flat}
+    </div>
+  );
 
   const cta = main ? (
     <>
@@ -163,14 +182,18 @@ export default function GoStage(sp: StageProps) {
         <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops.length)} فروشگاه، ${fa(plan.data!.total_walk_min)} دقیقه راه` : "مسیری نداریم"}</h2></div>
       {banner && <Note tone={banner.tone} icon={banner.icon}>{banner.t}</Note>}
       {plan.isError && <Note tone="unk" icon="store">هنوز هیچ فروشگاهی نگفته که کالا موجود است؛ به مرحلهٔ تأیید برگردید.</Note>}
-      {line}{main && <FinalSteps stop={main} card={cardOf(main.shop_id)} />}{actions}{check}
+      {line}{main && <details className="mc-card steps-d" style={{ padding: "10px 14px" }}><summary className="b sm" style={{ cursor: "pointer" }}>مسیر قدم‌به‌قدم تا {main.name}</summary><div style={{ marginTop: 10 }}><RouteSteps from={{ lat: m.place.lat, lon: m.place.lon }} to={{ lat: main.lat, lon: main.lon }} mode={m.mode} /></div></details>}{main && <FinalSteps stop={main} card={cardOf(main.shop_id)} from={{ lat: m.place.lat, lon: m.place.lon }} mode={m.mode} onFloors={() => setStack(true)} />}{main && m.productId && <Extras m={m} mallKey={cardOf(main.shop_id)?.mall_key} mall={main.mall} />}{actions}{check}
     </div>
   );
 
+  const mainCard = main ? cardOf(main.shop_id) : undefined;
+  const mallQ = useQuery({ queryKey: ["mall", mainCard?.mall_key], queryFn: () => api.mall(mainCard!.mall_key!), enabled: !!mainCard?.mall_key, staleTime: 5 * 60_000 });
+  useEffect(() => { if (arrived) Promise.resolve().then(() => setStack(true)); }, [arrived]); // reaching the mall opens the floor-by-floor view
+  const arrival = main && <ArrivalSheet open={stack} onClose={() => setStack(false)} mall={mallQ.data} t={{ shopId: main.shop_id, name: main.name, mall: main.mall, floor: mainCard?.floor ?? null, floorLabel: main.floor_label ?? mainCard?.floor_label ?? null, unit: main.unit ?? mainCard?.unit ?? null, plaque: main.plaque ?? mainCard?.plaque ?? null, hold: main.hold }} />;
   const counterSheet = <CounterCheck open={counter} onClose={() => setCounter(false)} m={m} shopId={main?.shop_id ?? null} shopName={main?.name ?? ""} inquiryId={mainP?.q.id ?? null} confirmed={main?.confirmed_price ?? null} />;
   if (desk) {
-    return <><Shell {...sp} patch={patchSlots} mapStage center={<div className="map-fill">{map ?? <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>} panel={body} cta={cta} />{counterSheet}</>;
+    return <><Shell {...sp} patch={patchSlots} mapStage center={<div className="map-fill">{map ?? <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>} panel={body} cta={cta} />{counterSheet}{arrival}</>;
   }
-  return <><Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{body}{map && <div className="stack">{map}</div>}</div></div>} cta={cta} />{counterSheet}</>;
+  return <><Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{body}{map && <div className="stack">{map}</div>}</div></div>} cta={cta} />{counterSheet}{arrival}</>;
   void set;
 }

@@ -38,7 +38,7 @@ function slotsOf(r: IntakeResult, base?: Record<string, unknown>): Record<string
     ...(s.place && { place: s.place.label }), ...(s.when && { when: s.when }), ...(s.mode && { mode: s.mode }), conditions: s.conditions };
 }
 
-export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن" }: { seed: IntakeSeed; onReady: (r: IntakeResult, gps: Place | null) => void; onEdit?: () => void; cta?: string }) {
+export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن", autoOption = false }: { seed: IntakeSeed; onReady: (r: IntakeResult, gps: Place | null, auto: boolean) => void; onEdit?: () => void; cta?: string; autoOption?: boolean }) {
   const { sid } = useSession();
   const [convo, setConvo] = useState<Msg[]>([]);
   const [steps, setSteps] = useState<string[]>([]);
@@ -111,7 +111,7 @@ export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن" }: { 
   const s = result?.slots;
   const chips: [string, string][] = s ? [
     ["کالا", s.query ?? ""], ["برای", s.need ?? ""], ["بودجه", budgetLabel(s.budget?.min ?? null, s.budget?.max ?? null) ?? ""],
-    ["از کجا", gps ? "موقعیت فعلی شما" : s.place?.label ?? ""], ["چه ساعتی", s.when ? whenText(s.when) : ""], ["با", s.mode ? MODE_LABEL[s.mode] : ""],
+    ["کالاهای دیگر", (s.more ?? []).map((x) => x.query).join("، ")], ["از کجا", gps ? "موقعیت فعلی شما" : s.place?.label ?? ""], ["چه ساعتی", s.when ? whenText(s.when) : ""], ["با", s.mode ? MODE_LABEL[s.mode] : ""],
   ].filter((x): x is [string, string] => !!x[1]) : [];
   const open = result?.questions ?? [];
   const assumed = (result?.assumed ?? []).map((k) => ({ when: "الان", mode: "پیاده", place: "مرکز تهران", budget: "بدون محدودیت بودجه", need: "بدون نیاز خاص" }[k])).filter(Boolean);
@@ -146,7 +146,8 @@ export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن" }: { 
           )}
           {!result.exact && open.length === 0 && <Note tone="unk" icon="q">«{result.slots.query}» را دقیقاً در فروشگاه‌ها پیدا نکردم؛ نزدیک‌ترین‌ها را نشان می‌دهم.</Note>}
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className="btn pri grow" onClick={() => (Object.keys(picked).length ? submit(picked) : onReady(result, gps))}>{Object.keys(picked).length ? "ثبت جواب‌ها" : open.length ? "همین‌ها خوب است؛ ادامه" : cta}</button>
+            <button type="button" className="btn pri grow" style={{ flexBasis: "100%" }} onClick={() => (Object.keys(picked).length ? submit(picked) : onReady(result, gps, autoOption))}>{Object.keys(picked).length ? "ثبت جواب‌ها" : open.length ? "همین‌ها خوب است؛ ادامه" : autoOption ? "خودکار انجامش بده" : cta}</button>
+            {autoOption && !Object.keys(picked).length && <button type="button" className="btn sec" onClick={() => onReady(result, gps, false)}>قدم‌به‌قدم می‌روم</button>}
             {onEdit && <button type="button" className="btn sec" onClick={onEdit}>ویرایش جمله</button>}
           </div>
         </div>

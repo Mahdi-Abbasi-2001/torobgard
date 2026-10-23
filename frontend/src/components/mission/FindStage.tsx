@@ -3,6 +3,7 @@
 // time scrubber that re-judges every shop's opening hours; the shortlist compares the chosen shops. Phone: map first, then the list;
 // desktop: the map stays in the middle and the list sits beside it.
 import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, type Advice, type ShopCard, type ShopFilters } from "@/lib/api";
 import { fa } from "@/lib/fa";
@@ -12,7 +13,7 @@ import { Icon, Radish } from "@/components/Icon";
 import { ShopMap } from "@/components/ShopMap";
 import { WhereToLook } from "@/components/WhereToLook";
 import { ZonesCard } from "@/components/discover";
-import { Bidi, Empty, ErrorState, Note } from "@/components/ui";
+import { Bidi, Empty, ErrorState, Note, Sheet } from "@/components/ui";
 import { AskSheet, useAsk } from "./AskSheet";
 import { ComparePanel } from "./ComparePanel";
 import { MallSheet } from "./MallSheet";
@@ -21,12 +22,13 @@ import { ShopSheet } from "./ShopSheet";
 import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 
+const PulseMap = dynamic(() => import("@/components/PulseMap"), { ssr: false, loading: () => <div className="sk" style={{ height: 520, borderRadius: 22 }} /> });
 const BASE_KEYS = ["stock", "price"];
-const seedPicks = (listed: ShopCard[]) => {
+export const seedPicks = (listed: ShopCard[]) => {
   const ok = listed.filter((s) => s.open.state !== "closed");
   return (ok.length >= 2 ? ok : listed).slice(0, 4).map((s) => s.shop_id);
 };
-const filtersOf = (m: Mission): ShopFilters => ({ installment: m.cond.installment, open_now: m.cond.open, radius_km: m.cond.near ? 1.2 : null, sort: "best", priority: m.priority });
+export const filtersOf = (m: Mission): ShopFilters => ({ installment: m.cond.installment, open_now: m.cond.open, radius_km: m.cond.near ? 1.2 : null, sort: "best", priority: m.priority });
 
 export default function FindStage(sp: StageProps) {
   const { m, view, set, go, patchSlots } = sp;
@@ -38,6 +40,7 @@ export default function FindStage(sp: StageProps) {
   const [onlyShop, setOnlyShop] = useState<string | null>(null);
   const [warn, setWarn] = useState("");
   const [hov, setHov] = useState<string | null>(null);
+  const [pulse, setPulse] = useState(false);
 
   const q = useQuery({
     queryKey: ["fshops", pid, m.place.lat, m.place.lon, m.when, m.cond, m.priority], placeholderData: keepPreviousData,
@@ -103,6 +106,7 @@ export default function FindStage(sp: StageProps) {
     <div className="mc-card scrub-card">
       <WhenScrubber when={m.when} onChange={(w) => patchSlots({ when: w })} compact={!desk} />
       <ModeChips mode={m.mode} onChange={(mode) => patchSlots({ mode })} />
+      <button type="button" className="chip" style={{ alignSelf: "flex-start" }} onClick={() => setPulse(true)}><Icon n="clock" s />ببین بازار در طول روز چطور باز و بسته می‌شود</button>
       {m.mode === "car" && <Note tone="warn" icon="alert">بازار مرکزی داخل طرح ترافیک است؛ بدون مجوز نمی‌شود با ماشین رفت.</Note>}
     </div>
   );
@@ -127,6 +131,10 @@ export default function FindStage(sp: StageProps) {
     <>
       <ShopSheet shopId={shopId} productId={pid} onClose={() => setShopId(null)} onMall={(k) => setMallKey(k)}
         onAsk={(id) => { setOnlyShop(id); setShopId(null); setAskOpen(true); }} />
+      <Sheet open={pulse} onClose={() => setPulse(false)} label="بازار در طول روز" className="tall">
+        <div className="row between"><div><div className="mc-label">تنفس بازار</div><div className="b" style={{ fontSize: 17 }}>بازار اطراف شما در طول روز</div></div><button className="iconbtn soft" onClick={() => setPulse(false)} aria-label="بستن"><Icon n="x" /></button></div>
+        {pulse && <PulseMap origin={m.place} mine={listed.map((s) => s.shop_id)} height={560} onPick={(t) => { patchSlots({ when: t }); setPulse(false); }} onUnavailable={() => setPulse(false)} />}
+      </Sheet>
       <MallSheet mallKey={mallKey} hits={hitIds} onClose={() => setMallKey(null)} onShop={(id) => setShopId(id)} />
       <AskSheet open={askOpen} onClose={() => setAskOpen(false)} m={m} shops={[...listed, ...cat]} only={onlyShop} onSent={() => go("confirm")} />
       {warn && <div className="toast" role="status"><Icon n="alert" />{warn}</div>}

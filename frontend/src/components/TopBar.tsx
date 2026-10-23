@@ -52,7 +52,7 @@ export function TopBar() {
   // badge only matters where the bar is visible; phones keep their single bottom-nav request
   const inq = useInquiries(desk ? sid : "", { live: false });
   const answered = inq.items.filter((i) => i.status === "answered").length;
-  if (path.startsWith("/seller") || path === "/" || path.startsWith("/m/") || path.startsWith("/missions")) return null; // seller pages and the mission screens have their own bar
+  if (path.startsWith("/seller") || path === "/" || path.startsWith("/m/") || path.startsWith("/missions") || path.startsWith("/basket")) return null; // seller pages and the mission screens have their own bar
 
   return (
     <header className="topbar">

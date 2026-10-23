@@ -19,7 +19,7 @@ import type { StageProps } from "./stage";
 
 const norm = (s: string) => s.replace(/ی$/, "").replace(/\s+/g, "");
 /** the need preset that matches the words the shopper used («ورزش» ↔ «ورزشی») */
-const matchNeed = (presets: Preset[] | undefined, need: string | null) =>
+export const matchNeed = (presets: Preset[] | undefined, need: string | null) =>
   need && presets ? presets.find((p) => norm(p.label).includes(norm(need)) || norm(need).includes(norm(p.label)) || p.why.includes(need)) ?? null : null;
 export const shortName = (p: { title: string; brand: string | null }) => {
   const i = p.title.indexOf(" مدل ");
@@ -27,7 +27,7 @@ export const shortName = (p: { title: string; brand: string | null }) => {
   // «… مدل 2021» ends in a bare number: that says nothing, so fall back to the opening words of the title
   return after.length >= 5 && /[A-Za-z\u0600-\u06FF]/.test(after) ? `${p.brand ?? ""} ${after}`.trim() : p.title.split(" ").slice(0, 4).join(" ");
 };
-const asMissionProduct = (p: Product) => ({ product_id: p.product_id, title: p.title, image: p.image, brand: p.brand, category: p.category, price_min: p.price_min, price_median: p.price_median, price_max: p.price_max, shop_count: p.shop_count });
+export const asMissionProduct = (p: Product) => ({ product_id: p.product_id, title: p.title, image: p.image, brand: p.brand, category: p.category, price_min: p.price_min, price_median: p.price_median, price_max: p.price_max, shop_count: p.shop_count });
 
 export default function DecideStage(sp: StageProps) {
   const { m, set, go, patchSlots } = sp;

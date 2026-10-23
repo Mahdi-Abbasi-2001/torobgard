@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { streamChat, type Block } from "@/lib/chat";
 import { fa, mil } from "@/lib/fa";
-import { useMissions, type Mission } from "@/lib/mission";
+import { useAddItem, useMissions, type Mission } from "@/lib/mission";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { ShopCard } from "@/components/cards";
@@ -27,6 +27,7 @@ const contextOf = (m: Mission) => [
 export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: boolean; onClose: () => void; mission: Mission; initialQ?: string }) {
   const { sid } = useSession();
   const { patch } = useMissions();
+  const addItem = useAddItem();
   const router = useRouter();
   const [msgs, setMsgs] = useState<Msg[]>(() => mission.chat.map((l) => ({ ...l, blocks: [] })));
   const [text, setText] = useState("");
@@ -49,6 +50,7 @@ export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: bo
       ...(p.place && { place: { ...p.place, source: "area" as const } }), ...(p.when && { when: p.when }), ...(p.mode && { mode: p.mode }),
       ...((p.installment || p.open_only) && { cond: { ...m.cond, installment: p.installment || m.cond.installment, open: p.open_only || m.cond.open } }),
     }));
+    p.add_items?.forEach((x) => addItem(mission, { query: x.query }));
     patchLast((m) => ({ ...m, changes: [...(m.changes ?? []), ...b.labels] }));
     if (p.query && mission.productId) { onClose(); router.push(`/m/${mission.id}?s=decide`); } // the model chosen no longer fits the narrower item
   };
