@@ -65,3 +65,27 @@ def parse_budget(text: str) -> dict:
     if m:
         out["min"] = val(m.group(1), m.group(2))
     return out
+
+
+# ---- a need that names a gender hides what is clearly made for the other one (neutral titles stay: they are unknown, not wrong)
+_FEMALE = re.compile(r"دختر|زنانه|بانوان|مانتو|سرافون|مقنعه|روسری|شومیز|دامن|ساپورت")
+_MALE = re.compile(r"پسر|مردانه|آقایان")
+
+
+def need_gender(need: str | None) -> str | None:
+    n = normalize_fa(need)
+    if _MALE.search(n):
+        return "m"
+    if _FEMALE.search(n):
+        return "f"
+    return None
+
+
+def fits_need(title: str | None, need: str | None) -> bool:
+    g = need_gender(need)
+    t = normalize_fa(title)
+    if g == "m":
+        return not _FEMALE.search(t)
+    if g == "f":
+        return not _MALE.search(t)
+    return True

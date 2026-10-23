@@ -18,6 +18,8 @@ export interface MissionProduct {
   product_id: string; title: string; image: string | null; brand: string | null; category: string | null;
   price_min: number | null; price_median: number | null; price_max: number | null; shop_count: number;
 }
+/** one line of the conversation kept with the mission: what was said, and what the assistant changed in the journey */
+export interface ChatLine { me: boolean; text: string; changes?: string[] }
 export interface Mission {
   id: string; createdAt: number; updatedAt: number;
   /** the shopper's own words */
@@ -37,8 +39,10 @@ export interface Mission {
   picks: string[]; priority: Priority;
   /** the shopper pressed «start the trip» */
   going: boolean;
+  /** what the start-screen agent understood, and the conversation since */
+  brief: string | null; chat: ChatLine[];
   /** visit reported: bought (shop id) or not */
-  done: { shopId: string | null; paid: number | null; found: boolean | null; at: number } | null;
+  done: { shopId: string | null; paid: number | null; found: boolean | null; at: number; reportId?: string; rating?: number } | null;
 }
 
 const KEY = "tg-missions-v1";
@@ -48,7 +52,7 @@ export const blankMission = (over: Partial<Mission> = {}): Mission => ({
   id: newId(), createdAt: Date.now(), updatedAt: Date.now(), text: "", query: "", category: null, need: null, presetId: null,
   budgetMin: null, budgetMax: null, cond: { installment: false, open: false, near: false },
   place: DEFAULT_PLACE, when: "now", mode: "walk", productId: null, product: null, champion: null, beaten: [], extras: [], picks: [], priority: "balanced",
-  going: false, done: null, ...over,
+  going: false, done: null, brief: null, chat: [], ...over,
 });
 
 interface Ctx {

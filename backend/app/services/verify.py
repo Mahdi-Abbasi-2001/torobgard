@@ -72,6 +72,13 @@ def add_report(con, session_id: str, shop_id: str, product_id: str, kind: str, a
     return {"id": rid, "kind": kind, "available": available, "price": price, "price_matched": price_matched}
 
 
+def rate_report(con, session_id: str, report_id: str, rating: int) -> dict | None:
+    """The shopper's 1-5 stars for the shop they just visited, attached to their own visit report."""
+    cur = con.execute("UPDATE reports SET rating=? WHERE id=? AND session_id=? AND kind='visit'", (rating, report_id, session_id))
+    con.commit()
+    return {"id": report_id, "rating": rating} if cur.rowcount else None
+
+
 def session_reports(con, session_id: str) -> list[dict]:
     return [{"id": r["id"], "shop_id": r["shop_id"], "product_id": r["product_id"], "kind": r["kind"],
              "available": None if r["available"] is None else bool(r["available"]), "price": r["price"],
@@ -133,7 +140,7 @@ def reliability(con, shop_ids: list[str]) -> dict[str, dict]:
     ids = sorted(set(shop_ids))
     if not ids:
         return {}
-    acc: dict[str, dict] = {s: {"asked": 0, "replied": 0, "times": [], "checks": 0, "matches": 0, "visits": 0, "visit_ok": 0}
+    acc: dict[str, dict] = {s: {"asked": 0, "replied": 0, "times": [], "checks": 0, "matches": 0, "visits": 0, "visit_ok": 0, "stars": []}
                             for s in ids}
     for ch in _chunks(ids):
         ph = ",".join("?" * len(ch))
@@ -156,8 +163,10 @@ def reliability(con, shop_ids: list[str]) -> dict[str, dict]:
                 a = acc[r["shop_id"]]
                 a["checks"] += 1
                 a["matches"] += abs(r["price"] - r["lp"]) <= r["lp"] * 0.02
-        for r in con.execute(f"SELECT shop_id, available, price_matched FROM reports WHERE shop_id IN ({ph}) AND kind='visit'", ch):
+        for r in con.execute(f"SELECT shop_id, available, price_matched, rating FROM reports WHERE shop_id IN ({ph}) AND kind='visit'", ch):
             a = acc[r["shop_id"]]
+            if r["rating"]:
+                a["stars"].append(r["rating"])
             a["visits"] += 1
             a["visit_ok"] += bool(r["available"]) and r["price_matched"] != 0
     out = {}
@@ -171,6 +180,7 @@ def reliability(con, shop_ids: list[str]) -> dict[str, dict]:
         out[s] = {"asked": a["asked"], "replied": a["replied"], "reply_rate": None if rate is None else round(rate, 2),
                   "median_reply_s": None if med is None else int(med), "price_checks": a["checks"],
                   "price_match_rate": round(a["matches"] / a["checks"], 2) if a["checks"] else None,
+                  "rating": {"avg": round(sum(a["stars"]) / len(a["stars"]), 1), "n": len(a["stars"])} if a["stars"] else None,
                   "visits": a["visits"], "visit_ok": a["visit_ok"], "score": round(max(0.0, min(score, 1.0)), 3),
                   "known": a["asked"] + a["visits"] >= 2, "label": _rel_label(a, rate, med)}
     return out

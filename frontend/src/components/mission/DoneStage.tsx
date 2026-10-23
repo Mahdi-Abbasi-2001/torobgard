@@ -28,8 +28,8 @@ export default function DoneStage(sp: StageProps) {
   const send = useMutation({
     mutationFn: (o: { found: boolean; same: boolean | null; paid: number | null }) => api.report({ session_id: sid, shop_id: chosen!.q.shop!.shop_id, product_id: m.productId!, kind: "visit", available: o.found,
       price_matched: o.found ? o.same : null, price: o.found && o.same === false ? o.paid : null, inquiry_id: chosen!.q.id }),
-    onSuccess: (_, o) => {
-      set({ done: { shopId: chosen!.q.shop!.shop_id, paid: o.paid, found: o.found, at: stamp() } });
+    onSuccess: (r, o) => {
+      set({ done: { shopId: chosen!.q.shop!.shop_id, paid: o.paid, found: o.found, at: stamp(), reportId: r.id } });
       qc.invalidateQueries({ queryKey: ["pshops-all"] });
     },
   });
@@ -39,6 +39,10 @@ export default function DoneStage(sp: StageProps) {
     if (k === "none") send.mutate({ found: false, same: null, paid: null });
   };
   const done = m.done;
+  const rate = useMutation({
+    mutationFn: (n: number) => api.rateReport(done!.reportId!, sid, n),
+    onSuccess: (_, n) => { set({ done: { ...done!, rating: n } }); qc.invalidateQueries({ queryKey: ["pshops-all"] }); },
+  });
   const paid = done?.paid ?? null;
   const median = m.product?.price_median ?? null;
   const diff = paid && median ? median - paid : null;
@@ -60,6 +64,18 @@ export default function DoneStage(sp: StageProps) {
         )}
       </div>
       <Note tone="ok" icon="check">ثبت شد. حالا کارت {shopName} برای همه می‌گوید «خریدار تأیید کرد، همین الان».</Note>
+      {done.reportId && (
+        <div className="mc-card" style={{ padding: 16, gap: 10 }}>
+          <div className="b">{done.rating ? "ممنون؛ امتیازتان ثبت شد" : `از ${shopName} چقدر راضی بودید؟`}</div>
+          <div className="stars" role="radiogroup" aria-label="امتیاز به فروشگاه">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button key={n} type="button" role="radio" aria-checked={(done.rating ?? 0) === n} aria-label={`${fa(n)} از ۵`} className={`star ${(done.rating ?? 0) >= n ? "on" : ""}`} disabled={rate.isPending} onClick={() => rate.mutate(n)}>★</button>
+            ))}
+          </div>
+          <span className="xs muted">{done.rating ? "هر وقت خواستید می‌توانید عوضش کنید." : "برخورد فروشنده، درست بودن قیمت، تحویل کالا. این امتیاز روی کارت فروشگاه برای بقیه می‌ماند."}</span>
+          {rate.isError && <Note tone="bad" icon="alert">{(rate.error as Error).message}</Note>}
+        </div>
+      )}
       {done.found === false && <button className="btn sec block" onClick={() => { set({ done: null }); setPick(null); go("go"); }}>سراغ فروشگاه جایگزین برو</button>}
     </div>
   ) : (

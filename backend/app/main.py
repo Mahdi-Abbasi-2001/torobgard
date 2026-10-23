@@ -11,8 +11,9 @@ from pydantic import BaseModel, Field
 
 from . import db
 from .agent.agent import run_chat
+from .agent.intake import run_intake
 from .agent.llm import OpenAICompatLLM
-from .services import campaigns, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
+from .services import advisor, campaigns, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
 from .services.hours import now_tehran
 from .services.text import split_budget
 
@@ -205,6 +206,30 @@ def compare(body: CompareBody, con: Con):
     res["insights"] = discover.compare_insights(res["products"], res["rows"], av)
     res["availability"] = av
     return res
+
+
+class AdviseIn(BaseModel):
+    product_id: str
+    lat: float | None = None
+    lon: float | None = None
+    when: str | None = None
+    need: str | None = Field(None, max_length=120)
+    priority: str = Field("balanced", pattern="^(balanced|price|near|trust|now)$")
+    budget_max: int | None = None
+    installment: bool = False
+
+
+@app.post("/api/mission/advise", tags=["mission"])
+async def mission_advise(body: AdviseIn):
+    """Which shops to ask first and why (LLM over the real candidates; the catalogue's own ranking without it)."""
+    con = db.connect()
+    try:
+        if not catalog.get_product(con, body.product_id):
+            raise HTTPException(404, "محصول پیدا نشد")
+        return await advisor.advise(con, body.product_id, _origin(body.lat, body.lon) or catalog.DEFAULT_LOC, when=body.when, need=body.need,
+                                    priority=body.priority, budget_max=body.budget_max, installment=body.installment, llm=OpenAICompatLLM())
+    finally:
+        con.close()
 
 
 class VerdictIn(CompareBody):
@@ -588,6 +613,21 @@ def add_report(body: ReportIn, request: Request, con: Con):
                              body.price_matched, body.inquiry_id, body.note)
 
 
+class RatingIn(BaseModel):
+    session_id: str
+    rating: int = Field(ge=1, le=5)
+
+
+@app.post("/api/reports/{report_id}/rating", tags=["inquiries"])
+def rate_report(report_id: str, body: RatingIn, request: Request, con: Con):
+    """1-5 stars for the shop, from the shopper who just visited it (attached to their own visit report)."""
+    _guard(con, body.session_id, request)
+    res = verify.rate_report(con, body.session_id, report_id, body.rating)
+    if not res:
+        raise HTTPException(404, "گزارش پیدا نشد")
+    return res
+
+
 @app.get("/api/sessions/{session_id}/reports", tags=["inquiries"])
 def session_reports(session_id: str, request: Request, con: Con):
     _guard(con, session_id, request)
@@ -783,6 +823,7 @@ def make_visit_plan(body: PlanIn, request: Request, con: Con):
 # ------------------------------------------------------------------ chat agent (SSE)
 class ChatIn(BaseModel):
     message: str = Field(min_length=1, max_length=600)
+    context: str | None = Field(None, max_length=700, description="what the shopper is doing right now (the mission), so short answers like «پسره» are read in that light")
 
 
 _chat_hits: dict[str, list[float]] = {}
@@ -813,10 +854,40 @@ async def chat(session_id: str, body: ChatIn, request: Request):
 
     async def gen():
         try:
-            async for ev in run_chat(session_id, body.message):
+            async for ev in run_chat(session_id, body.message, context=body.context):
                 yield f"data: {json.dumps(ev, ensure_ascii=False, default=str)}\n\n"
         except Exception as e:  # never leave the client hanging
             yield f"data: {json.dumps({'type': 'error', 'message': 'مشکلی پیش آمد. دوباره امتحان کنید.'}, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+class IntakeIn(BaseModel):
+    session_id: str = Field(max_length=80)
+    messages: list[dict] = Field(min_length=1, max_length=12)
+    slots: dict = Field(default_factory=dict)
+    pinned: list[str] = Field(default_factory=list, max_length=10)
+
+
+@app.post("/api/mission/intake", tags=["chat"])
+async def mission_intake(body: IntakeIn):
+    """Intake agent (SSE: status* then result): reads the shopper's text, checks it against the real catalogue with tools, fills the
+    mission's slots and asks at most two questions with tap-able options. Rule-based when the LLM is down (result.engine tells)."""
+    if not _rate_ok("intake:" + body.session_id, 16, 60.0):
+        raise HTTPException(429, "درخواست‌ها خیلی سریع است؛ کمی صبر کنید.")
+    msgs = [{"role": "agent" if m.get("role") == "agent" else "user", "text": str(m.get("text") or "")[:400]} for m in body.messages if str(m.get("text") or "").strip()]
+    if not msgs:
+        raise HTTPException(422, "متنی نیست.")
+
+    async def gen():
+        con = db.connect()
+        try:
+            async for ev in run_intake(con, msgs, body.slots, body.pinned):
+                yield f"data: {json.dumps(ev, ensure_ascii=False, default=str)}\n\n"
+        except Exception:
+            yield f"data: {json.dumps({'type': 'error', 'message': 'مشکلی پیش آمد. دوباره امتحان کنید.'}, ensure_ascii=False)}\n\n"
+        finally:
+            con.close()
 
     return StreamingResponse(gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 

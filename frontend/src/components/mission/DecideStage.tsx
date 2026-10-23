@@ -10,7 +10,9 @@ import { useIsDesktop } from "@/lib/media";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { WhereToLook } from "@/components/WhereToLook";
-import { Bidi, Empty, ErrorState, Sheet, Thumb } from "@/components/ui";
+import { Bidi, Empty, ErrorState, Note, Sheet, Thumb } from "@/components/ui";
+import { fitsNeed } from "@/lib/need";
+import { IntakeAgent, intakeToMission } from "./IntakeAgent";
 import { Shell } from "./chrome";
 import { ProductDetails } from "./ProductDetails";
 import type { StageProps } from "./stage";
@@ -21,7 +23,9 @@ const matchNeed = (presets: Preset[] | undefined, need: string | null) =>
   need && presets ? presets.find((p) => norm(p.label).includes(norm(need)) || norm(need).includes(norm(p.label)) || p.why.includes(need)) ?? null : null;
 export const shortName = (p: { title: string; brand: string | null }) => {
   const i = p.title.indexOf(" مدل ");
-  return i > 0 ? `${p.brand ?? ""} ${p.title.slice(i + 5)}`.trim() : p.title.split(" ").slice(0, 3).join(" ");
+  const after = i > 0 ? p.title.slice(i + 5).trim() : "";
+  // «… مدل 2021» ends in a bare number: that says nothing, so fall back to the opening words of the title
+  return after.length >= 5 && /[A-Za-z\u0600-\u06FF]/.test(after) ? `${p.brand ?? ""} ${after}`.trim() : p.title.split(" ").slice(0, 4).join(" ");
 };
 const asMissionProduct = (p: Product) => ({ product_id: p.product_id, title: p.title, image: p.image, brand: p.brand, category: p.category, price_min: p.price_min, price_median: p.price_median, price_max: p.price_max, shop_count: p.shop_count });
 
@@ -31,6 +35,8 @@ export default function DecideStage(sp: StageProps) {
   const { state } = useSession();
   const [sheet, setSheet] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
+  const [help, setHelp] = useState(false);
+  const [showAll, setShowAll] = useState(false); // «none is made for that need»: the shopper may still look at everything
 
   const presets = useQuery({ queryKey: ["presets", m.category], queryFn: () => api.presets(m.category!), enabled: !!m.category, staleTime: Infinity });
   const auto = m.presetId === null ? matchNeed(presets.data?.presets, m.need) : null;
@@ -44,9 +50,17 @@ export default function DecideStage(sp: StageProps) {
     placeholderData: keepPreviousData, enabled: !waitPresets && !!m.query,
   });
   // in-person shopping is about availability: among models that fit equally well, the ones more shops near you have come first
-  const items = useMemo(() => [...(res.data?.items ?? [])].sort((a, b) =>
-    (b.fit_score ?? 0) - (a.fit_score ?? 0) || (b.near?.near ?? 0) - (a.near?.near ?? 0) || b.shop_count - a.shop_count), [res.data]);
-  useEffect(() => { if (!m.category && items[0]?.category) set({ category: items[0].category }); }, [m.category, items, set]);
+  // (a partial match keeps the server's relevance order: stock must not push unrelated products up)
+  // «for a boy» hides what is clearly for girls; if nothing else is left the full list stays and says so
+  const found = useMemo(() => res.data?.items ?? [], [res.data]);
+  const forNeed = useMemo(() => found.filter((p) => fitsNeed(p.title, m.need)), [found, m.need]);
+  const hidden = forNeed.length ? found.length - forNeed.length : 0, noneForNeed = found.length > 0 && forNeed.length === 0;
+  const pool = useMemo(() => (forNeed.length ? forNeed : showAll ? found : []), [forNeed, showAll, found]);
+  const items = useMemo(() => (res.data?.applied.relaxed ? [...pool] : [...pool].sort((a, b) =>
+    (b.fit_score ?? 0) - (a.fit_score ?? 0) || (b.near?.near ?? 0) - (a.near?.near ?? 0) || b.shop_count - a.shop_count)), [res.data, pool]);
+  const relaxed = !!res.data?.applied.relaxed;
+  // only an exact match says which category the shopper means; a partial one is a guess
+  useEffect(() => { if (!m.category && !relaxed && items[0]?.category) set({ category: items[0].category }); }, [m.category, relaxed, items, set]);
 
   // models the assistant suggested join the duel first
   const missing = m.extras.filter((id) => !items.some((x) => x.product_id === id)).slice(0, 3);
@@ -55,6 +69,8 @@ export default function DecideStage(sp: StageProps) {
   const lead = all.find((x) => x.product_id === m.champion) ?? all.find((x) => x.product_id === m.productId) ?? all[0] ?? null;
   const challenger = lead ? nextChallenger(all, lead.product_id, m.beaten, m.extras) : null;
   const total = Math.max(1, Math.min(all.length - 1, 5));
+  // a duel needs models that several shops list; one-off listings (clothes, decor...) are browsed and picked directly
+  const browse = !!res.data && items.length > 0 && (relaxed || items.slice(0, 12).filter((p) => p.shop_count >= 3).length < 3);
   const needText = preset?.label ?? m.need;
 
   const cmp = useQuery({ queryKey: ["dcmp", lead?.product_id, challenger?.product_id], queryFn: () => api.compare([lead!.product_id, challenger!.product_id], m.place), enabled: !!lead && !!challenger, staleTime: 5 * 60_000 });
@@ -87,8 +103,9 @@ export default function DecideStage(sp: StageProps) {
   const body = (
     <div className="mc-main">
       <div className="mc-pad row between" style={{ alignItems: "flex-end", marginTop: desk ? 0 : 4 }}>
+        {browse ? <div><div className="xs faint">{fa(items.length)} نتیجه</div><h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>یکی را انتخاب کنید</h2></div> :
         <div><div className="xs faint">{challenger ? `مقایسهٔ ${fa(Math.min(m.beaten.length + 1, total))} از ${fa(total)}` : "پیشنهاد ما"}</div>
-          <h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>{challenger ? (needText ? `برای ${needText}، کدام بهتر است؟` : "کدام بهتر است؟") : "گزینهٔ برتر شما"}</h2></div>
+          <h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>{challenger ? (needText ? `برای ${needText}، کدام بهتر است؟` : "کدام بهتر است؟") : "گزینهٔ برتر شما"}</h2>{challenger && m.beaten.length > 0 && <div className="xs muted" style={{ marginTop: 2 }}>الان در صدر: <Bidi text={shortName(lead!)} /></div>}</div>}
       </div>
 
       {presets.data && presets.data.presets.length > 0 && (
@@ -97,11 +114,37 @@ export default function DecideStage(sp: StageProps) {
         </div>
       )}
 
+      {hidden > 0 && <div className="mc-pad"><Note tone="unk" icon="alert">{fa(hidden)} کالای مخصوص جنس دیگر کنار گذاشته شد تا فقط مناسب «{m.need}» ببینید.</Note></div>}
+      {noneForNeed && !showAll && (
+        <div className="mc-pad stack" style={{ gap: 10 }}>
+          <Empty icon="store" title={`کالایی مخصوص «${m.need}» پیدا نشد`}>در داده‌ها برای «{m.query}» فقط کالاهای مخصوص جنس دیگر یا نامشخص ثبت شده است. از ترب‌گرد بخواهید دقیق‌ترش کند، یا همه را ببینید و در فروشگاه چک کنید.</Empty>
+          <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+            <button type="button" className="btn pri" onClick={() => setHelp(true)}><Icon n="spark" s />از ترب‌گرد کمک بگیر</button>
+            <button type="button" className="btn sec" onClick={() => setShowAll(true)}>همه را نشان بده</button>
+          </div>
+        </div>
+      )}
+      {noneForNeed && showAll && <div className="mc-pad"><Note tone="warn" icon="alert">این‌ها مخصوص «{m.need}» نیستند؛ خودتان در فروشگاه چک کنید.</Note></div>}
+      {relaxed && items.length > 0 && (
+        <div className="mc-pad stack" style={{ gap: 8 }}>
+          <Note tone="warn" icon="alert">عبارت «{m.query}» را دقیقاً پیدا نکردیم؛ این‌ها نزدیک‌ترین نتیجه‌ها هستند و شاید همان چیزی نباشند که می‌خواهید. دقیق‌ترش کنید:</Note>
+          <button type="button" className="btn sec" style={{ alignSelf: "flex-start", minHeight: 42 }} onClick={() => setHelp(true)}><Icon n="spark" s />از ترب‌گرد کمک بگیر</button>
+          <div className="wrapr">
+            {m.query.split(/\s+/).filter(Boolean).length > 1 && m.query.split(/\s+/).filter(Boolean).map((w) => (
+              <button key={w} type="button" className="chip" onClick={() => set({ query: m.query.split(/\s+/).filter((x) => x && x !== w).join(" "), beaten: [], champion: null })}>بدون «{w}»</button>
+            ))}
+            {(res.data?.facets.categories ?? []).slice(0, 4).map((c) => (
+              <button key={c.name} type="button" className="chip" onClick={() => set({ category: c.name, presetId: null, beaten: [], champion: null })}>فقط «{c.name}»</button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {(res.isLoading || waitPresets) && <div className="mc-pad stack" style={{ gap: 10 }} aria-busy="true"><div className="sk mc-skel" style={{ height: 200 }} /><div className="sk mc-skel" style={{ height: 150 }} /></div>}
       {res.isError && <ErrorState error={res.error} retry={() => res.refetch()} />}
       {res.data && !items.length && !res.isFetching && <NoResults sp={sp} />}
 
-      {lead && (
+      {lead && !browse && (
         <>
           <div className={`mc-pad duel-grid ${challenger ? "" : "single"}`}>
             <Card p={lead} leader />
@@ -138,7 +181,23 @@ export default function DecideStage(sp: StageProps) {
           {res.data && res.data.capped && <div className="mc-pad mc-note">فقط بهترین گزینه‌های این جست‌وجو بررسی شد.</div>}
         </>
       )}
-      {desk && lead && <Actions />}
+      {browse && (
+        <div className="mc-pad browse-list">
+          {items.slice(0, 12).map((p) => (
+            <div key={p.product_id} className="card browse-card">
+              <button type="button" className="browse-hit" onClick={() => showDetails(p.product_id)} aria-label={`جزئیات ${p.title}`}>
+                <Thumb src={p.image} alt="" size={64} brand={p.brand} />
+                <span className="stack" style={{ gap: 2, minWidth: 0, textAlign: "start" }}>
+                  <span className="b sm" style={{ lineHeight: 1.6 }}><Bidi text={p.title} /></span>
+                  <span className="xs muted">{p.price_min != null ? `${mil(p.price_min)}` : "قیمت نامشخص"}، {fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} تایش نزدیک شماست` : ""}</span>
+                </span>
+              </button>
+              <button type="button" className="btn sec" style={{ minHeight: 42, fontSize: 14 }} onClick={() => choose(p)}>همین را می‌خواهم</button>
+            </div>
+          ))}
+        </div>
+      )}
+      {desk && lead && !browse && <Actions />}
     </div>
   );
 
@@ -156,13 +215,19 @@ export default function DecideStage(sp: StageProps) {
       <Shell {...sp} patch={patchSlots} mapStage={false}
         center={body}
         panel={desk && detailId ? <ProductDetails id={detailId} onChallenge={(id) => set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] }))} /> : undefined}
-        cta={!desk && lead ? (
+        cta={!desk && lead && !browse ? (
           <div className="mc-cta-row">
             <button className="btn pri" onClick={() => choose(lead)}>{shortName(lead)} را انتخاب می‌کنم</button>
             {challenger && <button className="btn sec" onClick={next}>گزینهٔ بعدی</button>}
           </div>
         ) : undefined}
         slotsCount={null} />
+      <Sheet open={help} onClose={() => setHelp(false)} label="کمک ترب‌گرد" className="tall">
+        {help && (
+          <IntakeAgent seed={{ text: m.text || m.query, context: "نتیجهٔ دقیقی پیدا نشد؛ کمک کن درست‌ترش کنیم." }} cta="جست‌وجوی دوباره" onEdit={() => setHelp(false)}
+            onReady={(r, gps) => { set({ ...intakeToMission(r, gps), beaten: [], champion: null, presetId: null }); setHelp(false); }} />
+        )}
+      </Sheet>
       <Sheet open={!desk && !!sheet} onClose={() => setSheet(null)} label="جزئیات کالا" className="tall">
         {sheet && <ProductDetails id={sheet} onClose={() => setSheet(null)} onChallenge={(id) => { set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] })); setSheet(null); }} />}
         {sheet && lead && <div className="sheet-foot"><button className="btn pri block" onClick={() => { const p = all.find((x) => x.product_id === sheet); if (p) choose(p); }}>همین را انتخاب می‌کنم</button></div>}

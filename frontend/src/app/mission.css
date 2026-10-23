@@ -291,3 +291,37 @@ html { scroll-behavior: smooth; }
 .arrive-card.ok { background: var(--ok-soft); color: var(--ok); }
 .show-guard { display: flex; flex-direction: column; gap: 2px; padding: 14px; border-radius: 16px; border: 2px dashed var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
 .show-guard b { font-size: 19px; font-weight: 800; line-height: 1.5; }
+
+/* browsing one-off listings: a plain list, one clear button each */
+.browse-card { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.browse-hit { display: flex; gap: 12px; align-items: center; background: none; border: 0; padding: 0; color: inherit; text-align: start; }
+.browse-list { display: flex; flex-direction: column; gap: 10px; }
+.browse-card:hover { border-color: var(--accent); }
+@media (min-width: 960px) {
+  .browse-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .browse-hit .thumb { width: 84px !important; height: 84px !important; }
+}
+
+/* ---------- the intake agent ---------- */
+.agent-card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 12px; animation: pop .3s cubic-bezier(.2, .7, .2, 1) both; box-shadow: 0 6px 24px -10px rgba(215, 57, 72, .35); }
+.agent-head { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.agent-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.agent-steps li { display: flex; align-items: center; gap: 8px; animation: rise .25s ease both; }
+.agent-steps li.done { color: var(--ink-3); } .agent-steps li.done .ic { color: var(--ok); }
+.agent-sum { font-size: 15.5px; font-weight: 750; line-height: 1.7; }
+.agent-q { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; background: var(--accent-soft); }
+
+/* ---------- the shop advice ---------- */
+.advice { gap: 10px; border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); animation: pop .3s cubic-bezier(.2, .7, .2, 1) both; }
+.advice-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.advice-list button { width: 100%; display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 14px; background: var(--sunk); border: 0; text-align: start; transition: background .2s, transform .2s; }
+.advice-list button:hover { background: var(--accent-soft); }
+.advice-list button:active { transform: scale(.985); }
+.advice-n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+
+/* ---------- stars after the visit ---------- */
+.stars { display: flex; gap: 6px; direction: ltr; justify-content: center; }
+.star { width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line-2); background: var(--card); color: var(--line-2); font-size: 28px; line-height: 1; transition: transform .2s cubic-bezier(.2, .7, .2, 1), color .2s, background .2s, border-color .2s; }
+.star:hover { transform: scale(1.08); }
+.star:active { transform: scale(.94); }
+.star.on { color: #e5a50a; background: color-mix(in srgb, #e5a50a 14%, var(--card)); border-color: #e5a50a; }

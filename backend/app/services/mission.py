@@ -97,6 +97,28 @@ def _slot_place(con, t: str) -> tuple[dict | None, str]:
     return info, rest
 
 
+def _exact(con, q: str, budget: dict):
+    try:
+        h = catalog.search_products(con, q, None, None, budget.get("min"), budget.get("max"), True, 1, 0)
+    except Exception:
+        return None
+    return h if h["items"] and not h.get("relaxed") else None
+
+
+def _trim(con, words: list[str], budget: dict) -> tuple[int, int]:
+    """Only for «برای <need> <product>»: the whole phrase if shops list it exactly, else drop leading words, then trailing ones."""
+    n = len(words)
+    if n <= 1 or _exact(con, " ".join(words), budget):
+        return 0, n
+    for k in range(1, n):
+        if _exact(con, " ".join(words[k:]), budget):
+            return k, n
+    for e in range(n - 1, 0, -1):
+        if _exact(con, " ".join(words[:e]), budget):
+            return 0, e
+    return 0, n
+
+
 def parse(con, text: str) -> dict:
     """Read a mission sentence. Every slot is present in the result; unread ones are null."""
     raw = text or ""
@@ -119,27 +141,30 @@ def parse(con, text: str) -> dict:
     if open_only:
         t = _strip(t, r"\bباز(?: باشه| باشد)\b")
 
-    # product words before «برای», the need after it
+    # filler, a year or «مد / جدید / بهترین» is not something a shop lists: left in, it turns an exact search into a partial one
+    t = _strip(t, r"\b(?:یه|یک|می ?خوام|می ?خواهم|میخوام|دنبال|نیاز دارم|لازم دارم|بخرم|بخریم|یکی|لطفا|لطفاً)\b")
+    t = re.sub(r"[،,.؟?!]+", " ", t).strip()
+    t = _strip(t, r"(?<!\d)(?:19|20|13|14)\d{2}(?!\d)|(?<!\S)(?:مد|جدید|جدیدترین|بهترین|خوب|ارزان|ارزونترین|ارزان‌ترین)(?!\S)")
+
+    # «هندزفری برای ورزش»: product before «برای», the need after it; «برای بچه لباس فرم»: need first, so find where the product starts
     need = None
-    m = _NEED_LEAD.search(" " + t + " ")
+    s_ = " " + t + " "
+    m = _NEED_LEAD.search(s_)
     prod = t
     if m:
-        s = " " + t + " "
-        prod = s[:m.start()].strip()
-        need = s[m.end():].strip() or None
-    prod = _strip(prod, r"\b(?:یه|یک|می ?خوام|میخوام|دنبال|نیاز دارم|لازم دارم|بخرم|یکی)\b")
-    prod = re.sub(r"[،,.؟?!]+", " ", prod).strip()
-    if need:
-        need = re.sub(r"[،,.؟?!]+", " ", need).strip()
+        before, after = s_[:m.start()].strip(), s_[m.end():].strip()
+        if before:
+            prod, need = before, after or None
+        else:
+            words = after.split()
+            k, e = _trim(con, words, budget)
+            prod, need = " ".join(words[k:e]), " ".join(words[:k] + words[e:]) or None
 
     category = None
     if prod:
-        try:
-            hit = catalog.search_products(con, prod, None, None, budget.get("min"), budget.get("max"), True, 1, 0)
-            if hit["items"]:
-                category = hit["items"][0].get("category")
-        except Exception:
-            category = None
+        hit = _exact(con, prod, budget)  # a partial match says nothing reliable about the category
+        if hit:
+            category = hit["items"][0].get("category")
 
     if prod:
         understood.append("product")

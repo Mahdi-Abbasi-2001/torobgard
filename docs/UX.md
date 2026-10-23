@@ -36,3 +36,16 @@ Old links (`/p/[id]/shops`, `/ask`, `/track`, `/plan`, `/mine`, chat proposals) 
 7. In the mall: «آخرین ۱۰۰ متر» card, then «رسیدم؛ به فروشنده خبر بده» (the seller's second phone shows «مشتری رسید» with the code; the simulated seller answers by itself).
 8. «بررسی کالا با عکس، قبل از پرداخت»: photo of the item; model and tag price are checked against what the seller confirmed, a mismatch can be reported.
 9. «خریدم؛ ثبت نتیجه» → «بله، همان قیمت».
+
+## The model is the brain, not a chat window
+
+The assistant never appears as a conversation you have to live in. It works behind the screens and surfaces as small, checkable cards:
+
+| Where | What the model does | What keeps it honest |
+|---|---|---|
+| **Start** (`IntakeAgent`) | Reads the sentence, fills every slot (item, need, budget band, place, time, mode), asks at most two tap-able questions about what is truly open. You watch each check live: "looking in the catalogue…", "reading the price range…". | Tools read the real data (`search_catalog`, `price_spread`, `lookup_place`, `category_needs`). Budget and place options come from the data, never from the model; questions about slots already found are dropped; two rounds at most; hand-set slots are pinned and never changed. |
+| **Find** (`AdviceCard`) | Looks at the real candidate shops (walk time, open at arrival, price vs the fair range, reply rate, last confirmation) and picks the 2–4 worth asking first, one reason each, plus one thing to watch on the trip. | Picks must be real candidates; shops that just said "not available" or are shut at arrival are removed first; the shortlist is only replaced while you haven't touched it. |
+| **Decide** | "Ask Torob-Gard to help" when a search finds nothing exact reruns the intake agent with that context. | Same guard rails as Start. |
+| **Compare / Confirm / Go** | Duel verdict for your need, seller replies parsed into price / stock / hours, a counter photo check. | Already grounded in specs, prices, and what the seller actually confirmed. |
+
+Every model call has a rules fallback with the same response shape (`engine` / `source` = `rules`), so the product works without a key and the card says so.

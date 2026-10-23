@@ -4,9 +4,17 @@ from __future__ import annotations
 from typing import Any
 
 from ..services import catalog, inquiries as inq
-from ..services.text import split_budget
+from ..services.text import fits_need, split_budget
 
 TOOLS = [
+    {"type": "function", "function": {
+        "name": "update_mission",
+        "description": "Write what the shopper just told you into THEIR errand on screen (the mission), so the journey changes instead of only the chat. Call it whenever they give a new fact about the errand: who it is for or the use (need), budget, where they start, when they go, how they travel, or a narrower item («لباس فرم» + «برای پسر» → query «لباس فرم مدرسه پسرانه», after you checked it with search_products). Send only the fields that changed.",
+        "parameters": {"type": "object", "properties": {
+            "need": {"type": "string", "description": "short: ورزش, پسر بچه, هدیه"}, "query": {"type": "string", "description": "narrower product words that search_products found results for"},
+            "budget_min": {"type": "integer"}, "budget_max": {"type": "integer"},
+            "place_name": {"type": "string", "description": "mall or area in Tehran"}, "when": {"type": "string", "description": "now | 1h | evening | tomorrow | HH:MM"},
+            "mode": {"type": "string", "enum": ["walk", "taxi", "car"]}, "installment": {"type": "boolean"}, "open_only": {"type": "boolean"}}}}},
     {"type": "function", "function": {
         "name": "search_products",
         "description": "Search the Tehran product catalogue. query = ONLY the product noun/brand/model (1-3 Persian words, e.g. «هندزفری گردنی», «گوشی سامسونگ»). NEVER put the use-case (ورزش، عکاسی، گیمینگ) or the budget in the query: use price_max/price_min (toman) for budget, and judge use-case from the returned titles. If results are in the wrong category, search again with `category` set to one of top_categories. Returns top products that at least one shop sells.",
@@ -99,6 +107,7 @@ class Ctx:
         loc = st.get("location") or {}
         self.origin = (loc["lat"], loc["lon"]) if loc.get("lat") else None
         self.filters = st.get("filters") or {}
+        self.need: str | None = None  # the errand's «for whom / what» when the chat runs inside a mission
         self.memo = st.get("chat_ctx") or {"shown": [], "focus": None}  # what the user has seen; survives between turns
 
 
@@ -109,13 +118,17 @@ def run_tool(ctx: Ctx, name: str, a: dict) -> tuple[Any, dict | None]:
         _, q = split_budget(q)
         res = catalog.search_products(con, q, a.get("category"), a.get("brand"), a.get("price_min"), a.get("price_max"), limit=8)
         items = res["items"]
+        fit = [p for p in items if fits_need(p["title"], ctx.need)]
+        dropped, items = len(items) - len(fit), fit  # «for a boy» does not list girls' coats
         _remember(ctx, items[:6])
         # stable sort: products with >=3 shops first, so the model's natural "pick the first good one" lets users compare shops
         items = sorted(items, key=lambda p: p["shop_count"] < 3)
         out = {"total": res["total"], "relaxed_match": res["relaxed"], "products": [_p(p) for p in items[:6]],
                "top_categories": [c["name"] for c in catalog.facets(con, q, a.get("category"))["categories"][:5]]}
+        if dropped:
+            out["note"] = f"{dropped} کالا که به‌وضوح برای جنس دیگری است کنار گذاشته شد؛ اگر چیزی برای «{ctx.need}» نماند، صادقانه بگو مخصوص آن در داده نیست."
         if not items:
-            return out | {"hint": "نتیجه‌ای نبود؛ کلمهٔ کوتاه‌تر یا بودجهٔ بالاتر امتحان کنید."}, None
+            return out | {"hint": "نتیجه‌ای نبود یا همهٔ نتیجه‌ها برای جنس دیگری بودند؛ صادقانه بگو و کلمهٔ دیگری امتحان کن."}, None
         return out, {"type": "product_cards", "query": q, "total": res["total"], "items": items[:4],
                      "applied": {"price_min": a.get("price_min"), "price_max": a.get("price_max")}}
     if name == "compare_products":
@@ -191,4 +204,40 @@ async def run_tool_async(ctx: Ctx, name: str, a: dict, llm=None) -> tuple[Any, d
         return ({"pros": [x["text"] for x in r["pros"]], "cons": [x["text"] for x in r["cons"]], "tips": r["tips"],
                  "reputation_unverified": r["reputation"] and r["reputation"]["text"], "key_specs": r["key_specs"][:4]},
                 {"type": "review", **r})
+    if name == "update_mission":
+        return _update_mission(ctx, a)
     return run_tool(ctx, name, a)
+
+
+_MODE_FA = {"walk": "پیاده", "taxi": "تاکسی", "car": "ماشین"}
+
+
+def _update_mission(ctx: Ctx, a: dict) -> tuple[Any, dict | None]:
+    """The patch the client applies to the mission. Places must exist in the data; anything else is passed through cleaned."""
+    import re
+    from . import intake
+    patch, labels = {}, []
+    if str(a.get("need") or "").strip():
+        patch["need"] = str(a["need"]).strip()[:40]; labels.append(f"برای: {patch['need']}")
+    if str(a.get("query") or "").strip():
+        q = re.sub(r"\s+", " ", str(a["query"])).strip()[:80]
+        found = catalog.search_products(ctx.con, q, None, None, None, None, True, 8, 0)  # only an exact match with something that fits the need
+        if found["items"] and not found.get("relaxed") and any(fits_need(p["title"], patch.get("need") or ctx.need) for p in found["items"]):
+            patch["query"] = q; labels.append(f"کالا: {q}")
+    lo, hi = a.get("budget_min") or None, a.get("budget_max") or None
+    if lo or hi:
+        patch["budget"] = {"min": lo, "max": hi}; labels.append("بودجه عوض شد")
+    if str(a.get("place_name") or "").strip():
+        p = intake._place(ctx.con, str(a["place_name"]))
+        if p.get("found"):
+            patch["place"] = {k: p[k] for k in ("label", "lat", "lon") if k in p}; labels.append(f"شروع از: {p['label']}")
+    if isinstance(a.get("when"), str) and intake.WHEN_OK.match(a["when"]):
+        patch["when"] = a["when"]; labels.append("زمان رفتن عوض شد")
+    if a.get("mode") in _MODE_FA:
+        patch["mode"] = a["mode"]; labels.append(f"با: {_MODE_FA[a['mode']]}")
+    for k, lab in (("installment", "قسطی"), ("open_only", "هنگام رسیدن باز باشد")):
+        if a.get(k) is True:
+            patch[k] = True; labels.append(lab)
+    if not patch:
+        return {"error": "nothing valid to update (a place, or an item with no exact result that fits the need, is ignored: tell the user honestly that nothing for that exists in the data)"}, None
+    return {"ok": True, "applied": labels}, {"type": "mission_update", "patch": patch, "labels": labels}

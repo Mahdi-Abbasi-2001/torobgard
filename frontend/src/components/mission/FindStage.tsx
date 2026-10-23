@@ -4,11 +4,11 @@
 // desktop: the map stays in the middle and the list sits beside it.
 import { keepPreviousData, useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, type ShopCard, type ShopFilters } from "@/lib/api";
+import { api, type Advice, type ShopCard, type ShopFilters } from "@/lib/api";
 import { fa } from "@/lib/fa";
 import { useIsDesktop } from "@/lib/media";
 import type { Mission } from "@/lib/mission";
-import { Icon } from "@/components/Icon";
+import { Icon, Radish } from "@/components/Icon";
 import { ShopMap } from "@/components/ShopMap";
 import { WhereToLook } from "@/components/WhereToLook";
 import { ZonesCard } from "@/components/discover";
@@ -51,7 +51,18 @@ export default function FindStage(sp: StageProps) {
 
   // first time shops load: pick the best open ones so the shortlist is never empty
   const seeded = useRef(m.picks.length > 0);
-  useEffect(() => { if (d && !seeded.current && listed.length) { seeded.current = true; set({ picks: seedPicks(listed) }); } }, [d, listed, set]);
+  const auto = useRef(""); // the shortlist as this screen made it; once the shopper changes it, the model's advice no longer replaces it
+  useEffect(() => { if (d && !seeded.current && listed.length) { seeded.current = true; const ids = seedPicks(listed); auto.current = ids.join(); set({ picks: ids }); } }, [d, listed, set]);
+
+  // the model's pick replaces the automatic one, but only while the shopper has not touched the shortlist
+  const adv = useQuery({
+    queryKey: ["advise", pid, m.place.lat, m.place.lon, m.when, m.need, m.priority, m.cond.installment, m.budgetMax], staleTime: 5 * 60_000, retry: 0,
+    queryFn: () => api.advise({ product_id: pid, lat: m.place.lat, lon: m.place.lon, when: m.when, need: m.need, priority: m.priority, budget_max: m.budgetMax, installment: m.cond.installment }),
+  });
+  useEffect(() => {
+    const ids = adv.data?.picks.map((p) => p.shop_id) ?? [];
+    if (ids.length && auto.current && m.picks.join() === auto.current && ids.join() !== auto.current) { auto.current = ids.join(); set({ picks: ids }); }
+  }, [adv.data, m.picks, set]);
 
   const toggle = (id: string) => {
     if (m.picks.includes(id)) { set({ picks: m.picks.filter((x) => x !== id) }); return; }
@@ -96,6 +107,7 @@ export default function FindStage(sp: StageProps) {
     </div>
   );
 
+  const adviceCard = <AdviceCard adv={adv.data} loading={adv.isLoading} listed={listed} picks={m.picks} onShop={setShopId} onUse={(ids) => { auto.current = ""; set({ picks: ids }); }} />;
   const hubCard = d?.zones && d.zones.length > 0 ? <ZonesCard zones={d.zones} onFocus={(z) => set({ picks: z.shop_ids.slice(0, 5) })} /> : null;
 
   const empty = noShops ? <NoShops sp={sp} catCount={cat.length} /> : null;
@@ -132,7 +144,7 @@ export default function FindStage(sp: StageProps) {
               {!noShops && <div className="map-bottom">{timeCard}</div>}
             </>
           }
-          panel={<div className="stack" style={{ gap: 12 }}>{few && <FewNote go={go} n={listed.length} />}{hubCard}{noShops ? null : compare}</div>}
+          panel={<div className="stack" style={{ gap: 12 }}>{few && <FewNote go={go} n={listed.length} />}{!noShops && adviceCard}{hubCard}{noShops ? null : compare}</div>}
           cta={noShops ? undefined : askCta} />
         {sheets}
       </>
@@ -153,7 +165,7 @@ export default function FindStage(sp: StageProps) {
                 {conds}
                 {q.isError ? <ErrorState error={q.error} retry={() => q.refetch()} /> : null}
                 {empty ?? <div className="mc-pad">{map}</div>}
-                {!noShops && <div className="mc-pad stack" style={{ gap: 12 }}>{timeCard}{few && <FewNote go={go} n={listed.length} />}{hubCard}</div>}
+                {!noShops && <div className="mc-pad stack" style={{ gap: 12 }}>{adviceCard}{timeCard}{few && <FewNote go={go} n={listed.length} />}{hubCard}</div>}
               </>
             )}
           </div>
@@ -163,6 +175,31 @@ export default function FindStage(sp: StageProps) {
         )} />
       {sheets}
     </>
+  );
+}
+
+/** The model's reading of the real candidates: which shops to ask first, one reason each, and what to watch on the trip. */
+function AdviceCard({ adv, loading, listed, picks, onShop, onUse }: { adv?: Advice; loading: boolean; listed: ShopCard[]; picks: string[]; onShop: (id: string) => void; onUse: (ids: string[]) => void }) {
+  if (loading) return <div className="mc-card advice" aria-busy="true"><div className="sk" style={{ height: 18, width: "60%" }} /><div className="sk" style={{ height: 40 }} /><div className="sk" style={{ height: 40 }} /></div>;
+  const rows = (adv?.picks ?? []).map((p) => ({ ...p, shop: listed.find((s) => s.shop_id === p.shop_id) })).filter((r) => r.shop);
+  if (!adv || rows.length === 0) return null;
+  const ids = rows.map((r) => r.shop_id);
+  const same = ids.length === picks.length && ids.every((i) => picks.includes(i));
+  return (
+    <section className="mc-card advice" aria-label="پیشنهاد ترب‌گرد">
+      <div className="row" style={{ gap: 8 }}><Radish size={22} /><b className="sm">پیشنهاد ترب‌گرد</b>{adv.source === "rules" && <span className="tb unk">بر پایهٔ رتبه‌بندی</span>}</div>
+      {adv.headline && <div className="b" style={{ lineHeight: 1.8 }}><Bidi text={fa(adv.headline)} /></div>}
+      <ol className="advice-list">
+        {rows.map((r, i) => (
+          <li key={r.shop_id}><button type="button" onClick={() => onShop(r.shop_id)}>
+            <span className="advice-n">{fa(i + 1)}</span>
+            <span className="stack" style={{ gap: 2, textAlign: "start" }}><b className="sm"><Bidi text={r.shop!.name} /></b>{r.reason && <span className="xs muted"><Bidi text={fa(r.reason)} /></span>}</span>
+          </button></li>
+        ))}
+      </ol>
+      {adv.tip && <Note tone="warn" icon="alert">{fa(adv.tip)}</Note>}
+      {!same && <button type="button" className="btn sec" onClick={() => onUse(ids)}><Icon n="check" s />همین‌ها را انتخاب کن</button>}
+    </section>
   );
 }
 

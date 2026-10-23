@@ -40,6 +40,8 @@ SYSTEM = """تو «ترب‌گرد» هستی؛ دستیار خرید حضوری
 20. اگر کالا پیدا نشد، هیچ فروشگاهی آن را ثبت نکرده، یا کاربر پرسید «کجا بخرم / کجا برم»، حتماً where_to_look را صدا بزن و در متن بگو کجا بروند (پاساژ/محله، تعداد فروشگاه‌های هم‌دسته در داده و فاصله). دانش عمومی خودت دربارهٔ بورس‌ها و راسته‌های بازار تهران را فقط به‌صورت knowledge_hint بده و در متن حتماً با عبارت «طبق اطلاعات عمومی (تأییدنشده)» برچسب بزن. اگر confidence پایین یا none بود صریح بگو داده فروشگاه‌ها این دسته را کم پوشش می‌دهد.
 22. وقتی کاربر می‌پرسد کالایی «خوبه؟»، کدام بهتر است، یا نظر می‌خواهد، product_review را صدا بزن. فقط از همان خروجی بگو؛ بخش reputation_unverified را حتماً با «طبق اطلاعات عمومی (تأییدنشده)» برچسب بزن و هرگز امتیاز، تعداد نظر یا عدد نساز.
 21. هر فیلد مرتبطی که در خروجی ابزار هست را نادیده نگیر: اگر فروشگاه اینستاگرام یا وب‌سایت دارد، گارانتی، ارسال فوری، قسطی یا توضیح فروشنده (seller_note) دارد و به تصمیم کاربر مربوط است، حتماً اشاره کن (لینک اینستاگرام/سایت را کامل بنویس).
+23. اگر پیام «ماموریت فعلی» همراهش هست و کاربر چیز تازه‌ای دربارهٔ خریدش گفت (برای چه کسی یا چه کاری، بودجه، از کجا شروع می‌کند، کی می‌رود، چطور می‌رود، یا کالا را دقیق‌تر کرد)، همان لحظه update_mission را صدا بزن تا سفر او عوض شود، نه فقط گفتگو؛ بعد فقط در یک یا دو جمله بگو چه چیزی عوض شد و قدم بعدی چیست؛ بعد از update_mission دوباره جستجو یا where_to_look نزن مگر کاربر خودش کالا یا مکان تازه‌ای بخواهد. اگر کالا را دقیق‌تر کرده، اول با search_products چک کن که نتیجه دارد و همان query را بفرست. برای جواب کوتاه به سؤال قبلی («پسره»، «تا ۲ میلیون»، «فردوسی») هم همین قانون است.
+24. اگر کاربر گفت نتیجه‌های سفر به درد نمی‌خورد یا ربطی ندارد: اول با search_products یک یا دو عبارت دقیق‌تر امتحان کن؛ اگر نتیجهٔ دقیق (نه تقریبی) داشت، همان را با update_mission در سفر بگذار. اگر داده اصلاً چنین مفهومی ندارد (مثلاً «دانشگاهی» یا «درسی» در دادهٔ کتاب‌ها نیست، ولی رشته‌ها مثل پزشکی هست)، صادقانه بگو و فقط یک سؤال مشخص بپرس (کدام رشته، درس یا اسم کتاب) و هرگز رشته، موضوع یا برندی را که کاربر خودش نگفته حدس نزن و در سفر نگذار؛ update_mission فقط با چیزی که کاربر گفته یا انتخاب کرده؛ بعد از جوابش (مثلاً «پزشکی») همان لحظه با search_products «کتاب پزشکی» را چک کن و اگر نتیجهٔ دقیق داشت update_mission با query بزن؛ گزینه‌ای (chips) نشان نده. در مسیر سفر، where_to_look و توصیهٔ مکان نده مگر کاربر خودش بپرسد «کجا».
 18. بعد از search_products اگر چند گزینه هست، یکی را با دلیل پیشنهاد بده (کارت‌ها را کاربر می‌بیند). اگر نتایج به‌وضوح نامرتبط‌اند (مثلاً لوازم جانبی یا کالای متفاوت) صادقانه بگو و جستجوی دقیق‌تری بزن.
 """
 
@@ -53,15 +55,21 @@ def _system_prompt(ctx: Ctx) -> str:
     return SYSTEM + f"\nاکنون: {day} {t:%H:%M} به وقت تهران. موقعیت کاربر: {loc}.\nکالاهای اخیراً نشان‌داده‌شده به کاربر:\n{seen}{focus}"
 
 
-async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = None) -> AsyncIterator[dict]:
+async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = None, context: str | None = None) -> AsyncIterator[dict]:
     """Yields UI events: text / tool_status / block / degraded / error / done."""
     llm = llm or OpenAICompatLLM()
     con = db.connect()
     try:
         ctx = Ctx(con, session_id)
+        if context and (mn := __import__("re").search(r"برای: (.+)", context)):
+            ctx.need = mn.group(1).strip()
         state = inq.get_session(con, session_id) or {}
         history = state.get("chat", [])[-HISTORY_TURNS:]
-        messages = [{"role": "system", "content": _system_prompt(ctx)}, *history, {"role": "user", "content": message}]
+        messages = [{"role": "system", "content": _system_prompt(ctx)}, *history]
+        in_mission = bool(context)
+        if context:  # the errand on screen: a short reply like «بچه پسره» answers a question about THIS errand, it is not a new topic
+            messages.append({"role": "system", "content": "ماموریت فعلی کاربر (پیام بعدی او دربارهٔ همین است، مگر صریحاً موضوع دیگری بگوید؛ جواب کوتاه او را در همین چارچوب بفهم و کالای دیگری جایش نگذار). همهٔ کارها داخل خود سفر انجام می‌شود: کارت کالا یا فروشگاه به کاربر نشان داده نمی‌شود؛ پس از هر کار (update_mission یا جستجو) فقط در یک تا دو جمله بگو چه چیزی را در سفر عوض کردی یا چه پیدا کردی و اگر چیزی پیدا نشد صادقانه بگو:\n" + context})
+        messages.append({"role": "user", "content": message})
         new_turns = [{"role": "user", "content": message}]
         try:
             pending = None  # latest product_cards block of this turn; earlier searches are intermediate
@@ -70,7 +78,7 @@ async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = 
                 last = step == MAX_STEPS - 1
                 if last:
                     messages.append({"role": "system", "content": "حالا بدون ابزار، با همین نتایج جواب نهایی کوتاه بده و یک قدم بعدی بگو."})
-                async for kind, val in llm.stream(messages, None if last else TOOLS):
+                async for kind, val in llm.stream(messages, None if last else [t for t in TOOLS if not (in_mission and t["function"]["name"] == "ask_user")]):  # inside a mission questions are plain text, answers go into the journey
                     if kind == "text":
                         text += val
                         yield {"type": "text", "delta": val}
@@ -94,6 +102,8 @@ async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = 
                         result, block = await run_tool_async(ctx, c["name"], args, llm)
                     except Exception as e:  # tool bug must not kill the chat
                         result, block = {"error": str(e)[:200]}, None
+                    if block and in_mission and block["type"] in ("product_cards", "shop_list", "comparison_table", "location_widget", "inquiry_proposal"):
+                        block = None  # inside a mission the answer goes into the journey itself; the chat only says what was done
                     if block:
                         if block["type"] == "product_cards":
                             pending = block  # only the final result list is shown to the user
@@ -127,7 +137,7 @@ async def run_chat(session_id: str, message: str, llm: OpenAICompatLLM | None = 
 
 _STATUS = {"search_products": "در حال جستجوی کالا…", "compare_products": "در حال مقایسهٔ مدل‌ها…",
            "find_shops": "در حال یافتن فروشگاه‌های نزدیک…", "similar_products": "در حال یافتن گزینه‌های مشابه…",
-           "ask_user": "…", "propose_inquiry": "در حال آماده‌سازی استعلام…", "get_inquiry_status": "در حال بررسی پاسخ فروشندگان…"}
+           "ask_user": "…", "update_mission": "در حال به‌روز کردن مسیر شما…", "propose_inquiry": "در حال آماده‌سازی استعلام…", "get_inquiry_status": "در حال بررسی پاسخ فروشندگان…"}
 
 
 async def _fallback(ctx: Ctx, message: str) -> AsyncIterator[dict]:

@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS {p}listing_updates(shop_id TEXT, product_id TEXT, pri
   PRIMARY KEY(shop_id, product_id));
 -- shoppers' own reports: after a visit, or after phoning the shop
 CREATE TABLE IF NOT EXISTS {p}reports(id TEXT PRIMARY KEY, session_id TEXT, shop_id TEXT, product_id TEXT, kind TEXT,
-  available INTEGER, price INTEGER, price_matched INTEGER, inquiry_id TEXT, note TEXT, created_at TEXT);
+  available INTEGER, price INTEGER, price_matched INTEGER, inquiry_id TEXT, note TEXT, created_at TEXT, rating INTEGER);
 -- "ask in waves": a queue of shops asked a few at a time until enough confirm
 CREATE TABLE IF NOT EXISTS {p}campaigns(id TEXT PRIMARY KEY, session_id TEXT, product_id TEXT, data TEXT, status TEXT,
   created_at TEXT, updated_at TEXT);
@@ -100,9 +100,22 @@ def connect(path: Path | str | None = None, state: bool = True) -> sqlite3.Conne
         con.execute("PRAGMA st.journal_mode=WAL")
         con.execute("PRAGMA st.synchronous=NORMAL")
         con.executescript(STATE_TABLES.format(p="st."))
+        _add_rating_column(con, "st.")
     elif not READONLY:
         con.executescript(STATE_TABLES.format(p=""))
+        _add_rating_column(con, "")
     return con
+
+
+def _add_rating_column(con: sqlite3.Connection, prefix: str) -> None:
+    """Reports gained a 1-5 star rating of the shop; an older state database gets the column once."""
+    try:
+        cols = [r[1] for r in con.execute(f"PRAGMA {prefix}table_info(reports)")]
+        if cols and "rating" not in cols:
+            con.execute(f"ALTER TABLE {prefix}reports ADD COLUMN rating INTEGER")
+            con.commit()
+    except sqlite3.Error:
+        pass
 
 
 def warm_cache(path: Path | str | None = None) -> float:

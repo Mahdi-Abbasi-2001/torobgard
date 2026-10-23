@@ -7,6 +7,7 @@ export type Block =
   | { type: "comparison_table"; products: CompareResult["products"]; rows: CompareResult["rows"] }
   | { type: "shop_list"; product: { product_id: string; title: string; image: string | null } | null; listed: ShopCard[]; category_only: ShopCard[]; counts: { listed: number; category_only: number } }
   | { type: "chips"; question: string; options: string[] }
+  | { type: "mission_update"; patch: { need?: string; query?: string; budget?: { min: number | null; max: number | null }; place?: { label: string; lat: number; lon: number }; when?: string; mode?: "walk" | "taxi" | "car"; installment?: boolean; open_only?: boolean }; labels: string[] }
   | { type: "inquiry_proposal"; product: { product_id: string; title: string; image: string | null } | null; shops: { shop_id: string; name: string; mall: string | null; floor_label: string | null; unit: string | null; area: string | null }[]; questions: { key: string; text: string }[] }
   | { type: "inquiry_status"; items: Inquiry[] }
   | ({ type: "review" } & ProductReview)
@@ -20,10 +21,39 @@ export type ChatEvent =
   | { type: "error"; message: string }
   | { type: "done" };
 
-export async function streamChat(sid: string, message: string, onEvent: (e: ChatEvent) => void, signal?: AbortSignal) {
+export async function streamChat(sid: string, message: string, onEvent: (e: ChatEvent) => void, signal?: AbortSignal, context?: string) {
   let r: Response;
   try {
-    r = await fetch(`/api/chat/${encodeURIComponent(sid)}`, { method: "POST", headers: { "Content-Type": "application/json", ...authHeader() }, body: JSON.stringify({ message }), signal });
+    r = await fetch(`/api/chat/${encodeURIComponent(sid)}`, { method: "POST", headers: { "Content-Type": "application/json", ...authHeader() }, body: JSON.stringify({ message, context }), signal });
+  } catch {
+    throw new Error("اتصال به اینترنت برقرار نیست.");
+  }
+  if (!r.ok || !r.body) {
+    let msg = "مشکلی پیش آمد. دوباره امتحان کنید.";
+    try { const j = await r.json(); if (typeof j.detail === "string") msg = j.detail; } catch {}
+    throw new Error(msg);
+  }
+  const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    let i: number;
+    while ((i = buf.indexOf("\n\n")) >= 0) {
+      const chunk = buf.slice(0, i); buf = buf.slice(i + 2);
+      const line = chunk.split("\n").find((l) => l.startsWith("data:"));
+      if (line) { try { onEvent(JSON.parse(line.slice(5))); } catch {} }
+    }
+  }
+}
+
+/** Intake agent: POST /api/mission/intake, SSE of {status}* then {result}. */
+export async function streamIntake(body: { session_id: string; messages: { role: "user" | "agent"; text: string }[]; slots: Record<string, unknown>; pinned: string[] },
+  onEvent: (e: import("./api").IntakeEvent) => void, signal?: AbortSignal) {
+  let r: Response;
+  try {
+    r = await fetch(`/api/mission/intake`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal });
   } catch {
     throw new Error("اتصال به اینترنت برقرار نیست.");
   }

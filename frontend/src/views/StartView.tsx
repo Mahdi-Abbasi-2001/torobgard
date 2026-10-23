@@ -16,6 +16,7 @@ import { SnapButton } from "@/components/SnapButton";
 import { Bidi, OfflineBanner } from "@/components/ui";
 import { MissionBar, missionHref } from "@/components/mission/chrome";
 import { MissionCard } from "@/components/mission/MissionCard";
+import { IntakeAgent, intakeToMission, type IntakeSeed } from "@/components/mission/IntakeAgent";
 import { SlotsSheet, type SlotsPatch } from "@/components/mission/SlotsSheet";
 import { slotsOf, type SlotKey } from "@/components/mission/slots";
 import type { Place } from "@/lib/geo";
@@ -34,6 +35,7 @@ export default function StartView() {
   const [text, setText] = useState("");
   const [debounced, setDebounced] = useState("");
   const [over, setOver] = useState<SlotsPatch>({});
+  const [agent, setAgent] = useState<IntakeSeed | null>(null); // set when the shopper presses start: the intake agent takes it from here
   const [slots, setSlots] = useState<{ open: boolean; focus: SlotKey | null }>({ open: false, focus: null });
   const field = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const t = setTimeout(() => setDebounced(text.trim()), 350); return () => clearTimeout(t); }, [text]);
@@ -60,7 +62,14 @@ export default function StartView() {
     update((s) => ({ ...s, place: made.place, when: made.when, mode: made.mode, locationAsked: s.locationAsked || made.place.source !== "default" }));
     router.push(missionHref(made.id));
   };
-  const start = () => { if (draft.query || draft.text) begin({ ...draft, query: draft.query || draft.text }); };
+  // what the shopper set by hand is pinned: the agent may not change it or ask about it
+  const pinnedNow = [over.need !== undefined && "need", (over.budgetMin !== undefined || over.budgetMax !== undefined) && "budget", over.place && "place", over.when && "when", over.mode && "mode", over.cond && "conditions"].filter(Boolean) as string[];
+  const agentSlots = {
+    ...(over.need !== undefined && { need: draft.need }), ...((over.budgetMin !== undefined || over.budgetMax !== undefined) && { budget: { min: draft.budgetMin, max: draft.budgetMax } }),
+    ...(over.place && { place: draft.place.label }), ...(over.when && { when: draft.when }), ...(over.mode && { mode: draft.mode }),
+    ...(over.cond && { conditions: { installment: draft.cond.installment, open: draft.cond.open } }),
+  };
+  const start = () => { if (text.trim()) setAgent({ text: text.trim(), slots: agentSlots, pinned: pinnedNow }); };
   const browse = (category: string) => begin(blankMission({ text: category, query: category, category, place: state.place, when: state.when, mode: state.mode }));
 
   const list = ready ? missions.slice(0, desk ? 3 : 2) : [];
@@ -102,10 +111,14 @@ export default function StartView() {
             <div className="stack" style={{ gap: 6 }}>
               <label htmlFor="errand" className="xs b muted">چه می‌خواهید؟</label>
               <div className="field" style={{ alignItems: "flex-start", borderColor: "var(--accent)", borderWidth: 2, padding: "6px 14px" }}>
-                <textarea id="errand" ref={field} rows={2} value={text} onChange={(e) => { setText(e.target.value); setOver({}); }} placeholder="مثلاً: هندزفری گردنی برای ورزش، تا ۳٫۵ میلیون، نزدیک علاالدین، عصر"
+                <textarea id="errand" ref={field} rows={2} value={text} onChange={(e) => { setText(e.target.value); setOver({}); setAgent(null); }} placeholder="مثلاً: هندزفری گردنی برای ورزش، تا ۳٫۵ میلیون، نزدیک علاالدین، عصر"
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); start(); } }} style={{ fontSize: desk ? 17 : 15 }} />
               </div>
             </div>
+            {agent ? (
+              <IntakeAgent key={agent.text} seed={agent} onEdit={() => setAgent(null)}
+                onReady={(r, gps) => begin({ ...draft, ...intakeToMission(r, gps), text: draft.text, query: r.slots.query ?? (draft.query || draft.text) })} />
+            ) : (
             <div className="mc-card" style={{ padding: 14, gap: 10, background: desk ? "var(--paper)" : "var(--card)" }}>
               <div className="mc-label">{text.trim() ? "از جمله‌تان این‌ها را فهمیدیم؛ برای تغییر، روی هر کدام بزنید" : "این‌ها فعلاً پیش‌فرض است؛ هر کدام را می‌شود عوض کرد"}</div>
               <div className={`slot-rows ${desk ? "start-slots" : ""}`}>
@@ -117,11 +130,12 @@ export default function StartView() {
                 ))}
               </div>
             </div>
+            )}
             <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
               <SnapButton className="btn sec grow" label="عکس از برچسب قیمت یا کالا"><Icon n="cam" s />عکس از برچسب قیمت</SnapButton>
               <button type="button" className="btn sec grow" onClick={() => (cats.data?.items[0] ? document.getElementById("browse")?.scrollIntoView({ behavior: "smooth", block: "center" }) : field.current?.focus())}><Icon n="search" s />فقط دارم نگاه می‌کنم</button>
             </div>
-            {desk && <button className="btn pri" style={{ minHeight: 56, fontSize: 17, borderRadius: 18 }} disabled={!text.trim()} onClick={start}>شروع کن</button>}
+            {desk && !agent && <button className="btn pri" style={{ minHeight: 56, fontSize: 17, borderRadius: 18 }} disabled={!text.trim()} onClick={start}>شروع کن</button>}
           </div>
 
           <div className={desk ? "" : "mc-pad"} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -149,7 +163,7 @@ export default function StartView() {
             )}
           </div>
         </main>
-        {!desk && <div className="mc-cta"><button className="btn pri" disabled={!text.trim()} onClick={start}>شروع کن</button></div>}
+        {!desk && !agent && <div className="mc-cta"><button className="btn pri" disabled={!text.trim()} onClick={start}>شروع کن</button></div>}
       </div>
       <SlotsSheet open={slots.open} onClose={() => setSlots({ open: false, focus: null })} value={draft} onChange={(patch) => setOver((o) => ({ ...o, ...patch, cond: patch.cond ? { ...(o.cond ?? draft.cond), ...patch.cond } : o.cond }))} focus={slots.focus} cta="تأیید" />
     </div>

@@ -43,7 +43,7 @@ export interface ProductDetail extends Product { images: string[]; model: string
 export interface SearchResult {
   total: number; items: Product[];
   facets: { categories: { name: string; count: number }[]; brands: { name: string; count: number }[] };
-  applied: { price_min: number | null; price_max: number | null; budget_from_query: boolean; when?: string };
+  applied: { price_min: number | null; price_max: number | null; budget_from_query: boolean; when?: string; relaxed?: boolean };
   capped?: boolean;
 }
 export interface Offer {
@@ -61,7 +61,7 @@ export interface Confirmation {
   state: "fresh" | "aging" | "expired"; simulated: boolean; inquiry_id: string | null; count: number;
 }
 export interface Reliability {
-  asked: number; replied: number; reply_rate: number | null; median_reply_s: number | null; price_checks: number;
+  asked: number; replied: number; reply_rate: number | null; median_reply_s: number | null; price_checks: number; rating?: { avg: number; n: number } | null;
   price_match_rate: number | null; visits: number; visit_ok: number; score: number; known: boolean; label: string | null;
 }
 export interface Payment { provider: string; channel: string; confirmed_in_store: boolean }
@@ -82,6 +82,8 @@ export type Weekday = "sat" | "sun" | "mon" | "tue" | "wed" | "thu" | "fri";
 export interface ShopDetail extends ShopCard {
   categories: string[]; weekly_hours: Record<Weekday, DayHours> | null; offer_count: number; offers: Offer[];
 }
+/** Which shops to ask first and why: the model's pick over the real candidates (source "rules": the catalogue's own ranking). */
+export interface Advice { picks: { shop_id: string; reason: string }[]; headline: string | null; tip: string | null; source: "llm" | "rules"; when: string }
 export interface ShopsForProduct {
   origin: [number, number] | null; listed: ShopCard[]; category_only: ShopCard[]; counts: { listed: number; category_only: number };
   zones?: Zone[]; fair_price?: FairPrice | null; when?: string; at?: string | null;
@@ -175,6 +177,17 @@ export interface VisitPlan {
   transport: { in_traffic_zone: boolean; suggestion: string | null }; deep_links: { neshan: string; balad: string; google: string } | null; checklist: string[];
 }
 
+export interface IntakeQuestion { slot: "query" | "need" | "budget" | "place" | "when" | "mode" | "other"; text: string; options: string[] }
+export interface IntakeResult {
+  slots: {
+    query: string | null; category: string | null; need: string | null; budget: { min: number | null; max: number | null } | null;
+    place: { kind: "mall" | "area"; label: string; lat: number; lon: number; mall_key?: string; area?: string } | null;
+    when: string | null; mode: "walk" | "taxi" | "car" | null; conditions: { installment: boolean; open: boolean };
+  };
+  exact: boolean; questions: IntakeQuestion[]; assumed: string[]; summary: string; engine: "llm" | "rules"; trace: string[];
+}
+export type IntakeEvent = { type: "status"; text: string } | ({ type: "result" } & IntakeResult) | { type: "error"; message: string };
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
@@ -228,6 +241,8 @@ export const api = {
     return req<SearchResult>(`/search/products${qs({ limit: 20, ...p, ...at(loc), prefs: x.prefs?.length ? JSON.stringify(x.prefs) : null, near_only: x.near_only,
       installment_only: x.installment_only, open_only: x.open_only, sort: x.sort, when: x.when && x.when !== "now" ? x.when : null })}${spec}`);
   },
+  advise: (b: { product_id: string; lat?: number; lon?: number; when?: string | null; need?: string | null; priority?: Priority; budget_max?: number | null; installment?: boolean }) =>
+    req<Advice>(`/mission/advise`, { method: "POST", body: JSON.stringify({ ...b, when: b.when && b.when !== "now" ? b.when : null }) }),
   missionParse: (text: string) => req<ParsedMission>(`/mission/parse`, { method: "POST", body: JSON.stringify({ text }) }),
   presets: (category: string) => req<{ category: string; presets: Preset[]; source: "llm" | "rules" }>(`/category-presets${qs({ category })}`),
   specFacets: (category: string) => req<{ items: SpecFacet[] }>(`/spec-facets${qs({ category })}`),
@@ -265,6 +280,8 @@ export const api = {
   visitPlan: (b: { session_id: string; product_id: string; lat?: number; lon?: number; order?: string[] }) => req<VisitPlan>(`/visit-plan`, { method: "POST", body: JSON.stringify(b) }),
   report: (b: { session_id: string; shop_id: string; product_id: string; kind: "visit" | "call"; available: boolean | null; price?: number | null; price_matched?: boolean | null; inquiry_id?: string | null; note?: string | null }) =>
     req<Report>(`/reports`, { method: "POST", body: JSON.stringify(b) }),
+  rateReport: (reportId: string, session_id: string, rating: number) =>
+    req<{ id: string; rating: number }>(`/reports/${encodeURIComponent(reportId)}/rating`, { method: "POST", body: JSON.stringify({ session_id, rating }) }),
   reports: (sid: string) => req<{ items: Report[] }>(`/sessions/${sid}/reports`),
   baleFollow: (sid: string) => req<{ enabled: boolean; bot_username?: string | null; command?: string; linked?: boolean }>(`/sessions/${sid}/bale`),
   inquiries: (sid: string) => req<{ items: Inquiry[] }>(`/sessions/${sid}/inquiries`),

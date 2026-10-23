@@ -62,7 +62,7 @@ export function ShopRow({ p, listed, now, flash, onChat, onHold, onAlt, onCall, 
       )}
       {q.status === "no_reply" && <div className="xs muted">مهلت پاسخ تمام شد و پاسخی نیامد.</div>}
       {!simple && kids.map((k: Inquiry) => <KidRow key={k.id} k={k} />)}
-      {hold && <div className="kid" style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}><Icon n="hold" s /><span className="grow">نگه داشته{hold.until ? ` تا ${fa(hold.until)}` : ""}؛ در فروشگاه این کد را بگویید:</span><span className="code num" style={{ color: "var(--accent-ink)" }}>{fa(hold.code)}</span></div>}
+      {hold && simple && <div className="kid" style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}><Icon n="hold" s /><span className="grow">نگه داشته{hold.until ? ` تا ${fa(hold.until)}` : ""}؛ در فروشگاه این کد را بگویید:</span><span className="code num" style={{ color: "var(--accent-ink)" }}>{fa(hold.code)}</span></div>}
       <div className="actions">
         {r >= 3 && onChat && <button className="btn ghost" style={{ minHeight: 40 }} onClick={onChat}><Icon n="chat" s />گفتگو و جزئیات</button>}
         {r === 3 && onHold && !holdWaiting && <button className="btn sec" onClick={onHold}><Icon n="hold" s />برایم نگه دار</button>}

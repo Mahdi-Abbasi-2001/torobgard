@@ -136,7 +136,7 @@ export function TruthRow({ offer, c, cat = false, listedShown = false }: { offer
 export function ReliabilityLine({ r }: { r?: Reliability | null }) {
   if (!r?.known || !r.label) return <div className="xs faint row" style={{ gap: 6 }}><Icon n="clock" s /><span>سابقهٔ پاسخ‌گویی: هنوز داده‌ای نداریم</span></div>;
   const good = r.score >= 0.6;
-  return <div className="xs row" style={{ gap: 6, color: good ? "var(--ok)" : "var(--ink-3)" }}><Icon n={good ? "shield" : "clock"} s /><span>{fa(r.label)}</span></div>;
+  return <div className="xs row" style={{ gap: 6, color: good ? "var(--ok)" : "var(--ink-3)" }}><Icon n={good ? "shield" : "clock"} s /><span>{fa(r.label)}{r.rating ? <> · <span style={{ color: "var(--warn, #b7791f)" }}>★</span> {fa(r.rating.avg)} از {fa(r.rating.n)} خریدار</> : null}</span></div>;
 }
 
 /** Red flags the seller wrote in their own listing (used, stock, regional version, copy, not registered...). */

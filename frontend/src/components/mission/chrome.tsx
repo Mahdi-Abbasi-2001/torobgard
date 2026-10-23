@@ -110,7 +110,7 @@ export function MissionAside({ m, view, status, onSlots, onAsk, children }: { m:
       <div className="grow" />
       <form className="mc-verdict" style={{ display: "flex", flexDirection: "column", gap: 8 }} onSubmit={(e) => { e.preventDefault(); onAsk(q); setQ(""); }}>
         <label htmlFor="mc-ask" style={{ fontWeight: 700, fontSize: 12 }}>از ترب‌گرد بپرسید</label>
-        <input id="mc-ask" value={q} onChange={(e) => setQ(e.target.value)} placeholder="مثلاً: قسطی کجا می‌دهد؟" style={{ height: 42, borderRadius: 12, border: "1px solid var(--line-2)", padding: "0 12px", background: "var(--card)", fontSize: 13 }} />
+        <input id="mc-ask" onFocus={() => onAsk("")} value={q} onChange={(e) => setQ(e.target.value)} placeholder="مثلاً: قسطی کجا می‌دهد؟" style={{ height: 42, borderRadius: 12, border: "1px solid var(--line-2)", padding: "0 12px", background: "var(--card)", fontSize: 13 }} />
       </form>
     </aside>
   );
