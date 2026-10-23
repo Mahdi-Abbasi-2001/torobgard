@@ -419,6 +419,8 @@ def test_find_shops_cards_carry_stock_and_trip_risk():
 
 def test_daily_stock_check_turns_one_tap_answers_into_confirmations_everyone_sees():
     from app.services import inquiries as inq
+    from app.db import connect
+    con = connect(); con.execute("DELETE FROM stock_checks WHERE status='pending'"); con.commit()  # earlier runs leave pending items behind
     shops = c.get("/api/pulse", params={"lat": 35.6955, "lon": 51.413, "radius_km": 1.2}).json()["shops"]
     r = c.post("/api/stockcheck/run", json={"shops": 3, "items": 2}).json()
     assert r["shops"] == 3 and r["items"] >= 3
@@ -502,6 +504,7 @@ def _wipe_test_accounts(shop):
     from app.db import connect
     con = connect()
     con.execute("DELETE FROM seller_shops WHERE shop_id=?", (shop,))
+    con.execute("DELETE FROM confirmations WHERE shop_id=? AND source='seller'", (shop,))  # the test's own stock taps
     con.execute("DELETE FROM auth_tokens WHERE user_id IN (SELECT id FROM users WHERE username IN ('seller-x1','seller-x2','shopper-x1'))")
     con.execute("DELETE FROM users WHERE username IN ('seller-x1','seller-x2','shopper-x1')")
     con.commit()

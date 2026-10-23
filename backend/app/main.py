@@ -38,6 +38,9 @@ async def lifespan(app: FastAPI):
     asyncio.get_running_loop().run_in_executor(None, db.warm_cache)  # background: don't delay startup
     from .services import groups as _groups
     _groups.shop_groups(None, wait=False)  # the map's shop kinds: built in the background, never inside a request
+    from .services import voice as _voice
+    if _voice.available():  # load the voice now (3 s), not inside the first call
+        asyncio.get_running_loop().run_in_executor(None, _voice.synth_wav, "سلام")
     inq.LOOP = asyncio.get_running_loop()
     task = asyncio.create_task(inq.timeout_loop())
     warm = asyncio.create_task(_warm_loop())
@@ -674,7 +677,7 @@ class TtsIn(BaseModel):
     text: str = Field(min_length=1, max_length=400)
 
 
-_TTS_CACHE: dict[str, bytes] = {}
+_TTS_CACHE: dict[str, tuple[bytes, str]] = {}
 
 
 @app.post("/api/tts", tags=["chat"])
@@ -683,18 +686,28 @@ async def tts(body: TtsIn, request: Request):
     from fastapi.responses import Response
     if not _rate_ok("tts:" + (request.client.host if request.client else "?"), limit=40):
         raise HTTPException(429, "کمی صبر کنید.")
+    from .services import voice
     text = body.text.strip()
     if text not in _TTS_CACHE:
-        llm = OpenAICompatLLM()
-        if not llm.configured:
-            raise HTTPException(503, "صدای دستیار الان در دسترس نیست.")
-        try:
-            _TTS_CACHE[text] = await llm.speak(text)
-        except Exception:
-            raise HTTPException(502, "صدا ساخته نشد.")
+        data, kind = None, "audio/wav"
+        if voice.available():  # our own Persian voice first: no key, no border
+            try:
+                data = await asyncio.to_thread(voice.synth_wav, text)
+            except Exception:
+                data = None
+        if data is None:
+            llm = OpenAICompatLLM()
+            if not llm.configured:
+                raise HTTPException(503, "صدای دستیار الان در دسترس نیست.")
+            try:
+                data, kind = await llm.speak(text), "audio/mpeg"
+            except Exception:
+                raise HTTPException(502, "صدا ساخته نشد.")
+        _TTS_CACHE[text] = (data, kind)
         if len(_TTS_CACHE) > 200:
             _TTS_CACHE.pop(next(iter(_TTS_CACHE)))
-    return Response(_TTS_CACHE[text], media_type="audio/mpeg", headers={"Cache-Control": "private, max-age=3600"})
+    data, kind = _TTS_CACHE[text]
+    return Response(data, media_type=kind, headers={"Cache-Control": "private, max-age=3600"})
 
 
 class BargainIn(BaseModel):

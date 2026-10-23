@@ -41,6 +41,7 @@ COPY backend/requirements.txt .
 RUN pip install -r requirements.txt
 COPY --from=catalog /app/catalog /app/catalog
 COPY backend/app ./app
+COPY backend/voices ./voices
 
 WORKDIR /app/frontend
 COPY --from=web /web/.next/standalone ./
