@@ -12,17 +12,50 @@ import { Bidi } from "@/components/ui";
 
 const persianVoice = () => (typeof speechSynthesis === "undefined" ? undefined : speechSynthesis.getVoices().find((v) => v.lang.toLowerCase().startsWith("fa")));
 
-/** Say it aloud; resolves when finished (or at once when the device has no Persian voice). Returns whether it was actually spoken. */
-function say(text: string): Promise<boolean> {
-  return new Promise((res) => {
-    const v = persianVoice();
-    if (!v) return res(false);
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = v; u.lang = v.lang; u.rate = 0.95;
-    u.onend = () => res(true); u.onerror = () => res(false);
-    speechSynthesis.speak(u);
-  });
+let audio: HTMLAudioElement | null = null;
+
+/** Say it aloud; resolves when finished. The device's own Persian voice when it has one, otherwise the server's voice (/api/tts).
+ *  Returns whether it was actually spoken (false = shown as subtitles only). */
+async function say(text: string): Promise<boolean> {
+  const v = persianVoice();
+  if (v) {
+    return new Promise((res) => {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = v; u.lang = v.lang; u.rate = 0.95;
+      u.onend = () => res(true); u.onerror = () => res(false);
+      speechSynthesis.speak(u);
+    });
+  }
+  try {
+    const r = await fetch("/api/tts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+    if (!r.ok) return false;
+    const url = URL.createObjectURL(await r.blob());
+    audio?.pause();
+    audio = new Audio(url);
+    return await new Promise<boolean>((res) => { audio!.onended = () => res(true); audio!.onerror = () => res(false); audio!.play().catch(() => res(false)); });
+  } catch { return false; }
+}
+
+type SR = { lang: string; interimResults: boolean; continuous: boolean; onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null; onend: (() => void) | null; onerror: (() => void) | null; start(): void; stop(): void };
+const speechRec = (): (new () => SR) | null => {
+  const w = typeof window === "undefined" ? null : (window as unknown as { SpeechRecognition?: new () => SR; webkitSpeechRecognition?: new () => SR });
+  return w?.SpeechRecognition ?? w?.webkitSpeechRecognition ?? null;
+};
+
+/** The browser's own Persian speech recognition (Chrome): live text while the seller talks, no upload. */
+function NativeMic({ onText, disabled }: { onText: (t: string) => void; disabled?: boolean }) {
+  const [on, setOn] = useState(false);
+  const rec = useRef<SR | null>(null);
+  const toggle = () => {
+    if (on) { rec.current?.stop(); return; }
+    const R = speechRec(); if (!R) return;
+    const r = new R(); r.lang = "fa-IR"; r.interimResults = true; r.continuous = false;
+    r.onresult = (e) => onText(Array.from(e.results).map((x) => x[0].transcript).join(" "));
+    r.onend = () => setOn(false); r.onerror = () => setOn(false);
+    rec.current = r; setOn(true); r.start();
+  };
+  return <button type="button" className={`iconbtn call-mic ${on ? "rec" : ""}`} disabled={disabled} aria-pressed={on} aria-label={on ? "پایان" : "گفتن جواب"} onClick={toggle}>{on ? <span className="spin" /> : <Icon n="mic" />}</button>;
 }
 
 function useRing(on: boolean) {
@@ -79,9 +112,11 @@ export function CallScreen({ i, shop, token, onDone, onDecline }: { i: Inquiry; 
         ) : (
           <>
             <div className="call-sub" aria-live="polite">{line}</div>
-            {!spoken && <div className="xs" style={{ opacity: .7 }}>این دستگاه صدای فارسی ندارد؛ سؤال را بخوانید و جواب بدهید.</div>}
+            {!spoken && <div className="xs" style={{ opacity: .7 }}>صدای دستیار در دسترس نیست؛ سؤال بالا را بخوانید و جواب بدهید.</div>}
             <div className="row" style={{ gap: 10, alignItems: "center", width: "100%" }}>
-              <VoiceButton className="iconbtn call-mic" disabled={speaking || send.isPending} onText={(t) => setText((x) => (x ? `${x} ${t}` : t))} />
+              {speechRec()
+                ? <NativeMic disabled={speaking || send.isPending} onText={(t) => setText(t)} />
+                : <VoiceButton className="iconbtn call-mic" disabled={speaking || send.isPending} onText={(t) => setText((x) => (x ? `${x} ${t}` : t))} />}
               <input className="call-in" value={text} onChange={(e) => setText(e.target.value)} placeholder="دکمهٔ میکروفون را بزنید و جواب را بگویید (یا اینجا بنویسید)" aria-label="جواب شما" />
             </div>
             <div className="xs" style={{ opacity: .65 }}>متن را بخوانید و اگر اشتباه بود درستش کنید، بعد بفرستید.</div>

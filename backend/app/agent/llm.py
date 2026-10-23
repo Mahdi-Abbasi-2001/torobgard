@@ -74,6 +74,22 @@ class OpenAICompatLLM:
             raise LLMUnavailable(f"STT HTTP {r.status_code}: {r.text[:200]}")
         return (r.json().get("text") or "").strip()
 
+    async def speak(self, text: str) -> bytes:
+        """Text to speech through the provider's /audio/speech (OpenAI-compatible); returns mp3 bytes."""
+        if not self.configured:
+            raise LLMUnavailable("no API key configured")
+        import os
+        body = {"model": os.environ.get("LLM_TTS_MODEL") or "tts-1", "voice": os.environ.get("LLM_TTS_VOICE") or "nova",
+                "input": text[:400], "response_format": "mp3"}
+        try:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(40, connect=10)) as c:
+                r = await c.post(f"{self.s['base_url']}/audio/speech", headers={"Authorization": f"Bearer {self.s['api_key']}"}, json=body)
+        except httpx.HTTPError as e:
+            raise LLMUnavailable(f"TTS network error: {e}") from e
+        if r.status_code != 200 or not r.content:
+            raise LLMUnavailable(f"TTS HTTP {r.status_code}: {r.text[:200]}")
+        return r.content
+
     async def _once(self, messages, tools, effort, json_mode=False):
         body = {"model": self.s["model"], "messages": messages, "stream": True}
         if effort:
