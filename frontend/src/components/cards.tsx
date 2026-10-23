@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Product, ShopCard as Shop } from "@/lib/api";
 import { fa, floorLabel, mil } from "@/lib/fa";
 import { Icon } from "./Icon";
-import { FairChip, FastChip, FlagChips, InstallmentChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, ShopName, TruthRow, confirmedPrice } from "./honesty";
+import { FairChip, FastChip, FlagChips, InstallmentChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, ShopName, StockChip, TruthRow, confirmedPrice } from "./honesty";
 import { useSession } from "@/lib/session";
 import { Bidi, Thumb } from "./ui";
 
@@ -37,6 +37,7 @@ export function ShopCard({ s, selected, onSelect, confirmed, href, flash, hovere
       {!cat && s.offer?.description && <div className="xs faint" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}><Bidi text={s.offer.description} /></div>}
       <div className="wrapr">{later && <span className="xs faint">وقتی می‌رسید:</span>}<OpenChip open={s.open} />
         {state.mode === "car" && s.travel?.car_note && <span className="tb warn"><Icon n="alert" s />{s.travel.car_note}</span>}</div>
+      {!cat && <StockChip stock={s.stock} why />}
       {s.reliability !== undefined && <ReliabilityLine r={s.reliability} />}
       <div className="wrapr"><InstallmentChips shop={s} /><FastChip v={s.fast_delivery} /></div>
       {(s.instagram || s.website) && (
@@ -67,7 +68,7 @@ export function ProductCard({ p, why, inCompare, onCompare }: { p: Product; why?
         {p.near && p.near.shops > 0 && (
           <div className="xs row" style={{ gap: 6, flexWrap: "wrap", color: p.near.near ? "var(--ok)" : "var(--ink-3)" }}>
             <Icon n="walk" s /><span className="grow">{[p.near.near ? `${fa(p.near.near)} فروشگاه تا ۱۵ دقیقه پیاده` : `نزدیک‌ترین ${fa(p.near.nearest_min ?? 0)} دقیقه پیاده`,
-              p.near.open > 0 ? `${fa(p.near.open)} تا باز` : null, p.near.installment > 0 ? `${fa(p.near.installment)} تا قسطی` : null].filter(Boolean).join("، ")}</span>
+              p.near.open > 0 ? `${fa(p.near.open)} باز` : null, p.near.installment > 0 ? `${fa(p.near.installment)} قسطی` : null].filter(Boolean).join("، ")}</span>
           </div>
         )}
         {p.fit && p.fit.length > 0 && (
@@ -79,7 +80,7 @@ export function ProductCard({ p, why, inCompare, onCompare }: { p: Product; why?
         )}
         {why && <div className="why"><b>چرا این؟</b><span>{why}</span></div>}
         {onCompare && (
-          <button type="button" className="xs row" style={{ gap: 6, background: "none", border: 0, padding: "4px 0", color: inCompare ? "var(--accent-ink)" : "var(--ink-3)", fontWeight: inCompare ? 650 : 500 }} onClick={onCompare} aria-pressed={inCompare}>
+          <button type="button" className="xs row" style={{ gap: 6, background: "none", border: 0, padding: "10px 0", minHeight: 40, color: inCompare ? "var(--accent-ink)" : "var(--ink-3)", fontWeight: inCompare ? 650 : 500 }} onClick={onCompare} aria-pressed={inCompare}>
             <span className={`sel ${inCompare ? "on" : ""}`} style={{ width: 20, height: 20, borderRadius: 6 }}>{inCompare && <Icon n="check" s />}</span>
             {inCompare ? "در مقایسه" : "افزودن به مقایسه"}
           </button>

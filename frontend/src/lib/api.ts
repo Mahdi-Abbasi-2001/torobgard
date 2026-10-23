@@ -47,7 +47,7 @@ export interface SearchResult {
   capped?: boolean;
 }
 export interface Offer {
-  offer_id: string; product_id: string; seller_title: string; title?: string; description?: string | null;
+  offer_id: string; product_id: string; seller_title: string; title?: string; category?: string | null; description?: string | null;
   warranty?: string | null; warranty_months?: number | null; price: number | null; changed_at: string | null;
   age_days: number | null; freshness: Freshness; suspicious: boolean; verified_by_seller: boolean;
   flags?: Flag[]; fair?: { level: "ok" | "warn"; text: string } | null;
@@ -57,7 +57,7 @@ export interface Offer {
 }
 /** Shared "what is true now" layer: newest seller answer / visit / call report for this shop + product. */
 export interface Confirmation {
-  available: boolean | null; price: number | null; source: "seller" | "visit" | "call"; at: string; age_min: number;
+  available: boolean | null; price: number | null; source: "seller" | "daily" | "visit" | "call"; at: string; age_min: number;
   state: "fresh" | "aging" | "expired"; simulated: boolean; inquiry_id: string | null; count: number;
 }
 export interface Reliability {
@@ -66,6 +66,7 @@ export interface Reliability {
 }
 export interface Payment { provider: string; channel: string; confirmed_in_store: boolean }
 export interface OpenInfo { state: OpenState; label: string; closes_at: string | null; opens_at: string | null; quality: "ok" | "missing" | "suspicious" }
+export interface StockLikelihood { score: number; level: "high" | "medium" | "low" | "unknown"; label: string; reasons: string[] }
 export interface ShopCard {
   shop_id: string; name: string; name_is_verified: boolean; address: string; area: string | null;
   lat: number; lon: number; mall: string | null; mall_key: string | null; floor: number | null; floor_label: string | null;
@@ -74,6 +75,8 @@ export interface ShopCard {
   instagram: { handle: string | null; profile_url: string } | null; website: string | null; phone_is_placeholder: boolean; phone?: string | null;
   tier?: "listed" | "category_only"; offer?: Offer | null; why?: string; score?: number;
   confirmation?: Confirmation | null; reliability?: Reliability | null;
+  /** how likely the shop has it right now (before anyone asked) and the chance the trip ends empty-handed */
+  stock?: StockLikelihood; trip_risk?: { percent: number; level: "low" | "medium" | "high"; label: string };
   travel?: Travel | null; score_parts?: Record<"price" | "distance" | "freshness" | "open" | "confirmations", number>; trust_score?: number;
 }
 export interface Shift { start_time: string; end_time: string }
@@ -81,9 +84,12 @@ export interface DayHours { shifts: Shift[]; status: "declared" | "closed" | "un
 export type Weekday = "sat" | "sun" | "mon" | "tue" | "wed" | "thu" | "fri";
 export interface ShopDetail extends ShopCard {
   categories: string[]; weekly_hours: Record<Weekday, DayHours> | null; offer_count: number; offers: Offer[];
+  /** what this shop lists of what was asked about (only when the request carried q / category) */
+  matching?: { offer_id: string; product_id: string; title: string; category: string | null; price: number | null }[];
 }
 /** Shops near a point with the shifts (minutes since midnight) they declare for a weekday; `known: false` means no declared hours. */
-export interface Pulse { weekday: string; total: number; shops: { shop_id: string; name: string; lat: number; lon: number; mall: string | null; km: number; known: boolean; closed_day: boolean; shifts: [number, number][] }[] }
+export interface PulseMatch { query: string | null; listed: { shop_id: string; name: string; lat: number; lon: number; price?: number | null; g?: string }[]; maybe: { shop_id: string; name: string; lat: number; lon: number; g?: string }[]; nearest?: { shop_id: string; name: string; lat: number; lon: number; km: number; g?: string } | null; categories: string[]; hotspot: { lat: number; lon: number; count: number } | null }
+export interface Pulse { weekday: string; total: number; shops: { shop_id: string; name: string; lat: number; lon: number; mall: string | null; km: number; known: boolean; closed_day: boolean; shifts: [number, number][]; g?: string }[] }
 /** An accessory of the chosen product, sold in the same mall as the stop. */
 export interface Extra { product_id: string; title: string; price: number; shop_id: string; shop: string; floor_label: string | null; unit: string | null; plaque: string | null; why: string }
 /** One trip for a basket: the fewest stops that cover it, each item at the stop where it is cheapest. */
@@ -126,6 +132,7 @@ export interface Answer {
 export interface ThreadMsg { role: "buyer" | "seller" | "agent" | "system"; text: string; channel: string; simulated: boolean; at: string }
 export interface Inquiry {
   id: string; session_id: string; status: InquiryStatus; label: string; kind: InquiryKind; parent_id: string | null;
+  via_call?: boolean; live_call?: boolean; escalated_from?: string | null;
   campaign_id: string | null; auto_from: string | null; hold_until: string | null; hold_code?: string | null; eta_min: number | null; target?: number | null;
   created_at: string; delivered_at: string | null; answered_at: string | null; deadline_at: string;
   questions: { key: string; text: string; custom?: boolean }[]; note: string | null; answer: Answer | null;
@@ -183,6 +190,7 @@ export interface PlanStop {
   lat: number; lon: number; arrive_at: string; closes_at: string | null; walk_min_from_previous: number; confirmed_by_seller: boolean; confirmed_price: number | null;
   inquiry_id: string | null; hold: { code: string; until: string | null } | null; rechecked_at: string | null; late: boolean; tight: boolean;
   warnings: { level: "bad" | "warn"; text: string }[]; in_traffic_zone: boolean;
+  trip_risk?: { percent: number; level: "low" | "medium" | "high"; label: string }; backup_same_mall?: boolean;
 }
 export interface VisitPlan {
   start: { label: string; lat: number; lon: number; time: string }; stops: PlanStop[]; total_walk_min: number; same_mall: string | null;
@@ -208,12 +216,21 @@ export class ApiError extends Error {
 
 // Login token (optional accounts). Kept in localStorage; sent on every API call so a user's session stays private.
 const AUTH_KEY = "tg-auth";
-export interface User { id: string; username: string; session_id: string }
+export interface User { id: string; username: string; session_id: string; role?: "shopper" | "seller"; shop_id?: string | null }
+export interface SellerShop {
+  shop_id: string; name: string; mall: string | null; unit: string | null; phone: string | null; closed_until: string | null;
+  open: { state: string; label: string };
+  weekly_hours: Record<string, { status: string; shifts: { start_time: string; end_time: string }[] }> | null;
+}
+export interface Listing { product_id: string; title: string; price: number | null; last: { available: boolean | null; price: number | null; at: string } | null }
 export const authStore = {
   get(): { token: string; user: User } | null { try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch { return null; } },
   set(v: { token: string; user: User } | null) { try { if (v) localStorage.setItem(AUTH_KEY, JSON.stringify(v)); else localStorage.removeItem(AUTH_KEY); } catch {} },
 };
 export const authHeader = (): Record<string, string> => { const a = typeof window === "undefined" ? null : authStore.get(); return a ? { Authorization: `Bearer ${a.token}` } : {}; };
+
+/** Seller routes: a token link addresses the shop in the path; a signed-in seller account (no token) uses /seller/me. */
+const sp = (shop: string, token: string) => (token ? `/seller/${shop}/${token}` : `/seller/me`);
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   let r: Response;
@@ -256,6 +273,8 @@ export const api = {
       installment_only: x.installment_only, open_only: x.open_only, sort: x.sort, when: x.when && x.when !== "now" ? x.when : null })}${spec}`);
   },
   pulse: (p: { lat: number; lon: number; radius_km?: number; product_id?: string; weekday?: string; limit?: number }) => req<Pulse>(`/pulse${qs(p)}`),
+  pulseCategories: (p: { lat: number; lon: number; radius_km?: number; limit?: number }) => req<{ items: { name: string; shops: number; g?: string }[] }>(`/pulse/categories${qs(p)}`),
+  pulseMatch: (p: { lat: number; lon: number; q?: string; category?: string; radius_km?: number }) => req<PulseMatch>(`/pulse/match${qs(p)}`),
   extras: (product_id: string, mall_key: string) => req<{ items: Extra[] }>(`/extras${qs({ product_id, mall_key })}`),
   basketPlan: (b: { product_ids: string[]; lat?: number; lon?: number; when?: string | null }) =>
     req<BasketPlan>(`/basket/plan`, { method: "POST", body: JSON.stringify({ ...b, when: b.when && b.when !== "now" ? b.when : null }) }),
@@ -276,7 +295,7 @@ export const api = {
   compare: (ids: string[], loc?: Loc) => req<CompareResult>(`/products/compare`, { method: "POST", body: JSON.stringify({ ids, ...at(loc) }) }),
   productShops: (id: string, loc: Loc, f: ShopFilters = {}, limit = 40, when?: string | null) =>
     req<ShopsForProduct>(`/products/${encodeURIComponent(id)}/shops${qs({ ...at(loc), ...f, priority: f.priority && f.priority !== "balanced" ? f.priority : null, limit, when: when && when !== "now" ? when : null })}`),
-  shop: (id: string, loc: Loc) => req<ShopDetail>(`/shops/${encodeURIComponent(id)}${qs(at(loc))}`),
+  shop: (id: string, loc: Loc, look?: { q?: string; category?: string }) => req<ShopDetail>(`/shops/${encodeURIComponent(id)}${qs({ ...at(loc), ...look })}`),
   malls: (limit = 12) => req<{ items: Mall[] }>(`/malls${qs({ limit })}`),
   mall: (key: string) => req<MallDirectory>(`/malls/${encodeURIComponent(key)}`),
   whereToLook: (p: { q: string; category?: string | null; hint?: string | null }, loc: Loc) =>
@@ -295,6 +314,7 @@ export const api = {
   campaigns: (sid: string) => req<{ items: Campaign[] }>(`/sessions/${sid}/campaigns`),
   stopCampaign: (sid: string, id: string) => req<Campaign>(`/campaigns/${id}/stop`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   hold: (sid: string, id: string, until: string) => req<Inquiry>(`/inquiries/${id}/hold`, { method: "POST", body: JSON.stringify({ session_id: sid, until }) }),
+  escalate: (sid: string, id: string) => req<Inquiry>(`/inquiries/${id}/escalate`, { method: "POST", body: JSON.stringify({ session_id: sid }) }),
   recheck: (sid: string, id: string, eta_min?: number | null, demo_gone = false) => req<Inquiry>(`/inquiries/${id}/recheck`, { method: "POST", body: JSON.stringify({ session_id: sid, eta_min, demo_gone }) }),
   transcribe: async (audio: Blob): Promise<{ text: string }> => {
     const r = await fetch(`/api/transcribe`, { method: "POST", headers: { "Content-Type": audio.type || "audio/webm" }, body: audio });
@@ -311,14 +331,28 @@ export const api = {
   reports: (sid: string) => req<{ items: Report[] }>(`/sessions/${sid}/reports`),
   baleFollow: (sid: string) => req<{ enabled: boolean; bot_username?: string | null; command?: string; linked?: boolean }>(`/sessions/${sid}/bale`),
   inquiries: (sid: string) => req<{ items: Inquiry[] }>(`/sessions/${sid}/inquiries`),
+  sellerStock: (shop: string, token: string) => req<{ items: { id: string; product_id: string; title: string; price: number | null }[] }>(`${sp(shop, token)}/stockcheck`),
+  sellerStockAnswer: (shop: string, token: string, id: string, a: { available: boolean; price?: number | null }) =>
+    req<{ left: number }>(`${sp(shop, token)}/stockcheck/${id}`, { method: "POST", body: JSON.stringify(a) }),
   sellerInbox: (shop: string, token: string) =>
-    req<{ shop: { shop_id: string; name: string; mall: string | null; unit: string | null }; bale?: { enabled: boolean; bot_username?: string | null; linked?: boolean; command?: string }; stats?: Partial<Reliability> & { listing_updates: number }; items: Inquiry[] }>(`/seller/${shop}/${token}/inquiries`),
+    req<{ shop: { shop_id: string; name: string; mall: string | null; unit: string | null }; bale?: { enabled: boolean; bot_username?: string | null; linked?: boolean; command?: string }; stats?: Partial<Reliability> & { listing_updates: number }; items: Inquiry[] }>(`${sp(shop, token)}/inquiries`),
   sellerAnswer: (shop: string, token: string, id: string, a: Partial<Answer> & { update_listing?: boolean }) =>
-    req<Inquiry>(`/seller/${shop}/${token}/inquiries/${id}/answer`, { method: "POST", body: JSON.stringify(a) }),
+    req<Inquiry>(`${sp(shop, token)}/inquiries/${id}/answer`, { method: "POST", body: JSON.stringify(a) }),
   sellerReply: (shop: string, token: string, id: string, text: string) =>
-    req<{ follow_up: string | null; inquiry: Inquiry }>(`/seller/${shop}/${token}/inquiries/${id}/reply`, { method: "POST", body: JSON.stringify({ text }) }),
+    req<{ follow_up: string | null; inquiry: Inquiry }>(`${sp(shop, token)}/inquiries/${id}/reply`, { method: "POST", body: JSON.stringify({ text }) }),
+  sellerToday: (shop: string, token: string) =>
+    req<{ asked: number; answered: number; missed: number; avg_response_s: number | null; on_the_way: number; confirmations: number; week_asked: number; tip: string | null; top: { product_id: string; title: string; count: number }[] }>(`${sp(shop, token)}/today`),
+  sellerShop: (shop: string, token: string) => req<SellerShop>(`${sp(shop, token)}/shop`),
+  sellerSetClosed: (shop: string, token: string, b: { mode: "reopen" | "today" | "hours"; hours?: number }) =>
+    req<SellerShop>(`${sp(shop, token)}/shop/closed`, { method: "POST", body: JSON.stringify(b) }),
+  demoCallSeller: (shop: string) => req<Inquiry>(`/demo/call-seller/${shop}`, { method: "POST" }),
+  sellerListings: (shop: string, token: string, q = "") => req<{ items: Listing[] }>(`${sp(shop, token)}/listings${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  sellerSetListing: (shop: string, token: string, productId: string, b: { available: boolean; price?: number | null }) =>
+    req<Listing>(`${sp(shop, token)}/listings/${encodeURIComponent(productId)}`, { method: "POST", body: JSON.stringify(b) }),
+  sellerSignup: (username: string, password: string, code: string) =>
+    req<{ user: User; token: string }>(`/seller/auth/signup`, { method: "POST", body: JSON.stringify({ username, password, code }) }),
   sellerUpdateListing: (shop: string, token: string, id: string) =>
-    req<Inquiry>(`/seller/${shop}/${token}/inquiries/${id}/update-listing`, { method: "POST" }),
+    req<Inquiry>(`${sp(shop, token)}/inquiries/${id}/update-listing`, { method: "POST" }),
   // EventSource cannot send headers, so an account's token rides in the query string (HTTPS in production)
   eventsUrl: (sid: string) => { const a = typeof window === "undefined" ? null : authStore.get(); return `${process.env.NEXT_PUBLIC_EVENTS_BASE ?? ""}/api/sessions/${sid}/events${a ? `?token=${encodeURIComponent(a.token)}` : ""}`; },
   signup: (username: string, password: string, session_id: string) =>

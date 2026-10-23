@@ -20,7 +20,7 @@ export function slotsOf(m: SlotInput): Slot[] {
     { key: "product", label: "کالا", value: m.product?.title ? m.product.title : m.query || "", open: !m.product },
     { key: "need", label: "برای", value: m.need ?? "", open: !m.need },
     { key: "budget", label: "بودجه", value: b ?? "", open: !b },
-    { key: "place", label: "از کجا", value: m.place.source === "default" ? "مرکز تهران" : m.place.label, open: m.place.source === "default" },
+    { key: "place", label: "از کجا", value: m.place.source === "default" ? "انتخاب نشده" : m.place.label, open: m.place.source === "default" },
     { key: "when", label: "چه ساعتی", value: whenText(m.when), open: false },
     { key: "mode", label: "با", value: MODE_LABEL[m.mode], open: false },
     { key: "cond", label: "شرایط", value: conds.join("، "), open: !conds.length },

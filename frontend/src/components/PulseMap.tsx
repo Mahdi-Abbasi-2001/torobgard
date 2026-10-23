@@ -91,8 +91,8 @@ export default function PulseMap({ origin, mine = [], height, onPick, onUnavaila
         <div className="pm-count"><b>{fa(open)}</b> فروشگاه باز<span className="xs faint"> از {fa(known)} فروشگاهی که ساعتش را می‌دانیم، از {fa(shops.length)} فروشگاه</span></div>
         <input type="range" className="pm-range" min={360} max={1439} step={15} value={minute} aria-label="ساعت" onChange={(e) => { setPlaying(false); setMinute(+e.target.value); }} />
         <div className="row" style={{ gap: 8 }}>
-          <button type="button" className="btn sec" onClick={() => { if (minute >= 1425) setMinute(360); setPlaying((p) => !p); }}><Icon n={playing ? "x" : "walk"} s />{playing ? "مکث" : "روز را پخش کن"}</button>
-          {onPick && <button type="button" className="btn pri grow" onClick={() => onPick(hhmm(minute))}>همین ساعت را انتخاب کن</button>}
+          <button type="button" className="btn sec" onClick={() => { if (minute >= 1425) setMinute(360); setPlaying((p) => !p); }}><Icon n={playing ? "x" : "walk"} s />{playing ? "توقف" : "پخش روز"}</button>
+          {onPick && <button type="button" className="btn pri grow" onClick={() => onPick(hhmm(minute))}>انتخاب همین ساعت</button>}
         </div>
         <span className="xs faint">سبز: بازِ اعلام‌شده، خاکستری: بستهٔ اعلام‌شده، توخالی: ساعتش را نمی‌دانیم. حلقهٔ قرمز: فروشگاه‌هایی که این کالا را دارند.</span>
       </div>

@@ -17,39 +17,41 @@ WALK_M_PER_MIN = 75  # 4.5 km/h; routed distance already follows the streets, so
 TTL = 3600
 _cache: dict[tuple, tuple[float, dict]] = {}
 
-_TURN = {"left": "چپ بپیچ", "right": "راست بپیچ", "slight left": "کمی به چپ بپیچ", "slight right": "کمی به راست بپیچ",
-         "sharp left": "تند به چپ بپیچ", "sharp right": "تند به راست بپیچ", "straight": "مستقیم برو", "uturn": "دور بزن"}
+_TURN = {"left": "به چپ بپیچید", "right": "به راست بپیچید", "slight left": "کمی به چپ بپیچید", "slight right": "کمی به راست بپیچید",
+         "sharp left": "تند به چپ بپیچید", "sharp right": "تند به راست بپیچید", "straight": "مستقیم بروید", "uturn": "دور بزنید"}
 
 
 def instruction(man: dict, name: str) -> str:
-    """One Persian sentence for an OSRM maneuver; «name» is the street the maneuver leads onto."""
+    """One Persian sentence for an OSRM maneuver, in the polite «شما» register; «name» is the street the maneuver leads onto."""
     t, mod = man.get("type", ""), (man.get("modifier") or "")
-    where = f" توی {name}" if name else ""
+    onto = f" و وارد خیابان {name} شوید" if name else ""
+    along = f" در خیابان {name}" if name else ""
     if t == "depart":
-        return f"راه بیفت{where}" if name else "راه بیفت"
+        return f"از همین‌جا شروع کنید و{(' در خیابان ' + name) if name else ''} جلو بروید"
     if t == "arrive":
-        side = {"left": "؛ مقصد سمت چپ توست", "right": "؛ مقصد سمت راست توست"}.get(mod, "")
-        return "رسیدی" + side
+        side = {"left": "؛ فروشگاه سمت چپ شماست", "right": "؛ فروشگاه سمت راست شماست"}.get(mod, "")
+        return "به مقصد رسیدید" + side
     if t in ("roundabout", "rotary", "roundabout turn", "exit roundabout", "exit rotary"):
         ex = man.get("exit")
-        return f"وارد میدان شو و از خروجی {to_persian_digits(str(ex))} بیرون برو" if ex else "از میدان رد شو"
+        return f"وارد میدان شوید و از خروجی {to_persian_digits(str(ex))} بیرون بروید" if ex else "از میدان بگذرید"
     if t == "end of road":
-        return f"ته مسیر، {_TURN.get(mod, 'ادامه بده')}{where}"
+        return f"سر پایان این خیابان، {_TURN.get(mod, 'ادامه دهید')}{onto if mod not in ('straight',) else ''}"
     if t == "fork":
-        return f"سر دوراهی {('سمت ' + ('چپ' if 'left' in mod else 'راست')) if mod else 'ادامه بده'}"
+        return f"سر دوراهی {('سمت ' + ('چپ' if 'left' in mod else 'راست') + ' را بگیرید') if mod else 'ادامه دهید'}"
     if t in ("new name", "continue", "merge", "on ramp", "off ramp"):
-        return f"ادامه بده{where}" if name else "مستقیم برو"
+        return f"ادامه دهید{along}" if name else "مستقیم بروید"
     if t == "turn":
-        return f"{_TURN.get(mod, 'ادامه بده')}{where if mod not in ('straight',) else ''}"
-    return f"ادامه بده{where}" if name else "ادامه بده"
+        base = _TURN.get(mod, "ادامه دهید")
+        return base + (onto if mod not in ("straight",) else along)
+    return f"ادامه دهید{along}" if name else "ادامه دهید"
 
 
 def _straight(a: tuple[float, float], b: tuple[float, float]) -> dict:
     km = haversine_km(a[0], a[1], b[0], b[1])
     d = km * 1000 * 1.3
     return {"source": "straight", "distance_m": round(d), "minutes": max(1, round(d / WALK_M_PER_MIN)), "points": [[a[0], a[1]], [b[0], b[1]]],
-            "steps": [{"text": "به سمت مقصد راه بیفت", "distance_m": round(d), "at_m": 0, "lat": a[0], "lon": a[1], "type": "depart", "modifier": "", "street": ""},
-                      {"text": "رسیدی", "distance_m": 0, "at_m": round(d), "lat": b[0], "lon": b[1], "type": "arrive", "modifier": "", "street": ""}]}
+            "steps": [{"text": "به سمت مقصد حرکت کنید", "distance_m": round(d), "at_m": 0, "lat": a[0], "lon": a[1], "type": "depart", "modifier": "", "street": ""},
+                      {"text": "به مقصد رسیدید", "distance_m": 0, "at_m": round(d), "lat": b[0], "lon": b[1], "type": "arrive", "modifier": "", "street": ""}]}
 
 
 def shape(osrm: dict, mode: str) -> dict:

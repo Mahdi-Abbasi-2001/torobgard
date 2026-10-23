@@ -9,9 +9,8 @@ import { streamIntake } from "@/lib/chat";
 import type { IntakeQuestion, IntakeResult } from "@/lib/api";
 import type { Mission } from "@/lib/mission";
 import { useSession } from "@/lib/session";
-import { Icon, Radish } from "@/components/Icon";
+import { Icon } from "@/components/Icon";
 import { Bidi, Note } from "@/components/ui";
-import { budgetLabel, MODE_LABEL, whenText } from "./slots";
 
 type Msg = { role: "user" | "agent"; text: string };
 export type IntakeSeed = { text: string; slots?: Record<string, unknown>; pinned?: string[]; context?: string };
@@ -41,8 +40,7 @@ function slotsOf(r: IntakeResult, base?: Record<string, unknown>): Record<string
 export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن", autoOption = false }: { seed: IntakeSeed; onReady: (r: IntakeResult, gps: Place | null, auto: boolean) => void; onEdit?: () => void; cta?: string; autoOption?: boolean }) {
   const { sid } = useSession();
   const [convo, setConvo] = useState<Msg[]>([]);
-  const [steps, setSteps] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
+    const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<IntakeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [typed, setTyped] = useState("");
@@ -55,11 +53,10 @@ export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن", auto
   const run = useCallback(async (messages: Msg[], prev?: IntakeResult | null) => {
     abort.current?.abort();
     const ac = new AbortController(); abort.current = ac;
-    setBusy(true); setError(null); setSteps([]);
+    setBusy(true); setError(null);
     try {
       await streamIntake({ session_id: sid || "anon", messages, slots: prev ? slotsOf(prev, seed.slots) : seed.slots ?? {}, pinned: seed.pinned ?? [] }, (e) => {
-        if (e.type === "status") setSteps((s) => [...s, e.text]);
-        else if (e.type === "result") setResult(e);
+        if (e.type === "result") setResult(e);
         else if (e.type === "error") setError(e.message);
       }, ac.signal);
     } catch (e) {
@@ -108,29 +105,20 @@ export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن", auto
     );
   };
 
-  const s = result?.slots;
-  const chips: [string, string][] = s ? [
-    ["کالا", s.query ?? ""], ["برای", s.need ?? ""], ["بودجه", budgetLabel(s.budget?.min ?? null, s.budget?.max ?? null) ?? ""],
-    ["کالاهای دیگر", (s.more ?? []).map((x) => x.query).join("، ")], ["از کجا", gps ? "موقعیت فعلی شما" : s.place?.label ?? ""], ["چه ساعتی", s.when ? whenText(s.when) : ""], ["با", s.mode ? MODE_LABEL[s.mode] : ""],
-  ].filter((x): x is [string, string] => !!x[1]) : [];
   const open = result?.questions ?? [];
-  const assumed = (result?.assumed ?? []).map((k) => ({ when: "الان", mode: "پیاده", place: "مرکز تهران", budget: "بدون محدودیت بودجه", need: "بدون نیاز خاص" }[k])).filter(Boolean);
+  // on the start screen nothing is left to ask: go straight on to the products instead of a card with only buttons
+  const advanced = useRef(false);
+  useEffect(() => {
+    if (busy) { advanced.current = false; return; }
+    if (autoOption && result && !error && open.length === 0 && !advanced.current) { advanced.current = true; onReady(result, gps, true); }
+  }, [autoOption, result, busy, error, open.length]); // eslint-disable-line react-hooks/exhaustive-deps -- once per answer
 
   return (
     <section className="agent-card" aria-label="دستیار ترب‌گرد" aria-live="polite">
-      <div className="agent-head"><Radish size={26} /><b>ترب‌گرد</b><span className="tb info">دستیار</span>{result?.engine === "rules" && <span className="tb unk">تحلیل ساده</span>}</div>
-      {(busy || steps.length > 0) && (
-        <ul className="agent-steps">
-          {steps.map((t, i) => <li key={i} className={busy && i === steps.length - 1 ? "now" : "done"}>{busy && i === steps.length - 1 ? <span className="spin" /> : <Icon n="check" s />}{t}</li>)}
-          {busy && steps.length === 0 && <li className="now"><span className="spin" />دارم جمله‌تان را می‌خوانم…</li>}
-        </ul>
-      )}
+      {busy && <div className="agent-wait"><span className="spin" />یک لحظه…</div>}
       {error && <Note tone="bad" icon="alert">{error}</Note>}
       {result && !busy && (
         <div className="stack" style={{ gap: 10 }}>
-          {result.summary && <div className="agent-sum"><Bidi text={fa(result.summary)} /></div>}
-          {chips.length > 0 && <div className="mc-slots">{chips.map(([k, v]) => <span key={k} className="slot"><span className="k">{k}</span><Bidi text={fa(v)} /></span>)}</div>}
-          {assumed.length > 0 && <div className="xs muted">فرض کردم: {assumed.join("، ")}. اگر این‌طور نیست، بعداً عوضش کنید.</div>}
           {open.map((q) => (
             <div key={q.text} className="agent-q">
               <div className="b sm">{fa(q.text)}</div>
@@ -146,9 +134,8 @@ export function IntakeAgent({ seed, onReady, onEdit, cta = "شروع کن", auto
           )}
           {!result.exact && open.length === 0 && <Note tone="unk" icon="q">«{result.slots.query}» را دقیقاً در فروشگاه‌ها پیدا نکردم؛ نزدیک‌ترین‌ها را نشان می‌دهم.</Note>}
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className="btn pri grow" style={{ flexBasis: "100%" }} onClick={() => (Object.keys(picked).length ? submit(picked) : onReady(result, gps, autoOption))}>{Object.keys(picked).length ? "ثبت جواب‌ها" : open.length ? "همین‌ها خوب است؛ ادامه" : autoOption ? "خودکار انجامش بده" : cta}</button>
-            {autoOption && !Object.keys(picked).length && <button type="button" className="btn sec" onClick={() => onReady(result, gps, false)}>قدم‌به‌قدم می‌روم</button>}
-            {onEdit && <button type="button" className="btn sec" onClick={onEdit}>ویرایش جمله</button>}
+            <button type="button" className="btn pri grow" style={{ flexBasis: "100%" }} onClick={() => (Object.keys(picked).length ? submit(picked) : onReady(result, gps, autoOption))}>{Object.keys(picked).length ? "ثبت جواب‌ها" : open.length ? "رد شدن؛ همهٔ کالاها را نشان بده" : autoOption ? "کالاها را نشانم بده" : cta}</button>
+            {onEdit && <button type="button" className="btn sec" onClick={onEdit}>تغییر جمله</button>}
           </div>
         </div>
       )}

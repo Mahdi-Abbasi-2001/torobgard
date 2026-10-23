@@ -210,9 +210,9 @@ function BudgetSlider({ id, value, onChange }: { id: string; value: number | nul
 
 function NoResults({ sp, cap, set }: { sp: SearchParams; cap: number | null; set: (p: Partial<SearchParams>) => void }) {
   const relax: { label: string; patch: Partial<SearchParams> }[] = [];
-  if (cap) relax.push({ label: "بودجه را بردار", patch: { price_max: String(NO_CAP) } });
+  if (cap) relax.push({ label: "حذف بودجه", patch: { price_max: String(NO_CAP) } });
   if (sp.brand) relax.push({ label: `برند «${sp.brand}» را بردار`, patch: { brand: undefined } });
-  if (sp.category) relax.push({ label: "دسته را بردار", patch: { category: undefined } });
+  if (sp.category) relax.push({ label: "حذف دسته", patch: { category: undefined } });
   // The search ANDs every word, so a single extra word ("ورزشی") can empty the list: offer dropping each one
   const words = (sp.q ?? "").split(/\s+/).filter((w) => w.length > 1 && !/^(زیر|تا|کمتر|از|میلیون|هزار|تومان|تومن|[\d۰-۹٫.,]+)$/.test(w));
   if (words.length > 1) words.forEach((w) => relax.push({ label: `بدون کلمهٔ «${w}»`, patch: { q: (sp.q ?? "").split(/\s+/).filter((x) => x !== w).join(" ") } }));

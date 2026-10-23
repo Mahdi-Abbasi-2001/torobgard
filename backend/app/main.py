@@ -13,7 +13,7 @@ from . import db
 from .agent.agent import run_chat
 from .agent.intake import run_intake
 from .agent.llm import OpenAICompatLLM
-from .services import advisor, basket, campaigns, extras, pulse as pulse_svc, routing, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan
+from .services import advisor, basket, campaigns, extras, pulse as pulse_svc, routing, catalog, converse, discover, inquiries as inq, mission as mission_svc, verify, visit_plan, stockcheck
 from .services.hours import now_tehran
 from .services.text import split_budget
 
@@ -217,6 +217,18 @@ async def get_route(from_lat: float, from_lon: float, to_lat: float, to_lon: flo
     return await routing.route((from_lat, from_lon), (to_lat, to_lon), mode)
 
 
+@app.get("/api/pulse/match", tags=["shops"])
+def get_pulse_match(con: Con, lat: float, lon: float, q: str | None = None, category: str | None = None, radius_km: float = Query(1.4, gt=0, le=5)):
+    """Which shops around a point carry what was typed (real listings), and which only declare the category: lights up the start map."""
+    return pulse_svc.match(con, lat, lon, q, category, radius_km)
+
+
+@app.get("/api/pulse/categories", tags=["shops"])
+def get_pulse_categories(con: Con, lat: float, lon: float, radius_km: float = Query(1.4, gt=0, le=5), limit: int = Query(8, ge=1, le=20)):
+    """What the market around a point sells most (by number of shops declaring it): the start screen's category chips."""
+    return {"items": pulse_svc.top_categories(con, lat, lon, radius_km, limit)}
+
+
 @app.get("/api/extras", tags=["mission"])
 def get_extras(product_id: str, mall_key: str, con: Con):
     """«While you're here»: accessories of this product that the same mall sells, cheapest listing each, with shop, floor and unit."""
@@ -381,8 +393,8 @@ def compare_shops(product_id: str, con: Con, ids: str = Query(..., description="
 
 # ------------------------------------------------------------------ shops / malls
 @app.get("/api/shops/{shop_id}", tags=["shops"])
-def shop(shop_id: str, con: Con, lat: float | None = None, lon: float | None = None):
-    s = catalog.get_shop(con, shop_id, _origin(lat, lon))
+def shop(shop_id: str, con: Con, lat: float | None = None, lon: float | None = None, q: str | None = None, category: str | None = None):
+    s = catalog.get_shop(con, shop_id, _origin(lat, lon), q, category)
     if not s:
         raise HTTPException(404, "فروشگاه پیدا نشد")
     return s
@@ -616,6 +628,21 @@ def recheck(inquiry_id: str, body: RecheckIn, request: Request, con: Con):
     return inq.request_recheck(con, inquiry_id, body.eta_min, demo_gone=body.demo_gone and os.environ.get("TOROB_DEMO_SOLDOUT", "1") != "0")
 
 
+class EscalateIn(BaseModel):
+    session_id: str
+
+
+@app.post("/api/inquiries/{inquiry_id}/escalate", tags=["inquiries"])
+def escalate(inquiry_id: str, body: EscalateIn, request: Request, con: Con):
+    """The shop did not answer the message: ask again by an automated call (once)."""
+    _guard(con, body.session_id, request)
+    _own_inquiry(con, inquiry_id, body.session_id)
+    v = inq.request_escalation(con, inquiry_id)
+    if not v:
+        raise HTTPException(409, "این پرسش را نمی‌شود دوباره از راه دیگری فرستاد")
+    return v
+
+
 @app.post("/api/transcribe", tags=["chat"])
 async def transcribe(request: Request):
     """Speech to text for the microphone button: the body is the raw recording (webm / ogg / mp4 / wav), the answer is {text}. The audio is
@@ -782,6 +809,7 @@ class AnswerIn(BaseModel):
 @app.get("/api/seller/{shop_id}/{token}/inquiries", tags=["seller"])
 def seller_list(shop_id: str, token: str, con: Con):
     _check(shop_id, token)
+    inq.touch_seller(shop_id)
     shop = catalog.get_shop(con, shop_id)
     from .services import bale
     n_upd = con.execute("SELECT COUNT(*) FROM listing_updates WHERE shop_id=?", (shop_id,)).fetchone()[0]
@@ -845,10 +873,258 @@ def seller_update_listing(shop_id: str, token: str, inquiry_id: str, con: Con):
     return v
 
 
+# ---- seller accounts: log in as a shop owner instead of opening a token link. Every /seller/me/* route is the token-link route for
+# the shop this account owns (shopper accounts get 403).
+class SellerSignupIn(BaseModel):
+    username: str = Field(min_length=1, max_length=64)
+    password: str = Field(min_length=1, max_length=128)
+    code: str = Field(min_length=3, max_length=300, description="the shop code «shop_id.token» or the whole seller link")
+
+
+def _parse_shop_code(code: str) -> tuple[str, str]:
+    c = code.strip().rstrip("/")
+    if "/seller/" in c:
+        parts = c.split("/seller/", 1)[1].split("/")
+        return (parts[0], parts[1]) if len(parts) >= 2 else ("", "")
+    if "." in c:
+        a, _, b = c.rpartition(".")
+        return a, b
+    return "", ""
+
+
+@app.post("/api/seller/auth/signup", tags=["seller"])
+def seller_signup(body: SellerSignupIn, con: Con):
+    shop_id, token = _parse_shop_code(body.code)
+    if not shop_id or not inq.valid_shop_token(shop_id, token) or not catalog.get_shop(con, shop_id):
+        raise HTTPException(403, "کد فروشگاه درست نیست. کد را از ترب‌گرد یا ربات بله بگیرید.")
+    try:
+        user, tok = auth.signup_seller(con, body.username, body.password, shop_id)
+    except auth.AuthError as e:
+        raise HTTPException(e.status, e.message)
+    return {"user": user, "token": tok}
+
+
+def _me_shop(request: Request, con) -> str:
+    u = auth.user_for_token(con, _token(request))
+    if not u:
+        raise HTTPException(401, "وارد نشده‌اید.")
+    if u["role"] != "seller" or not u["shop_id"]:
+        raise HTTPException(403, "این بخش مخصوص فروشنده‌هاست.")
+    return u["shop_id"]
+
+
+@app.get("/api/seller/me/inquiries", tags=["seller"])
+def me_list(request: Request, con: Con):
+    sid = _me_shop(request, con)
+    return seller_list(sid, inq.shop_token(sid), con)
+
+
+@app.post("/api/seller/me/inquiries/{inquiry_id}/answer", tags=["seller"])
+def me_answer(inquiry_id: str, body: AnswerIn, request: Request, con: Con):
+    sid = _me_shop(request, con)
+    return seller_answer(sid, inq.shop_token(sid), inquiry_id, body, con)
+
+
+@app.post("/api/seller/me/inquiries/{inquiry_id}/reply", tags=["seller"])
+async def me_reply(inquiry_id: str, body: ReplyIn, request: Request):
+    con = db.connect()
+    try:
+        sid = _me_shop(request, con)
+    finally:
+        con.close()
+    return await seller_reply(sid, inq.shop_token(sid), inquiry_id, body)
+
+
+@app.post("/api/seller/me/inquiries/{inquiry_id}/update-listing", tags=["seller"])
+def me_update_listing(inquiry_id: str, request: Request, con: Con):
+    sid = _me_shop(request, con)
+    return seller_update_listing(sid, inq.shop_token(sid), inquiry_id, con)
+
+
+class ListingIn(BaseModel):
+    available: bool
+    price: int | None = Field(None, ge=0)
+    update_listing: bool = True
+
+
+def _listings(con, shop_id: str, q: str = "", limit: int = 20) -> list[dict]:
+    like = f"%{q.strip()}%" if q.strip() else None
+    rows = con.execute(
+        "SELECT o.product_id, p.title FROM offers o JOIN products p USING(product_id) WHERE o.shop_id=? "
+        + ("AND p.title LIKE ? " if like else "") + "GROUP BY o.product_id ORDER BY p.shop_count DESC LIMIT ?",
+        (shop_id, *( [like] if like else []), limit)).fetchall()
+    out = []
+    for r in rows:
+        c = con.execute("SELECT available, price, source, created_at FROM confirmations WHERE shop_id=? AND product_id=? ORDER BY id DESC LIMIT 1",
+                        (shop_id, r["product_id"])).fetchone()
+        out.append({"product_id": r["product_id"], "title": r["title"], "price": inq._listed(con, shop_id, r["product_id"]),
+                    "last": {"available": None if c["available"] is None else bool(c["available"]), "price": c["price"], "at": c["created_at"]} if c else None})
+    return out
+
+
+@app.get("/api/seller/{shop_id}/{token}/listings", tags=["seller"])
+def link_listings(shop_id: str, token: str, con: Con, q: str = Query("", max_length=60), limit: int = Query(20, ge=1, le=50)):
+    _check(shop_id, token)
+    return {"items": _listings(con, shop_id, q, limit)}
+
+
+@app.post("/api/seller/{shop_id}/{token}/listings/{product_id}", tags=["seller"])
+def link_listing_set(shop_id: str, token: str, product_id: str, body: ListingIn, con: Con):
+    _check(shop_id, token)
+    return _set_listing(con, shop_id, product_id, body)
+
+
+@app.get("/api/seller/me/listings", tags=["seller"])
+def me_listings(request: Request, con: Con, q: str = Query("", max_length=60), limit: int = Query(20, ge=1, le=50)):
+    sid = _me_shop(request, con)
+    return {"items": _listings(con, sid, q, limit)}
+
+
+@app.post("/api/seller/me/listings/{product_id}", tags=["seller"])
+def me_listing_set(product_id: str, body: ListingIn, request: Request, con: Con):
+    """One tap: «I have it» / «I'm out», optionally with the real price. Shoppers see it as the seller's own confirmation."""
+    return _set_listing(con, _me_shop(request, con), product_id, body)
+
+
+def _set_listing(con, sid: str, product_id: str, body: ListingIn):
+    if not con.execute("SELECT 1 FROM offers WHERE shop_id=? AND product_id=?", (sid, product_id)).fetchone():
+        raise HTTPException(404, "این کالا در فروشگاه شما نیست")
+    listed = inq._listed(con, sid, product_id)
+    price = body.price if body.available else None
+    verify.record(con, sid, product_id, body.available, price, "seller")
+    if body.available and price and price != listed and body.update_listing:
+        verify.update_listing(con, sid, product_id, price)
+    return next((x for x in _listings(con, sid, "", 50) if x["product_id"] == product_id), {"product_id": product_id})
+
+
+# ---- the Today and Shop tabs
+def _today(con, sid: str) -> dict:
+    from .services import sellerstats
+    return sellerstats.today(con, sid)
+
+
+def _shop_info(con, sid: str) -> dict:
+    from .services import shopsettings
+    shop = catalog.get_shop(con, sid)
+    cu = shopsettings.closed_until(sid)
+    return {"shop_id": sid, "name": shop["name"], "mall": shop["mall"], "unit": shop["unit"], "phone": shop.get("phone"),
+            "weekly_hours": shop.get("weekly_hours"), "open": shop["open"], "closed_until": cu.isoformat() if cu else None}
+
+
+class ClosedIn(BaseModel):
+    mode: str = Field(pattern="^(reopen|today|hours)$")
+    hours: float | None = Field(None, gt=0, le=12)
+
+
+def _set_closed(con, sid: str, body: ClosedIn) -> dict:
+    from .services import shopsettings
+    shopsettings.set_closed(con, sid, hours=body.hours if body.mode == "hours" else None, rest_of_day=body.mode == "today")
+    return _shop_info(con, sid)
+
+
+@app.get("/api/seller/{shop_id}/{token}/today", tags=["seller"])
+def link_today(shop_id: str, token: str, con: Con):
+    _check(shop_id, token)
+    return _today(con, shop_id)
+
+
+@app.get("/api/seller/{shop_id}/{token}/shop", tags=["seller"])
+def link_shop(shop_id: str, token: str, con: Con):
+    _check(shop_id, token)
+    return _shop_info(con, shop_id)
+
+
+@app.post("/api/seller/{shop_id}/{token}/shop/closed", tags=["seller"])
+def link_shop_closed(shop_id: str, token: str, body: ClosedIn, con: Con):
+    _check(shop_id, token)
+    return _set_closed(con, shop_id, body)
+
+
+@app.get("/api/seller/me/today", tags=["seller"])
+def me_today(request: Request, con: Con):
+    return _today(con, _me_shop(request, con))
+
+
+@app.get("/api/seller/me/shop", tags=["seller"])
+def me_shop(request: Request, con: Con):
+    return _shop_info(con, _me_shop(request, con))
+
+
+@app.post("/api/seller/me/shop/closed", tags=["seller"])
+def me_shop_closed(body: ClosedIn, request: Request, con: Con):
+    return _set_closed(con, _me_shop(request, con), body)
+
+
+@app.post("/api/demo/call-seller/{shop_id}", tags=["seller"])
+def demo_call_seller(shop_id: str, con: Con):
+    """Demo helper: ring this shop's open seller page right now with an in-app voice call (the answer goes to a throw-away shopper session)."""
+    if not catalog.get_shop(con, shop_id):
+        raise HTTPException(404, "فروشگاه پیدا نشد")
+    if not inq.seller_online(shop_id):
+        raise HTTPException(409, "صفحهٔ فروشنده این فروشگاه الان باز نیست؛ اول آن را باز کنید.")
+    pid = con.execute("SELECT product_id FROM offers WHERE shop_id=? ORDER BY changed_at DESC LIMIT 1", (shop_id,)).fetchone()
+    made = inq.create(con, "demo-call", [shop_id], pid[0] if pid else None, ["stock", "price"], 90, inq.CALL_NOTE_LIVE,
+                      extra={"channel": "call", "live_call": True})
+    return inq.view(con, made[0]["id"])
+
+
+# ---- the daily stock check (see services/stockcheck.py)
+class StockAnswerIn(BaseModel):
+    available: bool
+    price: int | None = Field(None, ge=0)
+
+
+@app.get("/api/seller/{shop_id}/{token}/stockcheck", tags=["seller"])
+def seller_stockcheck(shop_id: str, token: str, con: Con):
+    """The shop's pending «do you still have these?» items."""
+    _check(shop_id, token)
+    return {"items": stockcheck.pending(con, shop_id)}
+
+
+@app.post("/api/seller/{shop_id}/{token}/stockcheck/{check_id}", tags=["seller"])
+def seller_stockcheck_answer(shop_id: str, token: str, check_id: str, body: StockAnswerIn, con: Con):
+    _check(shop_id, token)
+    r = stockcheck.answer(con, check_id, shop_id, body.available, body.price, channel="web")
+    if not r:
+        raise HTTPException(404, "این مورد پیدا نشد یا قبلاً جواب داده شده")
+    return {**r, "left": len(stockcheck.pending(con, shop_id))}
+
+
+@app.get("/api/seller/me/stockcheck", tags=["seller"])
+def me_stockcheck(request: Request, con: Con):
+    sid = _me_shop(request, con)
+    return {"items": stockcheck.pending(con, sid)}
+
+
+@app.post("/api/seller/me/stockcheck/{check_id}", tags=["seller"])
+def me_stockcheck_answer(check_id: str, body: StockAnswerIn, request: Request, con: Con):
+    sid = _me_shop(request, con)
+    return seller_stockcheck_answer(sid, inq.shop_token(sid), check_id, body, con)
+
+
+class StockRunIn(BaseModel):
+    shop_ids: list[str] = Field(default_factory=list, max_length=60)
+    near_lat: float | None = None
+    near_lon: float | None = None
+    shops: int = Field(20, ge=1, le=60, description="how many shops near the point when no shop_ids are given")
+    items: int = Field(6, ge=1, le=12)
+    simulate: bool = Field(False, description="demo: the shops answer (about 3 in 4 say yes)")
+
+
+@app.post("/api/stockcheck/run", tags=["seller"])
+def run_stockcheck(body: StockRunIn, con: Con):
+    """Start a round of the daily stock check (a daily job calls this in production; the demo can also have the shops answer)."""
+    ids = list(body.shop_ids)
+    if not ids:
+        lat, lon = body.near_lat or catalog.DEFAULT_LOC[0], body.near_lon or catalog.DEFAULT_LOC[1]
+        ids = [s["shop_id"] for s in pulse_svc.pulse(con, lat, lon, 1.2, limit=400)["shops"] if con.execute("SELECT 1 FROM offers WHERE shop_id=? LIMIT 1", (s["shop_id"],)).fetchone()][:body.shops]
+    return stockcheck.run(con, ids, body.items, body.simulate)
+
+
 @app.get("/api/demo/seller-link/{shop_id}", tags=["seller"])
 def demo_seller_link(shop_id: str):
     """Demo helper: the web inbox link a team member opens on a second phone to play this shop's seller."""
-    return {"path": f"/seller/{shop_id}/{inq.shop_token(shop_id)}"}
+    return {"path": f"/seller/{shop_id}/{inq.shop_token(shop_id)}", "code": f"{shop_id}.{inq.shop_token(shop_id)}"}
 
 
 # ------------------------------------------------------------------ visit plan

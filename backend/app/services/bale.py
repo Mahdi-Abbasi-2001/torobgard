@@ -156,6 +156,25 @@ async def notify_inquiry(iid: str, client: "BaleClient | None" = None) -> bool:
         con.close()
 
 
+async def send_stockcheck(shop_id: str, items: list[dict], client: "BaleClient | None" = None) -> int:
+    """The daily «do you still have these?» list to a linked shop: one message per item, two buttons each. Returns how many were sent."""
+    client = client or CLIENT
+    if not client or not items:
+        return 0
+    con = db.connect()
+    try:
+        link = con.execute("SELECT chat_id FROM bale_links WHERE shop_id=?", (shop_id,)).fetchone()
+        if not link:
+            return 0
+        await client.send(link["chat_id"], f"🗓 بررسی روزانهٔ موجودی: {len(items)} کالای پرتقاضای شما. برای هرکدام یک دکمه بزنید؛ خریدارها همان‌جا موجود بودنش را می‌بینند.")
+        for it in items:
+            price = f" (قیمت ثبت‌شده: {it['price']:,} تومان)" if it.get("price") else ""
+            await client.send(link["chat_id"], f"{str(it['title'])[:80]}{price}\nهنوز دارید؟", [[("✅ دارم", f"s:{it['id']}:1"), ("❌ ندارم", f"s:{it['id']}:0")]])
+        return len(items)
+    finally:
+        con.close()
+
+
 async def send_follow_up(con, shop_id: str, iid: str, text: str, client: "BaleClient | None" = None):
     """The assistant's follow-up question to a linked seller (the next free-text message answers it)."""
     client = client or CLIENT
@@ -314,6 +333,15 @@ async def _on_callback(con, client, cb):
         await client.call("answerCallbackQuery", callback_query_id=cb["id"])
     except BaleError:
         pass
+    sc = re.fullmatch(r"s:(chk_[0-9a-f]+):(1|0)", data)
+    if sc:   # the daily stock check
+        cid, opt = sc.groups()
+        r = con.execute("SELECT c.shop_id FROM stock_checks c JOIN bale_links b ON b.shop_id=c.shop_id WHERE c.id=? AND b.chat_id=?", (cid, chat)).fetchone()
+        if not r:
+            return await client.send(chat, "این مورد متعلق به فروشگاه‌های متصل به این گفتگو نیست.")
+        from . import stockcheck
+        done = stockcheck.answer(con, cid, r["shop_id"], opt == "1", channel="bale")
+        return await client.send(chat, "✅ ثبت شد؛ ممنون." if done else "این مورد قبلاً جواب داده شده است.")
     m = re.fullmatch(r"([ahru]):(inq_[0-9a-f]+):(1|0|same|tom)", data)
     if not m:
         return

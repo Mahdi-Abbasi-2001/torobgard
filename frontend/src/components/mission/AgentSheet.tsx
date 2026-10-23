@@ -12,14 +12,13 @@ import { ShopCard } from "@/components/cards";
 import { ReviewCardView } from "@/components/ReviewCard";
 import { WhereToLookCard } from "@/components/WhereToLook";
 import { Bidi, Sheet, Thumb } from "@/components/ui";
-import { slotSummary } from "./slots";
 
 type Msg = { me: boolean; text: string; blocks: Block[]; err?: string; changes?: string[] };
 const SUGGEST = ["اگر فردا بروم، چه فرقی می‌کند؟", "قسطی کجا می‌دهد؟", "در مغازه چه چیزی را چک کنم؟"];
 
 /** The errand as plain words, so the assistant answers about this errand and not a fresh topic. */
 const contextOf = (m: Mission) => [
-  `کالا: ${m.product?.title ?? m.query}`, m.need && `برای: ${m.need}`, m.category && `دسته: ${m.category}`,
+  m.product ? `مدلی که خود کاربر انتخاب کرده: ${m.product.title}` : `کالا: ${m.query} (کاربر هنوز مدلی انتخاب نکرده؛ انتخاب با خود اوست، تو انتخاب نکن)`, m.need && `برای: ${m.need}`, m.category && `دسته: ${m.category}`,
   (m.budgetMin || m.budgetMax) && `بودجه: ${m.budgetMin ? `از ${mil(m.budgetMin)} ` : ""}${m.budgetMax ? `تا ${mil(m.budgetMax)} ` : ""}میلیون تومان`.replace(/\s+/g, " "),
   `شروع از: ${m.place.label}`,
 ].filter(Boolean).join("\n");
@@ -79,10 +78,8 @@ export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: bo
   return (
     <Sheet open={open} onClose={onClose} label="از ترب‌گرد بپرسید" className="agent-sheet">
       <div className="row between"><h2>از ترب‌گرد بپرسید</h2></div>
-      <span className="xs faint" style={{ marginTop: -8 }}>سؤال بپرسید؛ جواب‌ها را می‌شود مستقیم به خریدتان اضافه کرد.</span>
+      <span className="xs faint" style={{ marginTop: -8 }}>هر چه می‌خواهید بپرسید یا عوض کنید؛ همین‌جا در خریدتان اعمال می‌شود.</span>
       <div className="stack agent-body" style={{ gap: 10 }}>
-        {mission.text && <div className="msg me">{mission.text}</div>}
-        <div className="msg ai">{mission.brief ? <>{fa(mission.brief)} سفر را همین‌طور ساختم: <span className="muted">{slotSummary(mission)}</span>. </> : <>این سفر را برای «<Bidi text={mission.query} />» ساختم. </>}هر چیزی را بگویید در همین سفر عوض می‌کنم و اینجا می‌نویسم چه کردم.</div>
         {!msgs.length && (
           <div className="stack" style={{ gap: 8 }}>
             <div className="wrapr">{SUGGEST.map((s) => <button key={s} type="button" className="chip" onClick={() => send(s)}>{s}</button>)}</div>
@@ -91,12 +88,12 @@ export function AgentSheet({ open, onClose, mission, initialQ = "" }: { open: bo
         {msgs.map((m, i) => m.me ? <div key={i} className="msg me">{m.text}</div> : (
           <div key={i} className="stack" style={{ gap: 8 }}>
             {m.text && <div className="msg ai" style={{ whiteSpace: "pre-wrap" }}>{m.text.replace(/\*\*|__|^#+\s*/gm, "")}</div>}
-            {m.changes && m.changes.length > 0 && <div className="note ok"><Icon n="check" s /><span><b>در سفر شما عوض شد:</b> {m.changes.join("، ")}</span></div>}
+            {m.changes && m.changes.length > 0 && <div className="note ok"><Icon n="check" s /><span><b>در خرید شما عوض شد:</b> {m.changes.join("، ")}</span></div>}
             {m.blocks.map((b, j) => <Blk key={j} b={b} onPick={send} onChallenge={challenge} />)}
             {m.err && <div className="note bad"><Icon n="alert" s /><span>{m.err}</span></div>}
           </div>
         ))}
-        {busy && <div className="toolline"><span className="spin" />{status ?? "در حال فکر کردن…"}</div>}
+        {busy && <div className="toolline"><span className="spin" />یک لحظه…</div>}
         <div ref={end} />
       </div>
       <form className="row" style={{ gap: 8 }} onSubmit={(e) => { e.preventDefault(); send(text); }}>
@@ -125,7 +122,7 @@ function Blk({ b, onPick, onChallenge }: { b: Block; onPick: (t: string) => void
       ))}
     </div>
   );
-  if (b.type === "mission_update") return <div className="note ok"><Icon n="check" s /><span><b>به سفر شما اضافه شد:</b> {b.labels.join("، ")}</span></div>;
+  if (b.type === "mission_update") return <div className="note ok"><Icon n="check" s /><span><b>به خرید شما اضافه شد:</b> {b.labels.join("، ")}</span></div>;
   if (b.type === "chips") return <div className="wrapr">{b.options.map((o) => <button key={o} type="button" className="chip" onClick={() => onPick(o)}>{o}</button>)}</div>;
   if (b.type === "shop_list") return <div className="stack" style={{ gap: 8 }}>{b.listed.slice(0, 3).map((s) => <ShopCard key={s.shop_id} s={s} />)}</div>;
   if (b.type === "review") return <ReviewCardView r={b} />;

@@ -12,12 +12,7 @@ import { Bidi } from "@/components/ui";
 
 const num = (s: string | null | undefined) => { const n = parseInt(String(s ?? "").replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : null; };
 
-/** Neshan's documented links: a point, and a route (Android/web only know car «d»; walking is iOS-only, so on foot the point link is used).
- *  No link opens street view directly; the shopper switches to it inside Neshan where the street is covered. */
-const neshanPoint = (lat: number, lon: number) => `https://nshn.ir/?lat=${lat}&lng=${lon}`;
-const neshanRoute = (a: { lat: number; lon: number }, b: { lat: number; lon: number }) => `https://nshn.ir?origin=${a.lat},${a.lon}&destination=${b.lat},${b.lon}&vehicle=d`;
-
-export function FinalSteps({ stop, card, from, mode, onFloors }: { stop: PlanStop; card?: ShopCard; from?: { lat: number; lon: number }; mode?: "walk" | "taxi" | "car"; onFloors?: () => void }) {
+export function FinalSteps({ stop, card, onFloors }: { stop: PlanStop; card?: ShopCard; onFloors?: () => void }) {
   const [copied, setCopied] = useState(false);
   const mall = useQuery({ queryKey: ["mall", card?.mall_key], queryFn: () => api.mall(card!.mall_key!), enabled: !!card?.mall_key, staleTime: 5 * 60_000 });
   const mine = num(stop.unit) ?? num(stop.plaque);
@@ -51,18 +46,15 @@ export function FinalSteps({ stop, card, from, mode, onFloors }: { stop: PlanSto
         </div>
       )}
       <div className="show-guard" aria-label="برای نشان دادن به نگهبان یا فروشنده">
-        <span className="xs">به نگهبان یا فروشنده‌ای که سر راه دیدید نشان بدهید:</span>
+        <span className="xs">اگر گم شدید، این نشانی را به نگهبان یا فروشنده‌ای که سر راه می‌بینید نشان دهید:</span>
         <b>{stop.name}</b>
         <span>{where}</span>
-        {stop.hold && <span className="xs">کد نگه‌داری: <b className="num">{fa(stop.hold.code)}</b></span>}
       </div>
       <div className="fs-actions">
         {onFloors && <button type="button" className="btn sec" onClick={onFloors}><Icon n="layers" s />کدام طبقه، کدام واحد؟</button>}
-        <a className="btn sec" href={neshanPoint(stop.lat, stop.lon)} target="_blank" rel="noopener noreferrer"><Icon n="eye" s />ببین خیابان روی نشان</a>
-        {from && mode && mode !== "walk" && <a className="btn sec" href={neshanRoute(from, stop)} target="_blank" rel="noopener noreferrer"><Icon n="walk" s />مسیریابی در نشان</a>}
         <button type="button" className="btn sec" onClick={share}><Icon n={copied ? "check" : "send"} s />{copied ? "کپی شد" : "فرستادن آدرس برای دوست"}</button>
       </div>
-      <span className="xs faint">نقشهٔ داخلی پاساژ در دادهٔ ترب نیست؛ طبقه، شماره و همسایه‌ها نزدیک‌ترین راهنما هستند. «نشان» در برگهٔ تازه باز می‌شود؛ اگر برای این خیابان تصویر ۳۶۰ درجه دارد، از خود نشان نمای خیابان را بزنید.</span>
+      <span className="xs faint">نقشهٔ داخلی پاساژ را نداریم؛ طبقه، شمارهٔ واحد و فروشگاه‌های همسایه نزدیک‌ترین راهنما هستند.</span>
     </div>
   );
 }

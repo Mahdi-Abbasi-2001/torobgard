@@ -42,9 +42,15 @@ CREATE TABLE IF NOT EXISTS {p}bale_links(shop_id TEXT PRIMARY KEY, chat_id TEXT,
 CREATE TABLE IF NOT EXISTS {p}bale_kv(k TEXT PRIMARY KEY, v TEXT);
 CREATE TABLE IF NOT EXISTS {p}product_reviews(product_id TEXT PRIMARY KEY, data TEXT, model TEXT, created_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}users(id TEXT PRIMARY KEY, username TEXT, username_norm TEXT UNIQUE, pw TEXT, session_id TEXT UNIQUE, created_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}shop_settings(shop_id TEXT PRIMARY KEY, closed_until TEXT, updated_at TEXT);
+CREATE TABLE IF NOT EXISTS {p}seller_shops(shop_id TEXT PRIMARY KEY, user_id TEXT UNIQUE, created_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}auth_tokens(token_hash TEXT PRIMARY KEY, user_id TEXT, created_at TEXT, expires_at TEXT);
 CREATE TABLE IF NOT EXISTS {p}inquiry_messages(id INTEGER PRIMARY KEY AUTOINCREMENT, inquiry_id TEXT, role TEXT, text TEXT,
   channel TEXT, simulated INTEGER DEFAULT 0, created_at TEXT);
+-- the daily «do you still have these?» check: a few of a shop's most-wanted items, one tap each (feeds the confirmations layer)
+CREATE TABLE IF NOT EXISTS {p}stock_checks(id TEXT PRIMARY KEY, shop_id TEXT, product_id TEXT, status TEXT, created_at TEXT, answered_at TEXT,
+  available INTEGER, price INTEGER, simulated INTEGER DEFAULT 0, channel TEXT);
+CREATE INDEX IF NOT EXISTS {p}ix_chk_shop ON stock_checks(shop_id);
 -- shared "what sellers/visitors confirmed" layer: newest row per (shop, product) wins and fades with age
 CREATE TABLE IF NOT EXISTS {p}confirmations(id INTEGER PRIMARY KEY AUTOINCREMENT, shop_id TEXT, product_id TEXT, available INTEGER,
   price INTEGER, source TEXT, inquiry_id TEXT, simulated INTEGER DEFAULT 0, created_at TEXT);
@@ -101,10 +107,23 @@ def connect(path: Path | str | None = None, state: bool = True) -> sqlite3.Conne
         con.execute("PRAGMA st.synchronous=NORMAL")
         con.executescript(STATE_TABLES.format(p="st."))
         _add_rating_column(con, "st.")
+        _add_role_column(con, "st.")
     elif not READONLY:
         con.executescript(STATE_TABLES.format(p=""))
         _add_rating_column(con, "")
+        _add_role_column(con, "")
     return con
+
+
+def _add_role_column(con: sqlite3.Connection, prefix: str) -> None:
+    """Accounts gained a role (shopper | seller); an older state database gets the column once."""
+    try:
+        cols = [r[1] for r in con.execute(f"PRAGMA {prefix}table_info(users)")]
+        if cols and "role" not in cols:
+            con.execute(f"ALTER TABLE {prefix}users ADD COLUMN role TEXT DEFAULT 'shopper'")
+            con.commit()
+    except sqlite3.Error:
+        pass
 
 
 def _add_rating_column(con: sqlite3.Connection, prefix: str) -> None:

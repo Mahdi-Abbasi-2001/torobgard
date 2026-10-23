@@ -10,13 +10,13 @@ from . import catalog, discover
 MAX_PICKS = 4
 
 PROMPT = """You are the planner of an in-person shopping errand in Tehran. The shopper wants ONE product and will message a few shops, then walk
-to the best one. From the candidate shops choose 2-4 to ask first. Use ONLY the given data. Prefer shops that are open when the shopper arrives,
+to the best one. From the candidate shops choose 2-4 to ask first. Use ONLY the given data. Prefer shops that are open when the shopper arrives, whose stock_likelihood is high (never fill the list with «کم» shops while better ones exist),
 close together (one trip), reliably answering, and not overpriced against fair_price; a confirmed answer is worth more than a listing. Respect the
 shopper's need, budget_max and priority. Reply JSON:
 {"picks": [{"shop_id": "<id from candidates>", "reason": "one short natural Persian clause citing a real number or fact (distance, closing time, price, reply rate)"}],
  "headline": "one short Persian sentence: the plan in plain words",
  "tip": "one short Persian sentence: what to watch for on this trip (closing time, a price far off, an unconfirmed shop)" | null}
-Order picks as they should be asked. Never invent shops, prices or hours."""
+Write each reason so a shopper understands it at a glance: plain words, no ratios like «۵۲ از ۵۳»; say «کم جواب می‌دهد» or «معمولاً جواب می‌دهد» instead, and mention a distance or price only as a short fact. Write prices the way people say them: «حدود ۱۱ میلیون تومان» or «۹۸۰ هزار تومان», never raw digits with separators. Order picks as they should be asked. Never invent shops, prices or hours."""
 
 
 def _compact(c: dict) -> dict:
@@ -27,7 +27,7 @@ def _compact(c: dict) -> dict:
             "open_at_arrival": (c.get("open") or {}).get("label"), "closes_at": (c.get("open") or {}).get("closes_at"),
             "price": o.get("price"), "price_check": (o.get("fair") or {}).get("text"), "price_age_days": o.get("age_days"),
             "confirmed": ({"price": conf.get("price"), "state": conf.get("state")} if conf else None),
-            "replies": rel.get("label") if rel.get("known") else None, "installment": c.get("installment"), "why": c.get("why")}
+            "replies": rel.get("label") if rel.get("known") else None, "stock_likelihood": (c.get("stock") or {}).get("label"), "stock_score": (c.get("stock") or {}).get("score"), "trip_risk": (c.get("trip_risk") or {}).get("label"), "installment": c.get("installment"), "why": c.get("why")}
 
 
 def rule_picks(listed: list[dict]) -> list[dict]:
@@ -47,6 +47,11 @@ async def advise(con, product_id: str, origin, *, when: str | None, need: str | 
         o["fair"] = discover.price_verdict(o["price"], fp) if o["price"] and not o["suspicious"] else None
     # a shop that just said "we don't have it" is not worth another message
     listed = [c for c in listed if (c.get("confirmation") or {}).get("available") is not False] or listed
+    # shops that almost certainly have nothing are not worth a message while enough likelier ones exist
+    likely = [c for c in listed if (c.get("stock") or {}).get("score", 50) >= 30]
+    listed = likely if len(likely) >= 3 else listed
+    close = [c for c in listed if c.get("walk_min") is None or c["walk_min"] <= 45]
+    listed = close or listed  # a shop two hours' walk away is not worth a message while a nearby one has it
     open_ = [c for c in listed if (c.get("open") or {}).get("state") != "closed"]
     listed = open_ if len(open_) >= 3 else listed  # a shop that is shut when you arrive is only worth a message if there is little else
     out = {"picks": rule_picks(listed), "headline": None, "tip": None, "source": "rules", "when": label}

@@ -42,17 +42,20 @@ export function ripenessOf(q: Inquiry, kids: Inquiry[]): { r: Ripeness; gone: bo
   return { r: 2, gone: false, hold: null };
 }
 
-export function useMissionStatus(m: Pick<Mission, "productId" | "going" | "done"> | undefined, { live = true }: { live?: boolean } = {}): MissionStatus {
+export function useMissionStatus(m: Pick<Mission, "productId" | "going" | "done"> & Partial<Pick<Mission, "createdAt">> | undefined, { live = true }: { live?: boolean } = {}): MissionStatus {
   const { sid } = useSession();
   const inq = useInquiries(sid, { live });
   const pid = m?.productId ?? null;
-  const camps = useQuery({ queryKey: ["campaigns", sid], queryFn: () => api.campaigns(sid), enabled: !!sid && !!pid, refetchInterval: 15_000 });
+  const camps = useQuery({ queryKey: ["campaigns", sid], queryFn: () => api.campaigns(sid), enabled: !!sid && !!pid, refetchInterval: live ? 15_000 : false });
 
   return useMemo<MissionStatus>(() => {
     const all = inq.items;
+    // inquiries belong to the session, not the mission: a question from an earlier journey for the same model must not count here
+    const since = (m?.createdAt ?? 0) - 60_000;
+    const mine = (iso: string) => { const t = Date.parse(/[zZ]|[+-]\d\d:?\d\d$/.test(iso) ? iso : iso + "Z"); return !(t < since); };
     // newest question per shop (asking again replaces the old card); holds and re-checks hang under the card they belong to
     const seen = new Set<string>();
-    const asks = all.filter((i) => i.kind === "ask" && pid && i.product?.product_id === pid && i.shop && !seen.has(i.shop.shop_id) && seen.add(i.shop.shop_id));
+    const asks = all.filter((i) => i.kind === "ask" && pid && mine(i.created_at) && i.product?.product_id === pid && i.shop && !seen.has(i.shop.shop_id) && seen.add(i.shop.shop_id));
     const byId = new Map(all.map((i) => [i.id, i]));
     const cardOf = new Map(asks.map((i) => [`${i.shop!.shop_id}:${i.product?.product_id}`, i.id]));
     const kidsOf = new Map<string, Inquiry[]>();
@@ -75,7 +78,7 @@ export function useMissionStatus(m: Pick<Mission, "productId" | "going" | "done"
     const held = items.find((x) => x.ripeness === 4);
     const cost = (x: ShopProgress) => Math.min(x.q.answer?.price ?? 9e12, x.deal ?? 9e12);
     const best = items.filter((x) => x.ripeness >= 3 && x.q.answer?.price).sort((a, b) => cost(a) - cost(b))[0] ?? items.find((x) => x.ripeness >= 3) ?? null;
-    const camp = camps.data?.items.find((c) => c.product_id === pid);
+    const camp = camps.data?.items.find((c) => c.product_id === pid && mine(c.created_at));
     const finished = !!m?.done;
     const stage: Stage = finished || m?.going || held ? 3 : items.length || camp ? 2 : pid ? 1 : 0;
     const bits = [confirmed && `${fa(confirmed)} تأیید`, unavailable && `${fa(unavailable)} ناموجود`, waiting && `${fa(waiting)} در حال پرسیدن`, silent && `${fa(silent)} بی‌پاسخ`].filter(Boolean);

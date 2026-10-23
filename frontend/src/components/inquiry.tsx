@@ -99,7 +99,7 @@ export function InquiryCard({ q, listed: listedIn, now, flash, onAlternatives, k
       {q.status === "answered" && a?.available !== false && !goneNow && (actions.onHold || actions.onRecheck || actions.onReport) && (
         <div className="actions">
           {actions.onHold && !holdOk && !(hold && (hold.status === "sent" || hold.status === "delivered")) && <button className="btn sec" onClick={actions.onHold}><Icon n="hold" s />برایم نگه دارید</button>}
-          {actions.onRecheck && !(lastRecheck && (lastRecheck.status === "sent" || lastRecheck.status === "delivered")) && <button className="btn sec" onClick={actions.onRecheck}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>}
+          {actions.onRecheck && !(lastRecheck && (lastRecheck.status === "sent" || lastRecheck.status === "delivered")) && <button className="btn sec" onClick={actions.onRecheck}><Icon n="walk" s />هنوز موجود است؟ دوباره بپرس</button>}
           {actions.onReport && <button className="btn ghost" onClick={actions.onReport}><Icon n="check" s />رفتم؛ نتیجه را بگویم</button>}
         </div>
       )}

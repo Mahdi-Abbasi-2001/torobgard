@@ -28,14 +28,16 @@ def _age_min(ts: str, now: datetime) -> int:
         return 10 ** 6
 
 
-def state_for(age_min: int) -> str:
-    return "fresh" if age_min < FRESH_MIN else "aging" if age_min < AGING_MIN else "expired"
+def state_for(age_min: int, source: str = "seller") -> str:
+    # a live answer fades within hours; the morning stock check describes the shelves for the whole day
+    fresh, aging = (480, 1440) if source == "daily" else (FRESH_MIN, AGING_MIN)
+    return "fresh" if age_min < fresh else "aging" if age_min < aging else "expired"
 
 
 # ---------------------------------------------------------------- writes
 def record(con, shop_id: str, product_id: str | None, available: bool | None, price: int | None, source: str,
            inquiry_id: str | None = None, simulated: bool = False, commit: bool = True):
-    """source: seller | visit | call. Nothing to record without a product or an availability/price signal."""
+    """source: seller | daily | visit | call. Nothing to record without a product or an availability/price signal."""
     if not product_id or (available is None and not price):
         return
     con.execute("INSERT INTO confirmations(shop_id,product_id,available,price,source,inquiry_id,simulated,created_at) "
@@ -117,7 +119,7 @@ def confirmations(con, pairs: list[tuple[str, str]], now: datetime | None = None
             continue
         age = _age_min(r["created_at"], now)
         out[k] = {"available": None if r["available"] is None else bool(r["available"]), "price": r["price"],
-                  "source": r["source"], "at": r["created_at"], "age_min": age, "state": state_for(age),
+                  "source": r["source"], "at": r["created_at"], "age_min": age, "state": state_for(age, r["source"]),
                   "simulated": bool(r["simulated"]), "inquiry_id": r["inquiry_id"], "count": 1}
     return out
 
@@ -202,12 +204,13 @@ def _rel_label(a: dict, rate: float | None, med: float | None) -> str | None:
         if rate is not None and rate >= 0.6 and med is not None:
             m = max(1, round(med / 60))
             parts.append(f"معمولاً ظرف {_fa(m)} دقیقه جواب می‌دهد")
-        parts.append(f"به {_fa(a['replied'])} از {_fa(a['asked'])} استعلام پاسخ داده")
+        low = a["replied"] / a["asked"] < 0.3
+        parts.append(f"کم جواب می‌دهد؛ به {_fa(a['replied'])} پیام از {_fa(a['asked'])} پیام" if low else f"به {_fa(a['replied'])} پیام از {_fa(a['asked'])} پیام جواب داده")
     if a["checks"] >= 2:
         r = a["matches"] / a["checks"]
         parts.append("قیمت ثبت‌شده‌اش معمولاً درست است" if r >= 0.7 else "قیمت ثبت‌شده‌اش اغلب عوض شده")
     if a["visits"]:
-        parts.append(f"{_fa(a['visit_ok'])} از {_fa(a['visits'])} مراجعه: همان‌طور که گفته بود")
+        parts.append(f"از {_fa(a['visits'])} نفری که رفته‌اند، {_fa(a['visit_ok'])} نفر کالا را همان‌طور که گفته بود دیدند")
     return " · ".join(parts)
 
 
@@ -239,7 +242,7 @@ def _annotate(con, cards, product_ids, now):
         c["reliability"] = rel.get(c["shop_id"])
         cf = c["confirmation"]
         if cf and cf["state"] != "expired" and c.get("why"):
-            who = {"seller": "فروشنده", "visit": "خریداری که رفت", "call": "خریداری که زنگ زد"}[cf["source"]]
+            who = {"seller": "فروشنده", "daily": "فروشنده در بررسی روزانه", "visit": "خریداری که رفت", "call": "خریداری که زنگ زد"}[cf["source"]]
             said = "موجودی‌اش را تأیید کرد" if cf["available"] is not False else "گفت ندارد"
             c["why"] = f"{who} {_ago(cf['age_min'])} {said} · " + c["why"]
         u = upd.get(k)
@@ -248,6 +251,11 @@ def _annotate(con, cards, product_ids, now):
             before = o.get("price")
             o.update(price_info(u["price"], u["at"], 0, now))
             o["updated_by_seller"], o["listed_before_update"] = True, before
+    from . import stock
+    act = stock.shop_activity(con)
+    for c in cards:  # last, so a seller's listing update and any fresh confirmation are already on the card
+        c["stock"] = stock.likelihood(c, act)
+        c["trip_risk"] = stock.risk_of_wasted_trip(c, c["stock"])
 
 
 def apply_listing_updates(con, shop_id: str, offers: list[dict], now: datetime | None = None):
@@ -276,6 +284,9 @@ def rank_adjust(card: dict) -> float:
     r = card.get("reliability")
     if r and r["known"]:
         adj += (0.5 - r["score"]) * 0.12
+    st = card.get("stock")
+    if st and st["level"] != "unknown":
+        adj += (0.55 - st["score"] / 100) * 0.3   # likely-in-stock shops edge ahead, long-shots sink (as marketplaces do with high unavailability risk)
     return adj
 
 

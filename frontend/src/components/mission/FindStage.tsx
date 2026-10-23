@@ -19,6 +19,7 @@ import { ComparePanel } from "./ComparePanel";
 import { MallSheet } from "./MallSheet";
 import { ModeChips, WhenScrubber } from "./Scrubber";
 import { ShopSheet } from "./ShopSheet";
+import { MODE_LABEL, whenText } from "./slots";
 import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 
@@ -41,6 +42,8 @@ export default function FindStage(sp: StageProps) {
   const [warn, setWarn] = useState("");
   const [hov, setHov] = useState<string | null>(null);
   const [pulse, setPulse] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [tab, setTab] = useState<"advice" | "shortlist">("advice"); // desktop side panel: what we suggest, then what you chose
 
   const q = useQuery({
     queryKey: ["fshops", pid, m.place.lat, m.place.lon, m.when, m.cond, m.priority], placeholderData: keepPreviousData,
@@ -102,11 +105,18 @@ export default function FindStage(sp: StageProps) {
       hubs={hubs} onHub={(key) => { if (!key.startsWith("~")) setMallKey(key); }} height={desk ? "100%" : 300} />
   ) : q.isLoading ? <div className="sk" style={{ height: desk ? "100%" : 300, borderRadius: 18 }} aria-busy="true" /> : null;
 
-  const timeCard = (
+  // the arrival time and the way of going sit folded away until wanted: they are also on the side panel, and the open card covered half the map
+  const timeCard = !timeOpen ? (
+    <div className="mc-card scrub-card scrub-fold">
+      <span className="sm">رسیدن: <b>{whenText(m.when)}</b>، با <b>{MODE_LABEL[m.mode]}</b></span>
+      <button type="button" className="chip on" onClick={() => setTimeOpen(true)}>تغییر زمان و وسیله</button>
+    </div>
+  ) : (
     <div className="mc-card scrub-card">
+      <button type="button" className="chip" style={{ alignSelf: "flex-end" }} onClick={() => setTimeOpen(false)}>بستن</button>
       <WhenScrubber when={m.when} onChange={(w) => patchSlots({ when: w })} compact={!desk} />
       <ModeChips mode={m.mode} onChange={(mode) => patchSlots({ mode })} />
-      <button type="button" className="chip" style={{ alignSelf: "flex-start" }} onClick={() => setPulse(true)}><Icon n="clock" s />ببین بازار در طول روز چطور باز و بسته می‌شود</button>
+      <button type="button" className="chip" style={{ alignSelf: "flex-start" }} onClick={() => setPulse(true)}><Icon n="clock" s />ببینید بازار در طول روز چطور باز و بسته می‌شود</button>
       {m.mode === "car" && <Note tone="warn" icon="alert">بازار مرکزی داخل طرح ترافیک است؛ بدون مجوز نمی‌شود با ماشین رفت.</Note>}
     </div>
   );
@@ -132,7 +142,7 @@ export default function FindStage(sp: StageProps) {
       <ShopSheet shopId={shopId} productId={pid} onClose={() => setShopId(null)} onMall={(k) => setMallKey(k)}
         onAsk={(id) => { setOnlyShop(id); setShopId(null); setAskOpen(true); }} />
       <Sheet open={pulse} onClose={() => setPulse(false)} label="بازار در طول روز" className="tall">
-        <div className="row between"><div><div className="mc-label">تنفس بازار</div><div className="b" style={{ fontSize: 17 }}>بازار اطراف شما در طول روز</div></div><button className="iconbtn soft" onClick={() => setPulse(false)} aria-label="بستن"><Icon n="x" /></button></div>
+        <div className="row between"><div><div className="mc-label">ساعت کاری بازار</div><div className="b" style={{ fontSize: 17 }}>بازار اطراف شما در طول روز</div></div><button className="iconbtn soft" onClick={() => setPulse(false)} aria-label="بستن"><Icon n="x" /></button></div>
         {pulse && <PulseMap origin={m.place} mine={listed.map((s) => s.shop_id)} height={560} onPick={(t) => { patchSlots({ when: t }); setPulse(false); }} onUnavailable={() => setPulse(false)} />}
       </Sheet>
       <MallSheet mallKey={mallKey} hits={hitIds} onClose={() => setMallKey(null)} onShop={(id) => setShopId(id)} />
@@ -152,7 +162,16 @@ export default function FindStage(sp: StageProps) {
               {!noShops && <div className="map-bottom">{timeCard}</div>}
             </>
           }
-          panel={<div className="stack" style={{ gap: 12 }}>{few && <FewNote go={go} n={listed.length} />}{!noShops && adviceCard}{hubCard}{noShops ? null : compare}</div>}
+          panel={noShops ? <div className="stack" style={{ gap: 12 }}>{few && <FewNote go={go} n={listed.length} />}{hubCard}</div> : (
+            <div className="stack" style={{ gap: 12 }}>
+              <div className="seg" role="tablist" aria-label="بخش‌های پنل">
+                <button type="button" role="tab" aria-selected={tab === "advice"} className={tab === "advice" ? "on" : ""} onClick={() => setTab("advice")}>پیشنهاد ترب‌گرد</button>
+                <button type="button" role="tab" aria-selected={tab === "shortlist"} className={tab === "shortlist" ? "on" : ""} onClick={() => setTab("shortlist")}>فروشگاه‌های منتخب ({fa(m.picks.length)})</button>
+              </div>
+              <div className="xs faint">{tab === "advice" ? "ترب‌گرد کدام فروشگاه‌ها را اول بپرسد؛ با «انتخاب همین‌ها» می‌پذیرید." : "اینجا فروشگاه‌هایی را که می‌خواهید بپرسید کنار هم مقایسه کنید؛ از روی نقشه هم می‌شود اضافه یا حذف کرد."}</div>
+              {tab === "advice" ? <>{few && <FewNote go={go} n={listed.length} />}{adviceCard}{hubCard}</> : compare}
+            </div>
+          )}
           cta={noShops ? undefined : askCta} />
         {sheets}
       </>
@@ -206,7 +225,7 @@ function AdviceCard({ adv, loading, listed, picks, onShop, onUse }: { adv?: Advi
         ))}
       </ol>
       {adv.tip && <Note tone="warn" icon="alert">{fa(adv.tip)}</Note>}
-      {!same && <button type="button" className="btn sec" onClick={() => onUse(ids)}><Icon n="check" s />همین‌ها را انتخاب کن</button>}
+      {!same && <button type="button" className="btn sec" onClick={() => onUse(ids)}><Icon n="check" s />انتخاب همین‌ها</button>}
     </section>
   );
 }

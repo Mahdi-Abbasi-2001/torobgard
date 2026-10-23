@@ -67,7 +67,7 @@ export default function CompareView({ ids }: { ids: string[] }) {
                 <Thumb src={p.image} alt={p.title} size="100%" h={110} brand={p.brand} />
                 <div className="xs b" style={{ lineHeight: 1.5 }}><Bidi text={p.title} /></div>
                 <div className="sm b num">{p.price_min != null ? `از ${mil(p.price_min)}` : "قیمت نامشخص"}</div>
-                <div className="xs faint">{fa(p.shop_count)} فروشگاه{av[p.product_id]?.near ? `، ${fa(av[p.product_id].near)} تا نزدیک` : ""}</div>
+                <div className="xs faint">{fa(p.shop_count)} فروشگاه{av[p.product_id]?.near ? `، ${fa(av[p.product_id].near)} نزدیک شما` : ""}</div>
                 {ins && <div className="xs" style={{ color: "var(--ok)", lineHeight: 1.6 }}>{fa(ins.per_product.find((x) => x.product_id === p.product_id)?.text ?? "")}</div>}
               </Link>
             </div>
@@ -106,7 +106,7 @@ export default function CompareView({ ids }: { ids: string[] }) {
             </table>
           </div>
         )}
-        <span className="xs faint">داده‌های مشخصات از ترب؛ نام ویژگی‌ها برای همهٔ کالاها یکسان ثبت نشده. خانهٔ سبز: مقدار بهتر (فقط وقتی واحدها یکی است).</span>
+        <span className="xs faint">مشخصات از ترب گرفته شده؛ نام ویژگی‌ها برای همهٔ کالاها یکسان ثبت نشده. خانهٔ سبز: مقدار بهتر (فقط وقتی واحدها یکی است).</span>
       </div>
       <div className="sticky-cta">
         <Link className="btn pri block" href={`/p/${best.product_id}/shops`}>فروشگاه‌های نزدیک برای {verdict.data ? "انتخاب پیشنهادی" : "انتخاب اول"} <Icon n="fwd" s /></Link>

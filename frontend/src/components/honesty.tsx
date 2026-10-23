@@ -1,5 +1,5 @@
 // The honesty system: listed vs seller-confirmed vs unknown never share a look (design-brief §3).
-import type { Confirmation, Flag, Offer, OpenInfo, Payment, Reliability, ShopCard, Travel } from "@/lib/api";
+import type { Confirmation, Flag, Offer, OpenInfo, Payment, Reliability, ShopCard, StockLikelihood, Travel } from "@/lib/api";
 import { daysAgo, fa, floorLabel, money, walk } from "@/lib/fa";
 import { Icon } from "./Icon";
 
@@ -98,13 +98,13 @@ export function SourceNote({ children }: { children: React.ReactNode }) {
 }
 
 export function NoCallNote() {
-  return <div className="note unk"><Icon n="lock" s /><span>شمارهٔ تلفن این فروشگاه در داده‌ها معتبر نیست؛ مطمئن‌ترین راه «استعلام» است و پاسخ را همین‌جا می‌بینید. اگر خودتان زنگ زدید، نتیجه را در صفحهٔ پیگیری ثبت کنید تا بقیه هم ببینند.</span></div>;
+  return <div className="note unk"><Icon n="lock" s /><span>شمارهٔ تلفن معتبری برای این فروشگاه نداریم؛ مطمئن‌ترین راه «استعلام» است و پاسخ را همین‌جا می‌بینید. اگر خودتان زنگ زدید، نتیجه را در صفحهٔ پیگیری ثبت کنید تا بقیه هم ببینند.</span></div>;
 }
 
 /** "n minutes / hours ago" from a minute count. */
 export const agoMin = (m: number) => (m < 1 ? "همین الان" : m < 60 ? `${fa(m)} دقیقه پیش` : m < 1440 ? `${fa(Math.round(m / 60))} ساعت پیش` : `${fa(Math.round(m / 1440))} روز پیش`);
 
-const SOURCE: Record<Confirmation["source"], string> = { seller: "تأیید فروشنده", visit: "دیدهٔ خریدار", call: "تماس خریدار" };
+const SOURCE: Record<Confirmation["source"], string> = { seller: "تأیید فروشنده", daily: "بررسی روزانهٔ فروشنده", visit: "دیدهٔ خریدار", call: "تماس خریدار" };
 
 /** A confirmation that may still be shown as current (fresh or aging) and says the item is there. */
 export const liveConfirmation = (c?: Confirmation | null) => (c && c.state !== "expired" && c.available !== false ? c : null);
@@ -134,7 +134,7 @@ export function TruthRow({ offer, c, cat = false, listedShown = false }: { offer
 }
 
 export function ReliabilityLine({ r }: { r?: Reliability | null }) {
-  if (!r?.known || !r.label) return <div className="xs faint row" style={{ gap: 6 }}><Icon n="clock" s /><span>سابقهٔ پاسخ‌گویی: هنوز داده‌ای نداریم</span></div>;
+  if (!r?.known || !r.label) return <div className="xs faint row" style={{ gap: 6 }}><Icon n="clock" s /><span>سابقهٔ پاسخ‌گویی: هنوز اطلاعاتی نداریم</span></div>;
   const good = r.score >= 0.6;
   return <div className="xs row" style={{ gap: 6, color: good ? "var(--ok)" : "var(--ink-3)" }}><Icon n={good ? "shield" : "clock"} s /><span>{fa(r.label)}{r.rating ? <> · <span style={{ color: "var(--warn, #b7791f)" }}>★</span> {fa(r.rating.avg)} از {fa(r.rating.n)} خریدار</> : null}</span></div>;
 }
@@ -161,4 +161,17 @@ export function travelText(t: Travel | null | undefined, mode: "walk" | "taxi" |
   if (!t) return null;
   const m = t[mode];
   return `${m === 0 ? "کمتر از ۱" : fa(m)} دقیقه ${MODE_FA[mode]}`;
+}
+
+
+/** «احتمال موجود بودن»: our estimate before anyone asks; the reasons are in the tooltip and one line below on request. A likelihood, not a promise. */
+export function StockChip({ stock, why = false }: { stock?: StockLikelihood; why?: boolean }) {
+  if (!stock || stock.level === "unknown") return null;
+  const tone = stock.level === "high" ? "ok" : stock.level === "medium" ? "warn" : "bad";
+  return (
+    <span className="stack" style={{ gap: 2 }}>
+      <span className={`tb ${tone}`} title={stock.reasons.join(" · ")}><Icon n="shield" s />احتمال موجود بودن: {stock.label}</span>
+      {why && stock.reasons[0] && <span className="xs muted">{stock.reasons[0]}</span>}
+    </span>
+  );
 }

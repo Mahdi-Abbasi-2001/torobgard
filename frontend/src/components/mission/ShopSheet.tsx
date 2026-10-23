@@ -1,6 +1,7 @@
 "use client";
 // One shop, everything the shopper needs before walking in (canvas S2): where in the mall, the three separate facts (listed price age,
 // seller confirmation, stock), reliability, weekly hours, the seller's own listing text, installments, ways to get there.
+import { RouteButton } from "@/components/RoutePreview";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { fa } from "@/lib/fa";
@@ -28,7 +29,7 @@ export function ShopSheet({ shopId, productId, onClose, onMall, onAsk, askLabel 
         <>
           <div className="stack" style={{ gap: 6 }}>
             <ShopName shop={s} />
-            {!s.name_is_verified && <span className="xs faint">نام از داده‌ها نمایش داده می‌شود؛ ممکن است با تابلوی فروشگاه فرق کند.</span>}
+            {!s.name_is_verified && <span className="xs faint">نامی که می‌بینید از اطلاعات ثبت‌شده آمده و ممکن است با تابلوی فروشگاه فرق کند.</span>}
             <div className="wrapr"><OpenChip open={s.open} />{s.open.state === "closed" && s.open.opens_at && <span className="xs faint">باز می‌شود: {fa(s.open.opens_at)}</span>}</div>
           </div>
           {offer && (
@@ -48,11 +49,7 @@ export function ShopSheet({ shopId, productId, onClose, onMall, onAsk, askLabel 
             {wrong && <Note tone="warn" icon="alert"><b>ساعت‌ها ممکن است دقیق نباشد.</b> قبل از رفتن بپرسید.</Note>}
             {s.weekly_hours ? <Hours wh={s.weekly_hours} /> : <Note tone="unk" icon="clock"><b>ساعت کاری ثبت نشده.</b> قبل از رفتن بپرسید.</Note>}
           </div>
-          <div className="row" style={{ gap: 8 }}>
-            <a className="btn sec grow" href={`https://nshn.ir/?lat=${s.lat}&lng=${s.lon}`} target="_blank" rel="noopener">نشان</a>
-            <a className="btn sec grow" href={`https://balad.ir/location?latitude=${s.lat}&longitude=${s.lon}`} target="_blank" rel="noopener">بلد</a>
-            <a className="btn sec grow" href={`https://maps.google.com/?q=${s.lat},${s.lon}`} target="_blank" rel="noopener">گوگل</a>
-          </div>
+          <div className="row" style={{ gap: 8 }}><RouteButton to={{ lat: s.lat, lon: s.lon }} label={s.name} /></div>
           {(s.website || s.instagram) && (
             <div className="wrapr">
               {s.instagram && <a className="chip" href={s.instagram.profile_url} target="_blank" rel="noopener"><Icon n="link" s />اینستاگرام</a>}

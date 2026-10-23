@@ -145,7 +145,7 @@ export default function ProductView({ id }: { id: string }) {
           </div>
           <div className="row">
             <button className="btn sec" onClick={() => openCompare(id)}><Icon n="compare" s />مقایسه با کالای دیگر</button>
-            <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />فروشگاه‌های نزدیک</Link>
+            <Link className="btn pri grow" href={`/p/${id}/shops`}><Icon n="map" s />شروع خرید از فروشگاه‌های نزدیک</Link>
           </div>
         </div>
         </div>

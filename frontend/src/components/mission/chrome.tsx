@@ -91,8 +91,9 @@ export function MissionAside({ m, view, status, onSlots, onAsk, children }: { m:
   const notes = [m.product ? m.product.brand ?? "" : "", status.asked ? `${fa(status.asked)} پرسیده` : "", status.confirmed ? `${fa(status.confirmed)} تأیید` : "", status.held ? `کد ${fa(status.held.hold?.code ?? "")}` : ""];
   return (
     <aside className="mc-aside" aria-label="خرید">
-      <div className="mc-label">خرید</div>
+      <div className="mc-label">خرید شما</div>
       <div style={{ fontSize: 18, fontWeight: 800, lineHeight: 1.45 }}><Bidi text={missionTitle(m)} /></div>
+      <div className="xs faint">هر مورد را بزنید تا عوض شود؛ نتیجه‌ها همان لحظه به‌روز می‌شوند.</div>
       <div className="slot-rows">
         {slotsOf(m).filter((s) => s.key !== "product").map((s) => (
           <button key={s.key} type="button" className={`slot-row ${s.open ? "open" : ""}`} onClick={() => onSlots(s.key)}>
@@ -100,6 +101,7 @@ export function MissionAside({ m, view, status, onSlots, onAsk, children }: { m:
           </button>
         ))}
       </div>
+      <div className="mc-label" style={{ marginTop: 6 }}>مرحله‌ها</div>
       <div className="rail-v" role="list" aria-label="مرحله‌ها">
         {STAGE_LABEL.map((l, i) => {
           const can = i <= status.stage;

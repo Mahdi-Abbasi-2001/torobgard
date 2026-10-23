@@ -83,8 +83,13 @@ def _issue_token(con, user_id: str) -> str:
     return token
 
 
-def _public(row) -> dict:
-    return {"id": row["id"], "username": row["username"], "session_id": row["session_id"]}
+def _public(row, con=None) -> dict:
+    role = (row["role"] if "role" in row.keys() else None) or "shopper"
+    shop = None
+    if role == "seller" and con is not None:
+        r = con.execute("SELECT shop_id FROM seller_shops WHERE user_id=?", (row["id"],)).fetchone()
+        shop = r["shop_id"] if r else None
+    return {"id": row["id"], "username": row["username"], "session_id": row["session_id"], "role": role, "shop_id": shop}
 
 
 def session_owner(con, session_id: str) -> str | None:
@@ -103,7 +108,23 @@ def signup(con, username: str, password: str, anon_session: str | None) -> tuple
                 (uid, (username or "").strip(), u, hash_password(password), sid, _now().isoformat()))
     con.commit()
     row = con.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
-    return _public(row), _issue_token(con, uid)
+    return _public(row, con), _issue_token(con, uid)
+
+
+def signup_seller(con, username: str, password: str, shop_id: str) -> tuple[dict, str]:
+    """A shop owner's account. The caller has already checked the shop code; one account per shop."""
+    u = validate(username, password)
+    if con.execute("SELECT 1 FROM users WHERE username_norm=?", (u,)).fetchone():
+        raise AuthError(409, "این نام کاربری قبلاً گرفته شده است.")
+    if con.execute("SELECT 1 FROM seller_shops WHERE shop_id=?", (shop_id,)).fetchone():
+        raise AuthError(409, "این فروشگاه قبلاً حساب دارد؛ وارد شوید.")
+    uid = "usr_" + uuid.uuid4().hex[:16]
+    con.execute("INSERT INTO users(id,username,username_norm,pw,session_id,created_at,role) VALUES(?,?,?,?,?,?,'seller')",
+                (uid, (username or "").strip(), u, hash_password(password), str(uuid.uuid4()), _now().isoformat()))
+    con.execute("INSERT INTO seller_shops(shop_id,user_id,created_at) VALUES(?,?,?)", (shop_id, uid, _now().isoformat()))
+    con.commit()
+    row = con.execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    return _public(row, con), _issue_token(con, uid)
 
 
 def login(con, username: str, password: str, anon_session: str | None, ip: str) -> tuple[dict, str]:
@@ -119,10 +140,10 @@ def login(con, username: str, password: str, anon_session: str | None, ip: str) 
         raise AuthError(401, "نام کاربری یا رمز عبور درست نیست.")
     _FAILS.pop(f"u:{u}", None)
     # bring along what this device did before logging in
-    if anon_session and anon_session != row["session_id"] and not session_owner(con, anon_session):
+    if (row["role"] if "role" in row.keys() else None) != "seller" and anon_session and anon_session != row["session_id"] and not session_owner(con, anon_session):
         con.execute("UPDATE inquiries SET session_id=? WHERE session_id=?", (row["session_id"], anon_session))
         con.commit()
-    return _public(row), _issue_token(con, row["id"])
+    return _public(row, con), _issue_token(con, row["id"])
 
 
 def user_for_token(con, token: str | None) -> dict | None:
@@ -132,7 +153,7 @@ def user_for_token(con, token: str | None) -> dict | None:
                     (hashlib.sha256(token.encode()).hexdigest(),)).fetchone()
     if not r or r["expires_at"] < _now().isoformat():
         return None
-    return _public(r)
+    return _public(r, con)
 
 
 def logout(con, token: str | None):

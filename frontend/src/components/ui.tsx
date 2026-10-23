@@ -23,6 +23,8 @@ export function AppBar({ title, sub, back = true, end }: { title?: ReactNode; su
       )}
       <h1>{title}{sub && <span className="t2">{sub}</span>}</h1>
       {end}
+      {/* the desktop bar already has the brand link; on a phone this is the way back to the start screen from any page */}
+      <Link href="/" className="iconbtn appbar-home" aria-label="صفحهٔ اصلی"><Icon n="home" /></Link>
     </header>
   );
 }
@@ -38,7 +40,7 @@ export function Steps({ at }: { at: 0 | 1 | 2 | 3 }) {
 
 export function BottomNav({ badge = 0 }: { badge?: number }) {
   const path = usePathname();
-  const items: [string, IconName, string][] = [["/", "home", "خانه"], ["/chat", "chat", "گفتگو"], ["/missions", "bag", "مأموریت‌ها"]];
+  const items: [string, IconName, string][] = [["/", "home", "خانه"], ["/chat", "chat", "گفتگو"], ["/missions", "bag", "خریدهای من"]];
   return (
     <nav className="nav" aria-label="ناوبری اصلی">
       {items.map(([href, ic, label]) => {

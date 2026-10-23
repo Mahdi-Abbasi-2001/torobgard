@@ -25,7 +25,6 @@ import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 import { shortName } from "./DecideStage";
 
-const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE !== "0";
 
 const shortShop = (n: string) => n.split(/\s+/).slice(0, 3).join(" ");
 
@@ -55,6 +54,7 @@ export default function ConfirmStage(sp: StageProps) {
   const cardOf = (id: string | undefined) => all.find((s) => s.shop_id === id);
 
   const stop = useMutation({ mutationFn: (id: string) => api.stopCampaign(sid, id), onSuccess: () => qc.invalidateQueries({ queryKey: ["campaigns", sid] }) });
+  const escalate = useMutation({ mutationFn: (p: ShopProgress) => api.escalate(sid, p.q.id), onSuccess: () => qc.invalidateQueries({ queryKey: ["inquiries", sid] }) });
   const recheck = useMutation({
     mutationFn: (p: ShopProgress) => api.recheck(sid, p.q.id, cardOf(p.q.shop?.shop_id)?.walk_min ?? null),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["inquiries", sid] }),
@@ -117,7 +117,7 @@ export default function ConfirmStage(sp: StageProps) {
       {items.map((x) => (
         <ShopRow key={x.q.id} p={x} listed={cardOf(x.q.shop?.shop_id)} now={now} flash={flash === x.q.id}
           onChat={() => setChat(x.q.id)} onHold={() => setHoldId(x.q.id)} onAlt={() => setAltId(x.kids.find((k) => k.kind === "recheck" && k.status === "unavailable")?.id ?? x.q.id)}
-          onCall={() => setCallId(x.q.id)} onRecheck={() => recheck.mutate(x)} />
+          onCall={() => setCallId(x.q.id)} onRecheck={() => recheck.mutate(x)} onEscalate={() => escalate.mutate(x)} />
       ))}
       {queued.map((n) => <QueuedRow key={n.shop_id} name={n.name} why={n.why} listed={cardOf(n.shop_id)} />)}
       {!items.length && !camp && <Note tone="unk" icon="send">هنوز از هیچ فروشگاهی نپرسیده‌اید؛ به مقایسه برگردید و چند فروشگاه را انتخاب کنید.</Note>}
@@ -145,7 +145,7 @@ export default function ConfirmStage(sp: StageProps) {
         <Toggle on={auto} onChange={setAuto} label="پرسیدن خودکار از جایگزین‌ها" />
       </div>
       <NotifyOptIn sid={sid} />
-      {(simulated || DEMO) && items.length > 0 && <Note tone="info" icon="spark"><b>این جواب‌ها نمایشی‌اند.</b> فروشندهٔ نمایشی مثل آدم واقعی می‌نویسد؛ ترب‌گرد جوابش را می‌خواند و اگر چیزی کم باشد دوباره می‌پرسد.</Note>}
+      {simulated && items.length > 0 && <Note tone="info" icon="spark"><b>این جواب‌ها نمایشی‌اند.</b> فروشندهٔ نمایشی مثل آدم واقعی می‌نویسد؛ ترب‌گرد جوابش را می‌خواند و اگر چیزی کم باشد دوباره می‌پرسد.</Note>}
     </div>
   );
 

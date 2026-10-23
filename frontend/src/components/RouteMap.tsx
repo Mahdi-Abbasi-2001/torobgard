@@ -148,7 +148,7 @@ export default function RouteMap({ from, to, label, mode, height, onUnavailable,
   const starting = travelled < 15 && step?.type === "depart";
   const upcoming = starting ? step : next;
   const toNext = starting ? (next ? next.at_m : left) : next ? Math.max(0, next.at_m - travelled) : left;
-  const text = arrived ? "رسیدی" : starting ? step!.text : next ? (next.type === "arrive" ? `به ${label} می‌رسی` : next.text) : `به ${label} می‌رسی`;
+  const text = arrived ? "رسیدید" : starting ? step!.text : next ? (next.type === "arrive" ? `به ${label} می‌رسید` : next.text) : `به ${label} می‌رسید`;
   const deg = arrived || !upcoming || upcoming.type === "arrive" ? 0 : TURN_DEG[upcoming.modifier] ?? 0;
   const ring = plan ? 100 * (1 - left / (plan.distance_m || 1)) : 0;
   const straight = plan?.source === "straight";
@@ -176,7 +176,7 @@ export default function RouteMap({ from, to, label, mode, height, onUnavailable,
             {mode3 === "idle" ? (
               <>
                 {!straight && <button type="button" className="btn pri" onClick={preview}><Icon n="walk" s />پیش‌نمایش مسیر</button>}
-                <button type="button" className="btn sec" onClick={live}><Icon n="loc" s />دنبالم بیا</button>
+                <button type="button" className="btn sec" onClick={live}><Icon n="loc" s />مسیریابی زنده</button>
               </>
             ) : <button type="button" className="btn pri" onClick={stop}><Icon n="x" s />توقف</button>}
           </div>

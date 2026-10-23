@@ -6,6 +6,7 @@ import { keepPreviousData } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { api, type PlanStop, type ShopCard } from "@/lib/api";
 import { clock, fa, floorLabel, money } from "@/lib/fa";
+import { useDemo } from "@/lib/demo";
 import { useIsDesktop } from "@/lib/media";
 import { useSession } from "@/lib/session";
 import { useNow } from "@/lib/useInquiries";
@@ -22,11 +23,11 @@ import { FinalSteps } from "./FinalSteps";
 import { Shell } from "./chrome";
 import type { StageProps } from "./stage";
 
-const DEMO = process.env.NEXT_PUBLIC_DEMO_MODE !== "0";
 
 export default function GoStage(sp: StageProps) {
   const { m, status, set, go, patchSlots } = sp;
   const desk = useIsDesktop();
+  const demo = useDemo();
   const { sid } = useSession();
   const qc = useQueryClient();
   const pid = m.productId!;
@@ -49,7 +50,8 @@ export default function GoStage(sp: StageProps) {
   });
   const shops = useQuery({ queryKey: ["pshops-all", pid, m.place.lat], queryFn: () => api.productShops(pid, m.place, { sort: "best" }, 100, m.when) });
   const cardOf = (id: string): ShopCard | undefined => [...(shops.data?.listed ?? []), ...(shops.data?.category_only ?? [])].find((s) => s.shop_id === id);
-  const stops: PlanStop[] = plan.data?.stops ?? [];
+  // a fallback shop more than 45 minutes beyond the first stop is no real fallback: it is not shown
+  const stops: PlanStop[] = (plan.data?.stops ?? []).filter((s, i) => i === 0 || s.walk_min_from_previous <= 45);
   const main = stops[0];
   const progressOf = (shopId: string) => status.items.find((x) => x.q.shop?.shop_id === shopId);
   const mainP = main ? progressOf(main.shop_id) : undefined;
@@ -94,8 +96,15 @@ export default function GoStage(sp: StageProps) {
                 {s.confirmed_price ? `تأیید فروشنده: ${money(s.confirmed_price)} تومان` : "تأیید فروشنده: موجود"}{p?.q.answered_at ? `، ${clock(p.q.answered_at)}` : ""}.
                 {s.closes_at ? ` تا ${fa(s.closes_at)} باز است.` : ""}
               </div>
+              {s.trip_risk && (() => { const lv = s.trip_risk.level; return (
+                <div className={`note ${lv === "low" ? "ok" : lv === "medium" ? "warn" : "bad"}`} style={{ fontSize: 14, fontWeight: 700 }}>
+                  <Icon n={lv === "low" ? "check" : "alert"} s />
+                  <span>خطر دست‌خالی برگشتن: {s.trip_risk.label}
+                    <span className="xs" style={{ display: "block", fontWeight: 550 }}>{lv === "low" ? "احتمالاً کالا آنجاست" : lv === "medium" ? "ممکن است کالا تمام شده باشد؛ جایگزین را در نظر داشته باشید" : "احتمال زیاد کالا آنجا نیست یا مغازه بسته است"}{i > 0 && s.backup_same_mall ? " · همان پاساژ است؛ اگر اولی نداشت، تقریباً راه اضافه‌ای نیست" : ""}</span>
+                  </span>
+                </div>); })()}
               {s.warnings.map((w) => <div key={w.text} className={`note ${w.level === "bad" ? "bad" : "warn"}`}><Icon n="alert" s /><span>{w.text}</span></div>)}
-              {s.hold && <div className="hold-chip"><Icon n="hold" s />کد نگه‌داری: <b className="num">{fa(s.hold.code)}</b>{s.hold.until ? <span className="xs">، تا {fa(s.hold.until)}</span> : null}</div>}
+              {s.hold && <div className="hold-chip hold-big"><Icon n="hold" s /><span>این کد را به فروشنده نشان دهید تا کالا را برایتان نگه دارد<b className="num">{fa(s.hold.code)}</b>{s.hold.until ? <span className="xs">تا {fa(s.hold.until)} نگه می‌دارد</span> : null}</span></div>}
             </div>
           </div>
         );
@@ -121,17 +130,11 @@ export default function GoStage(sp: StageProps) {
       )}
       <div className="trip-actions">
         <button className="btn pri" disabled={!mainP || hereWaiting || arriveMut.isPending || here?.status === "answered"} onClick={() => arriveMut.mutate()}><Icon n="pin" s />رسیدم؛ به فروشنده خبر بده</button>
-        <button className="btn sec" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: false })}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>
-        {DEMO && <button className="btn ghost demo-btn" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: true })} title="فقط در حالت نمایشی">نمایشی: اگر تمام شده بود</button>}
+        <button className="btn sec" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: false })}><Icon n="walk" s />هنوز موجود است؟ دوباره بپرس</button>
+        {demo && <button className="btn ghost demo-btn" disabled={!mainP || checking || recheck.isPending} onClick={() => recheck.mutate({ demo: true })} title="فقط در حالت نمایشی">نمایشی: اگر تمام شده بود</button>}
       </div>
       {arriveMut.isError && <Note tone="bad" icon="alert">{(arriveMut.error as Error).message}</Note>}
       {recheck.isError && <Note tone="bad" icon="alert">{(recheck.error as Error).message}</Note>}
-      {plan.data?.deep_links && main && (
-        <div className="row" style={{ gap: 8 }}>
-          <a className="btn sec grow" href={`https://nshn.ir/?lat=${main.lat}&lng=${main.lon}`} target="_blank" rel="noopener">مسیریابی با نشان</a>
-          <a className="btn sec grow" href={`https://balad.ir/location?latitude=${main.lat}&longitude=${main.lon}`} target="_blank" rel="noopener">با بلد</a>
-        </div>
-      )}
       {plan.data?.transport.suggestion && <Note tone="warn" icon="alert">{plan.data.transport.suggestion}</Note>}
     </div>
   );
@@ -176,15 +179,30 @@ export default function GoStage(sp: StageProps) {
     </>
   ) : <button className="btn pri" onClick={() => go("confirm")}>برگشت به جواب فروشنده‌ها</button>;
 
-  const body = (
-    <div className="stack" style={{ gap: 12 }}>
+  // what comes first matters on a phone: where I am going, then the map and the next step, then the stops and the details
+  const head = (
+    <>
       <div className="stack" style={{ gap: 2 }}><div className="xs faint">مسیر امروز</div>
-        <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops.length)} فروشگاه، ${fa(plan.data!.total_walk_min)} دقیقه راه` : "مسیری نداریم"}</h2></div>
+        <h2 style={{ margin: 0, fontSize: desk ? 24 : 20, fontWeight: 800 }}>{plan.isLoading ? "…" : stops.length ? `${fa(stops[0].walk_min_from_previous)} دقیقه تا ${stops[0].name}${stops.length > 1 ? "؛ یک جایگزین هم کنارش هست" : ""}` : "مسیری نداریم"}</h2></div>
       {banner && <Note tone={banner.tone} icon={banner.icon}>{banner.t}</Note>}
       {plan.isError && <Note tone="unk" icon="store">هنوز هیچ فروشگاهی نگفته که کالا موجود است؛ به مرحلهٔ تأیید برگردید.</Note>}
-      {line}{main && <details className="mc-card steps-d" style={{ padding: "10px 14px" }}><summary className="b sm" style={{ cursor: "pointer" }}>مسیر قدم‌به‌قدم تا {main.name}</summary><div style={{ marginTop: 10 }}><RouteSteps from={{ lat: m.place.lat, lon: m.place.lon }} to={{ lat: main.lat, lon: main.lon }} mode={m.mode} /></div></details>}{main && <FinalSteps stop={main} card={cardOf(main.shop_id)} from={{ lat: m.place.lat, lon: m.place.lon }} mode={m.mode} onFloors={() => setStack(true)} />}{main && m.productId && <Extras m={m} mallKey={cardOf(main.shop_id)?.mall_key} mall={main.mall} />}{actions}{check}
-    </div>
+    </>
   );
+  const tail = (
+    <>
+      {line}{main && <details className="mc-card steps-d" style={{ padding: "10px 14px" }}><summary className="b sm" style={{ cursor: "pointer" }}>مسیر قدم‌به‌قدم تا {main.name}</summary><div style={{ marginTop: 10 }}><RouteSteps from={{ lat: m.place.lat, lon: m.place.lon }} to={{ lat: main.lat, lon: main.lon }} mode={m.mode} /></div></details>}{main && <FinalSteps stop={main} card={cardOf(main.shop_id)} onFloors={() => setStack(true)} />}{main && m.productId && <Extras m={m} mallKey={cardOf(main.shop_id)?.mall_key} mall={main.mall} />}{actions}{check}
+    </>
+  );
+  const stepsDetails = main && <details className="mc-card steps-d" style={{ padding: "10px 14px" }}><summary className="b sm" style={{ cursor: "pointer" }}>مسیر قدم‌به‌قدم تا {main.name}</summary><div style={{ marginTop: 10 }}><RouteSteps from={{ lat: m.place.lat, lon: m.place.lon }} to={{ lat: main.lat, lon: main.lon }} mode={m.mode} /></div></details>;
+  // phone: the map, then the one thing to do now («I'm here»), then the stops; the long last-100-metres guide stays folded until you reach the mall
+  const phoneTail = (
+    <>
+      {actions}{line}{stepsDetails}
+      {main && <details className="mc-card steps-d" style={{ padding: "10px 14px" }} open={arrived || undefined}><summary className="b sm" style={{ cursor: "pointer" }}>آخرین ۱۰۰ متر: از در پاساژ تا فروشگاه</summary><div style={{ marginTop: 10 }}><FinalSteps stop={main} card={cardOf(main.shop_id)} onFloors={() => setStack(true)} /></div></details>}
+      {main && m.productId && <Extras m={m} mallKey={cardOf(main.shop_id)?.mall_key} mall={main.mall} />}{check}
+    </>
+  );
+  const body = <div className="stack" style={{ gap: 12 }}>{head}{tail}</div>;
 
   const mainCard = main ? cardOf(main.shop_id) : undefined;
   const mallQ = useQuery({ queryKey: ["mall", mainCard?.mall_key], queryFn: () => api.mall(mainCard!.mall_key!), enabled: !!mainCard?.mall_key, staleTime: 5 * 60_000 });
@@ -194,6 +212,6 @@ export default function GoStage(sp: StageProps) {
   if (desk) {
     return <><Shell {...sp} patch={patchSlots} mapStage center={<div className="map-fill">{map ?? <div className="sk" style={{ height: "100%", borderRadius: 22 }} />}</div>} panel={body} cta={cta} />{counterSheet}{arrival}</>;
   }
-  return <><Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{body}{map && <div className="stack">{map}</div>}</div></div>} cta={cta} />{counterSheet}{arrival}</>;
+  return <><Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12 }}>{head}{map && <div className="stack">{map}</div>}{phoneTail}</div></div>} cta={cta} />{counterSheet}{arrival}</>;
   void set;
 }

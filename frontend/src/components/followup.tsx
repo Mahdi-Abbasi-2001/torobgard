@@ -145,7 +145,7 @@ export function CallScript({ q, sid, onDone }: { q: Inquiry; sid: string; onDone
       {phone ? (
         <>
           <a className="btn sec block" href={`tel:${phone.replace(/[^\d+]/g, "")}`}><Icon n="phone" s />تماس با <bdi dir="ltr">{fa(phone)}</bdi></a>
-          <Note tone="unk" icon="alert">در دادهٔ این مسابقه شماره‌ها ساختگی‌اند؛ در نسخهٔ واقعی همین دکمه تماس می‌گیرد.</Note>
+          <Note tone="unk" icon="alert">در این نسخهٔ آزمایشی شماره‌ها نمونه‌اند؛ در نسخهٔ نهایی همین دکمه تماس می‌گیرد.</Note>
         </>
       ) : <Note tone="unk" icon="phone">شماره‌ای برای این فروشگاه ثبت نشده؛ حضوری یا از راه استعلام بپرسید.</Note>}
       <div className="h4">چه شنیدید؟ <span className="n">برای بقیهٔ خریدارها هم ثبت می‌شود</span></div>
@@ -189,10 +189,10 @@ export function VisitReport({ q, sid, onDone }: { q: Inquiry; sid: string; onDon
 export function CampaignBanner({ c, onStop, stopping }: { c: Campaign; onStop: () => void; stopping: boolean }) {
   const total = c.asked + c.queued || 1;
   const head = c.status === "done" ? `${fa(c.confirmed)} فروشگاه تأیید کرد؛ بقیه را نپرسیدیم.`
-    : c.status === "exhausted" ? "همهٔ گزینه‌های صف پرسیده شدند."
-    : c.status === "stopped" ? "پرسیدن موجی متوقف شد."
+    : c.status === "exhausted" ? "از همهٔ فروشگاه‌های فهرست پرسیده شد."
+    : c.status === "stopped" ? "پرسیدن متوقف شد."
     : c.tomorrow ? "همهٔ فروشگاه‌های مناسب الان بسته‌اند؛ دربارهٔ فردا می‌پرسیم."
-    : `موج‌به‌موج می‌پرسیم: هم‌زمان ${fa(c.wave)} فروشگاه، تا ${fa(c.target)} نفر تأیید کند.`;
+    : `چند فروشگاه را با هم می‌پرسیم: هر بار ${fa(c.wave)} فروشگاه، تا ${fa(c.target)} نفر تأیید کند.`;
   return (
     <div className="camp" role="status">
       <div className="row" style={{ gap: 8 }}><Icon n="spark" s /><b className="sm grow">{head}</b>

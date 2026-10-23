@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from . import catalog
+from . import stock
 from .geo import haversine_km
 from .hours import now_tehran
 
@@ -68,9 +69,13 @@ def build(con, origin: tuple[float, float], stops_in: list[dict], order: list[st
                     "arrive_at": _fmt(t), "closes_at": closes, "walk_min_from_previous": w,
                     "confirmed_by_seller": bool(s.get("confirmed")), "confirmed_price": s.get("price"),
                     "inquiry_id": s.get("inquiry_id"), "hold": s.get("hold"), "rechecked_at": s.get("rechecked_at"), "late": late, "tight": tight, "warnings": warnings,
-                    "in_traffic_zone": d["in_traffic_zone"]})
+                    "in_traffic_zone": d["in_traffic_zone"],
+                    # a seller said yes: very likely in stock, so what is left of the risk is mostly the opening hours
+                    "trip_risk": stock.risk_of_wasted_trip({"open": d["open"]}, {"score": 93 if s.get("confirmed") else 55})})
         t += STAY_MIN
         cur = (d["lat"], d["lon"])
+    for o in out[1:]:   # a backup in the same mall as the first stop costs almost no extra walking: say so
+        o["backup_same_mall"] = bool(o["mall"]) and o["mall"] == out[0]["mall"]
     malls = {o["mall"] for o in out if o["mall"]}
     traffic = any(o["in_traffic_zone"] for o in out)
     first = out[0] if out else None

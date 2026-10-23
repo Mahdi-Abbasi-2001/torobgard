@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { MallDirectory } from "@/lib/api";
 import { fa, floorLabel } from "@/lib/fa";
 import { Icon } from "@/components/Icon";
-import { HoldRing } from "@/components/HoldRing";
 import { Bidi, Sheet } from "@/components/ui";
 
 const num = (s: string | null | undefined) => { const n = parseInt(String(s ?? "").replace(/\D/g, ""), 10); return Number.isFinite(n) ? n : null; };
@@ -61,8 +60,7 @@ export function MallStack({ mall, t, replay }: { mall?: MallDirectory; t: StackT
       <div className="ms-info">
         <span className="xs faint">{mall ? `${t.mall ?? mall.mall} ${fa(floors.length)}${mall.floors.length > floors.length ? "+" : ""} طبقه` : t.mall}</span>
         <b className="ms-title">{stage < 1 ? "دارم طبقه‌ها را می‌چینم…" : stage < 2 ? floorLabel(t.floorLabel) ?? "طبقه" : [floorLabel(t.floorLabel), t.unit ? `واحد ${fa(t.unit)}` : t.plaque ? `پلاک ${fa(t.plaque)}` : null].filter(Boolean).join("، ")}</b>
-        {stage >= 2 && <span className="xs muted">{neighbours.length ? <>کنار <Bidi text={neighbours.map((n) => n.s.name).join(" و ")} />. اگر گم شدی اسم یکی‌شان را از نگهبان بپرس.</> : "اگر گم شدی، نام فروشگاه را از نگهبان یا فروشنده‌های اطراف بپرس."}</span>}
-        {stage >= 2 && t.hold && <div className="ms-hold"><span className="xs">نگه داشته؛ این کد را بگو</span><b className="num">{fa(t.hold.code)}</b><HoldRing until={t.hold.until} size={38} /></div>}
+        {stage >= 2 && <span className="xs muted">{neighbours.length ? <>کنار <Bidi text={neighbours.map((n) => n.s.name).join(" و ")} />. اگر گم شدید، اسم یکی‌شان را از نگهبان بپرسید.</> : "اگر گم شدید، نام فروشگاه را از نگهبان یا فروشنده‌های اطراف بپرسید."}</span>}
       </div>
     </div>
   );
@@ -72,13 +70,13 @@ export function ArrivalSheet({ open, onClose, mall, t }: { open: boolean; onClos
   const [replay, setReplay] = useState(0);
   return (
     <Sheet open={open} onClose={onClose} label="طبقه و واحد" className="tall">
-      <div className="row between"><div><div className="mc-label">رسیدی؛ حالا کدام طبقه؟</div><div className="b" style={{ fontSize: 17 }}><Bidi text={t.name} /></div></div>
+      <div className="row between"><div><div className="mc-label">رسیدید؛ حالا کدام طبقه؟</div><div className="b" style={{ fontSize: 17 }}><Bidi text={t.name} /></div></div>
         <button className="iconbtn soft" onClick={onClose} aria-label="بستن"><Icon n="x" /></button></div>
       {open && <MallStack mall={mall} t={t} replay={replay} />}
       <div className="row" style={{ gap: 8 }}>
         <button type="button" className="btn sec grow" onClick={() => setReplay((x) => x + 1)}><Icon n="refresh" s />دوباره نشان بده</button>
       </div>
-      <span className="xs faint">طرح ساده از روی طبقه و شمارهٔ واحدها؛ نقشهٔ داخلی واقعی پاساژ نیست (پله، آسانسور و ورودی‌ها در داده نیست).</span>
+      <span className="xs faint">طرح ساده از روی طبقه و شمارهٔ واحدها؛ نقشهٔ داخلی واقعی پاساژ نیست (جای پله، آسانسور و ورودی‌ها را نداریم).</span>
     </Sheet>
   );
 }

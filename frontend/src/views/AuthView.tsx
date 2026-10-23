@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { authStore } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/Icon";
 import { AppBar, Note, Seg } from "@/components/ui";
@@ -26,7 +27,7 @@ export default function AuthView({ mode: initial = "login", next }: { mode?: "lo
     setBusy(true);
     try {
       await signIn(mode, username.trim(), password);
-      router.push(dest);
+      router.push(authStore.get()?.user.role === "seller" ? "/seller" : dest);
     } catch (e) {
       setErr((e as Error).message);
     } finally { setBusy(false); }

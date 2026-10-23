@@ -64,7 +64,7 @@ export default function ChatView({ initial }: { initial?: string }) {
             {m.err && <div className="note bad"><Icon n="alert" s /><span>{m.err}</span></div>}
           </div>
         ))}
-        {busy && <div className="toolline"><span className="spin" />{status ?? "در حال فکر کردن…"}</div>}
+        {busy && <div className="toolline"><span className="spin" />یک لحظه…</div>}
         <div ref={end} />
       </div>
       <form className="composer" style={{ bottom: "calc(62px + env(safe-area-inset-bottom, 0px))" }} onSubmit={(e) => { e.preventDefault(); send(text); }}>

@@ -646,3 +646,5 @@ input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; }
 /* ---------- photo price check entry on Home ---------- */
 .snap-cta { padding: 12px 14px; gap: 12px; text-align: start; border-color: var(--accent-soft); }
 .snap-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: 0 0 auto; }
+.appbar-home { display: none; }
+@media (max-width: 899px) { .appbar-home { display: inline-grid; } }

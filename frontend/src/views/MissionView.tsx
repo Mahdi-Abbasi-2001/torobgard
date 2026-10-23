@@ -36,7 +36,7 @@ export default function MissionView({ id }: { id: string }) {
       ? s : { ...s, place: m.place, when: m.when, mode: m.mode, locationAsked: s.locationAsked || m.place.source !== "default" }));
   }, [placeKey, m?.when, m?.mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const go = useCallback((v: View, replace = false) => { const h = missionHref(id, v); if (replace) router.replace(h); else router.push(h); }, [id, router]);
+  const go = useCallback((v: View | null, replace = false) => { const h = missionHref(id, v ?? undefined); if (replace) router.replace(h); else router.push(h); }, [id, router]);
   const patchSlots = useCallback((p: SlotsPatch) => set(p), [set]);
 
   if (!ready) return <div className="mc"><MissionBar /><div className="mc-body"><div className="mc-center mc-pad" style={{ paddingTop: 20 }}><div className="sk mc-skel" style={{ height: 120 }} /><div className="sk mc-skel" style={{ height: 260 }} /></div></div></div>;
@@ -52,7 +52,8 @@ export default function MissionView({ id }: { id: string }) {
   const view: View = asked && VIEWS.includes(asked) && STAGE_OF[asked] <= status.stage ? asked : natural;
   const props: StageProps = { m, view, status, set, go, patchSlots };
   // autopilot runs until the shopper sets off (or takes over): the rail links (?s=) always open the normal stage
-  if (m.auto && !asked && !m.going && !status.finished) return <AutopilotStage {...props} />;
+  // the shopper always picks the model first; autopilot only takes over once there is one
+  if (m.auto && m.productId && !asked && !m.going && !status.finished) return <AutopilotStage {...props} />;
   return view === "decide" ? <DecideStage {...props} />
     : view === "find" || view === "compare" ? <FindStage {...props} />
     : view === "confirm" ? <ConfirmStage {...props} />

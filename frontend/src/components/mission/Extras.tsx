@@ -24,7 +24,7 @@ export function Extras({ m, mallKey, mall }: { m: Mission; mallKey: string | nul
   };
   return (
     <div className="mc-card" style={{ padding: 14, gap: 10 }}>
-      <div><div className="b sm">حالا که اینجایی</div><div className="xs muted">در همین {mall ?? "پاساژ"} هم می‌فروشند؛ چند قدم از مسیرت</div></div>
+      <div><div className="b sm">حالا که اینجا هستید</div><div className="xs muted">در همین {mall ?? "پاساژ"} هم می‌فروشند؛ چند قدم از مسیرت</div></div>
       {list.map((x) => {
         const inBasket = basket.some((b) => b.productId === x.product_id);
         return (

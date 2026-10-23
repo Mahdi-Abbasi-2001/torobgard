@@ -6,6 +6,6 @@ import type { SlotsPatch } from "./SlotsSheet";
 export interface StageProps {
   m: Mission; view: View; status: MissionStatus;
   set: (p: Partial<Mission> | ((m: Mission) => Partial<Mission>)) => void;
-  go: (v: View, replace?: boolean) => void;
+  go: (v: View | null, replace?: boolean) => void; // null: the mission's own front door (autopilot, when it is on)
   patchSlots: (p: SlotsPatch) => void;
 }

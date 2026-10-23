@@ -32,7 +32,7 @@ export function ThemeToggle() {
     window.dispatchEvent(new Event("tg-theme"));
   };
   return (
-    <button type="button" className="tb-theme" onClick={flip} aria-label={dark ? "پوستهٔ روشن" : "پوستهٔ تیره"} title={dark ? "پوستهٔ روشن" : "پوستهٔ تیره"}>
+    <button type="button" className="tb-theme" onClick={flip} aria-label={dark ? "حالت روشن" : "حالت تیره"} title={dark ? "حالت روشن" : "حالت تیره"}>
       <Icon n={dark ? "sun" : "moon"} s />
     </button>
   );
@@ -63,14 +63,14 @@ export function TopBar() {
         <input id="tb-q" value={text} onChange={(e) => setText(e.target.value)} placeholder="نام کالا یا نیازتان را بنویسید…" enterKeyHint="search" />
         <SnapButton className="iconbtn" label="عکس از کالا: مدل و قیمت را بسنجیم" />
       </form>
-      <button type="button" className="chip" style={{ minHeight: 40 }} onClick={() => setLocOpen(true)} aria-label={`محدوده: ${state.place.label}. تغییر`}>
-        <Icon n="pin" s />{state.place.label}<Icon n="fwd" s />
+      <button type="button" className="chip" style={{ minHeight: 40 }} onClick={() => setLocOpen(true)} aria-label={state.place.source === "default" ? "انتخاب موقعیت شما" : `موقعیت شما: ${state.place.label}. تغییر`}>
+        <Icon n="pin" s />{state.place.source === "default" ? "موقعیت خود را انتخاب کنید" : state.place.label}<Icon n="fwd" s />
       </button>
       <CompareChip />
       <nav className="tb-links" aria-label="ناوبری اصلی">
         <Link href="/chat" className={path.startsWith("/chat") ? "on" : ""} aria-current={path.startsWith("/chat") ? "page" : undefined}><Icon n="chat" s />گفتگو</Link>
         <Link href="/missions" className={path.startsWith("/missions") ? "on" : ""} aria-current={path.startsWith("/missions") ? "page" : undefined}>
-          <Icon n="bag" s />مأموریت‌ها{answered > 0 && <span className="dot" aria-label={`${fa(answered)} پاسخ تازه`}>{fa(answered)}</span>}
+          <Icon n="bag" s />خریدهای من{answered > 0 && <span className="dot" aria-label={`${fa(answered)} پاسخ تازه`}>{fa(answered)}</span>}
         </Link>
       </nav>
       {user

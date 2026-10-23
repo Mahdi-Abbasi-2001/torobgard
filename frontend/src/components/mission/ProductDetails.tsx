@@ -46,7 +46,7 @@ export function ProductDetails({ id, onChallenge, onClose }: { id: string; onCha
           <div className="row" style={{ gap: 12 }}>
             <Thumb src={d.image} alt="" size={72} brand={d.brand} />
             <div><div className="b" style={{ fontSize: 16, lineHeight: 1.5 }}><Bidi text={d.title} /></div>
-              <div className="xs faint">{fa(d.shop_count)} فروشگاه{ins.data?.availability?.near ? `، ${fa(ins.data.availability.near)} تا ${fa(15)} دقیقه پیاده` : ""}</div></div>
+              <div className="xs faint">{fa(d.shop_count)} فروشگاه{ins.data?.availability?.near ? `، ${fa(ins.data.availability.near)} فروشگاه تا ۱۵ دقیقه پیاده` : ""}</div></div>
           </div>
           {d.price_min != null && d.price_max != null && (
             <div className="stack" style={{ gap: 6 }}>

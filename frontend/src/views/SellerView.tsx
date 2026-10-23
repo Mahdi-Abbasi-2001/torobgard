@@ -3,51 +3,147 @@
 // "yes, same price as listed"; or just type the answer like in a chat and the assistant reads it (and may ask once more).
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ApiError, api, type Inquiry } from "@/lib/api";
+import Link from "next/link";
+import { ApiError, api, type Inquiry, type Listing } from "@/lib/api";
+import { useSession } from "@/lib/session";
 import { fa, minutesAgo, money, parseNum } from "@/lib/fa";
 import { useNow } from "@/lib/useInquiries";
 import { Icon } from "@/components/Icon";
+import { TodayTab, ShopTab } from "@/views/SellerTabs";
+import { CallScreen } from "@/components/CallScreen";
 import { Conversation } from "@/components/followup";
 import { Bidi, Empty, ErrorState, Note, Seg, SkeletonCards } from "@/components/ui";
 
 const HOURS: [string, string][] = [["19:00", "۱۹:۰۰"], ["20:00", "۲۰:۰۰"], ["21:00", "۲۱:۰۰"], ["22:00", "۲۲:۰۰"]];
 
+/** The daily «do you still have these?»: a few of the shop's most-wanted items, one tap each. Every tap tells shoppers the truth for the day. */
+function DailyCheck({ shop, token }: { shop: string; token: string }) {
+  const qc = useQueryClient();
+  const q = useQuery({ queryKey: ["stockcheck", shop, token], queryFn: () => api.sellerStock(shop, token), refetchInterval: 30_000 });
+  const ans = useMutation({
+    mutationFn: (v: { id: string; available: boolean; price: number | null }) => api.sellerStockAnswer(shop, token, v.id, { available: v.available, price: v.price }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["stockcheck", shop, token] }),
+  });
+  const all = q.data?.items ?? [];
+  const items = all.slice(0, 6);   // a short list gets answered; the rest follows tomorrow
+  if (!items.length) return null;
+  return (
+    <section className="card" style={{ padding: 14, gap: 10, display: "flex", flexDirection: "column" }} aria-label="بررسی روزانهٔ موجودی">
+      <div><div className="h4">امروز هنوز این کالاها را دارید؟</div>
+        <div className="xs muted">برای هر کالا یک دکمه بزنید؛ خریدارها همان‌جا می‌بینند که امروز تأیید کرده‌اید و فروشگاهتان بالاتر نشان داده می‌شود.</div></div>
+      {items.map((it) => (
+        <div key={it.id} className="row" style={{ gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <div className="grow" style={{ minWidth: 160 }}><div className="sm b"><Bidi text={it.title.length > 60 ? `${it.title.slice(0, 60)}…` : it.title} /></div>
+            {it.price != null && <div className="xs faint">قیمت ثبت‌شده: {money(it.price)} تومان</div>}</div>
+          <button type="button" className="btn pri" style={{ minHeight: 42 }} disabled={ans.isPending} onClick={() => ans.mutate({ id: it.id, available: true, price: it.price })}>دارم</button>
+          <button type="button" className="btn sec" style={{ minHeight: 42 }} disabled={ans.isPending} onClick={() => ans.mutate({ id: it.id, available: false, price: null })}>ندارم</button>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+type Tab = "now" | "today" | "stock" | "shop";
+
+/** `token` empty = the signed-in seller account (routes under /seller/me); otherwise the shop's own link. */
 export default function SellerView({ shop, token }: { shop: string; token: string }) {
   const [sent, setSent] = useState<string | null>(null);
-  const q = useQuery({ queryKey: ["seller", shop, token], queryFn: () => api.sellerInbox(shop, token), refetchInterval: 6_000, retry: (n, e) => !(e instanceof ApiError && e.status === 403) && n < 1 });
+  const [declined, setDeclined] = useState<string[]>([]);
+  const [tab, setTab] = useState<Tab>("now");
+  const now = useNow();
+  const { user, signOut } = useSession();
+  const q = useQuery({ queryKey: ["seller", shop, token], queryFn: () => api.sellerInbox(shop, token), refetchInterval: 3_000, retry: (n, e) => !(e instanceof ApiError && (e.status === 403 || e.status === 401)) && n < 1 });
 
-  if (q.error instanceof ApiError && q.error.status === 403) return (
+  if (q.error instanceof ApiError && (q.error.status === 403 || q.error.status === 401)) return (
     <main className="main"><div style={{ paddingTop: 120 }}>
-      <Empty icon="lock" tone="bad" title="این لینک معتبر نیست">لینک منقضی شده یا مال فروشگاه دیگری است. لینک تازه را از ربات بله بگیرید.</Empty></div></main>
+      <Empty icon="lock" tone="bad" title={token ? "این لینک معتبر نیست" : "دسترسی فروشنده ندارید"}>{token ? "لینک منقضی شده یا مال فروشگاه دیگری است. لینک تازه را از ربات بله بگیرید." : "با حساب فروشنده وارد شوید."}</Empty>
+      {!token && <div className="center" style={{ marginTop: 12 }}><Link className="btn pri" href="/seller">ورود فروشنده</Link></div>}</div></main>
   );
   if (q.isLoading) return <main className="main"><SkeletonCards n={2} /></main>;
   if (q.isError || !q.data) return <main className="main"><ErrorState error={q.error} retry={() => q.refetch()} /></main>;
   const pending = q.data.items.filter((i) => i.status === "sent" || i.status === "delivered");
   const past = q.data.items.filter((i) => !pending.includes(i));
   const st = q.data.stats;
+  const ringing = pending.find((i) => i.kind === "ask" && i.live_call && !declined.includes(i.id) && new Date(i.deadline_at).getTime() > now);
 
   return (
     <main className="main seller-main">
+      {ringing && <CallScreen key={ringing.id} i={ringing} shop={shop} token={token} onDone={setSent} onDecline={() => setDeclined((d) => [...d, ringing.id])} />}
       <header className="sellerbar">
         <span className="mk"><Icon n="inbox" /></span>
-        <div className="grow"><div className="b">{q.data.shop.name}</div><div className="xs" style={{ opacity: .75 }}>صندوق استعلام · نسخهٔ فروشنده</div></div>
+        <div className="grow"><div className="b">{q.data.shop.name}</div><div className="xs" style={{ opacity: .75 }}>نسخهٔ فروشنده{user?.role === "seller" ? ` · ${user.username}` : ""}</div></div>
+        {!token && <button type="button" className="btn ghost" style={{ color: "inherit", minHeight: 36 }} onClick={async () => { await signOut(); window.location.href = "/seller"; }}>خروج</button>}
       </header>
+      <nav className="seller-tabs" role="tablist" aria-label="بخش‌های فروشنده">
+        <button type="button" role="tab" aria-selected={tab === "now"} className={tab === "now" ? "on" : ""} onClick={() => setTab("now")}>الان{pending.length ? <b className="seller-badge">{fa(pending.length)}</b> : null}</button>
+        <button type="button" role="tab" aria-selected={tab === "today"} className={tab === "today" ? "on" : ""} onClick={() => setTab("today")}>امروز</button>
+        <button type="button" role="tab" aria-selected={tab === "stock"} className={tab === "stock" ? "on" : ""} onClick={() => setTab("stock")}>موجودی</button>
+        <button type="button" role="tab" aria-selected={tab === "shop"} className={tab === "shop" ? "on" : ""} onClick={() => setTab("shop")}>فروشگاه</button>
+      </nav>
       <div className="pad stack" style={{ gap: 14, paddingTop: 14 }}>
-        {st && (st.asked || st.listing_updates) ? (
-          <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 4 }}>
-            <div className="h4">کارنامهٔ پاسخ‌گویی شما</div>
-            <div className="xs muted">{st.label ? fa(st.label) : `به ${fa(st.replied ?? 0)} از ${fa(st.asked ?? 0)} استعلام پاسخ داده‌اید`}</div>
-            <div className="xs faint">فروشگاه‌هایی که زود و درست جواب می‌دهند بالاتر نشان داده می‌شوند.{st.listing_updates ? ` · ${fa(st.listing_updates)} قیمت را از همین‌جا به‌روز کرده‌اید.` : ""}</div>
-          </div>
-        ) : null}
-        {q.data.bale?.enabled && <BaleConnect b={q.data.bale} />}
-        <div className="xs muted">{pending.length ? `${fa(pending.length)} استعلام منتظر پاسخ شماست` : "استعلام تازه‌ای ندارید. این صفحه خودکار به‌روز می‌شود."}</div>
-        {sent && <div className="card"><Empty icon="check" tone="ok" title="پاسخ شما ارسال شد">{sent}</Empty></div>}
-        {pending.map((i) => <Answerable key={i.id} i={i} shop={shop} token={token} onSent={setSent} />)}
-        {past.length > 0 && <div className="h4" style={{ marginTop: 8 }}>پاسخ‌داده‌ها</div>}
-        {past.map((i) => <Past key={i.id} i={i} shop={shop} token={token} />)}
+        {tab === "today" ? <TodayTab shop={shop} token={token} /> : tab === "shop" ? <ShopTab shop={shop} token={token} shopId={q.data.shop.shop_id} bale={q.data.bale?.enabled ? <BaleConnect b={q.data.bale} /> : null} /> : tab === "stock" ? (
+          <>
+            <DailyCheck shop={shop} token={token} />
+            <Listings shop={shop} token={token} />
+          </>
+        ) : (
+          <>
+            {st && (st.asked || st.listing_updates) ? (
+              <div className="card" style={{ padding: 12, display: "flex", flexDirection: "column", gap: 4 }}>
+                <div className="h4">کارنامهٔ پاسخ‌گویی شما</div>
+                <div className="xs muted">{st.label ? fa(st.label) : `به ${fa(st.replied ?? 0)} از ${fa(st.asked ?? 0)} استعلام پاسخ داده‌اید`}</div>
+                <div className="xs faint">فروشگاه‌هایی که زود و درست جواب می‌دهند بالاتر نشان داده می‌شوند.{st.listing_updates ? ` · ${fa(st.listing_updates)} قیمت را از همین‌جا به‌روز کرده‌اید.` : ""}</div>
+              </div>
+            ) : null}
+            {q.data.bale?.enabled && <BaleConnect b={q.data.bale} />}
+            <div className="xs muted">{pending.length ? `${fa(pending.length)} استعلام منتظر پاسخ شماست` : "استعلام تازه‌ای ندارید. این صفحه خودکار به‌روز می‌شود."}</div>
+            {sent && <div className="card"><Empty icon="check" tone="ok" title="پاسخ شما ارسال شد">{sent}</Empty></div>}
+            {pending.map((i) => <Answerable key={i.id} i={i} shop={shop} token={token} onSent={setSent} />)}
+            {past.length > 0 && <div className="h4" style={{ marginTop: 8 }}>پاسخ‌داده‌ها</div>}
+            {past.map((i) => <Past key={i.id} i={i} shop={shop} token={token} />)}
+          </>
+        )}
       </div>
     </main>
+  );
+}
+
+/** Your own products: search, then one tap «I have it» / «out of stock», with the real price when it changed. */
+function Listings({ shop, token }: { shop: string; token: string }) {
+  const qc = useQueryClient();
+  const [term, setTerm] = useState("");
+  const [prices, setPrices] = useState<Record<string, string>>({});
+  const key = ["listings", shop, token, term];
+  const q = useQuery({ queryKey: key, queryFn: () => api.sellerListings(shop, token, term), placeholderData: (p) => p });
+  const set = useMutation({
+    mutationFn: (v: { id: string; available: boolean; price?: number | null }) => api.sellerSetListing(shop, token, v.id, { available: v.available, price: v.price }),
+    onSuccess: (r) => qc.setQueryData<{ items: Listing[] }>(key, (d) => d && { items: d.items.map((x) => (x.product_id === r.product_id ? r : x)) }),
+  });
+  return (
+    <section className="card" style={{ padding: 14, gap: 10, display: "flex", flexDirection: "column" }} aria-label="کالاهای من">
+      <div className="h4">کالاهای شما</div>
+      <div className="field" style={{ minHeight: 48 }}>
+        <input value={term} onChange={(e) => setTerm(e.target.value)} placeholder="جستجوی کالا در فروشگاه خودتان" aria-label="جستجوی کالا" />
+      </div>
+      {q.isLoading && <div className="sk" style={{ height: 80 }} />}
+      {q.data?.items.length === 0 && <div className="xs muted">کالایی پیدا نشد.</div>}
+      {q.data?.items.map((it) => {
+        const out = it.last?.available === false, has = it.last?.available === true;
+        const typed = prices[it.product_id];
+        return (
+          <div key={it.product_id} className="stack" style={{ gap: 6, paddingBlock: 6, borderTop: "1px solid var(--line, #0001)" }}>
+            <div className="sm b"><Bidi text={it.title.length > 70 ? `${it.title.slice(0, 70)}…` : it.title} /></div>
+            <div className="xs faint">{it.price != null ? `قیمت ثبت‌شده: ${money(it.price)} تومان` : "بدون قیمت"}{out ? " · اعلام‌شده: ناموجود" : has ? " · اعلام‌شده: موجود" : ""}</div>
+            <div className="row" style={{ gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <input className="seller-price" inputMode="numeric" aria-label="قیمت تازه (تومان)" placeholder={it.price != null ? `قیمت تازه (اختیاری)` : "قیمت"} value={typed ?? ""} onChange={(e) => setPrices((p) => ({ ...p, [it.product_id]: e.target.value }))} />
+              <button type="button" className={`btn ${has ? "pri" : "sec"}`} style={{ minHeight: 42 }} disabled={set.isPending} onClick={() => set.mutate({ id: it.product_id, available: true, price: typed ? parseNum(typed) : it.price })}>موجود است</button>
+              <button type="button" className={`btn ${out ? "pri" : "sec"}`} style={{ minHeight: 42 }} disabled={set.isPending} onClick={() => set.mutate({ id: it.product_id, available: false })}>تمام شده</button>
+            </div>
+          </div>
+        );
+      })}
+      {set.isError && <Note tone="bad" icon="alert">{(set.error as Error).message}</Note>}
+    </section>
   );
 }
 

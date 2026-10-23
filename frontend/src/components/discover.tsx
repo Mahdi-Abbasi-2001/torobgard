@@ -1,5 +1,6 @@
 "use client";
 // Steps 1–3 building blocks: when / how you go, best place to go, model variants, fair price, score breakdown.
+import { RouteButton } from "@/components/RoutePreview";
 import Link from "next/link";
 import { useState } from "react";
 import type { FairPrice, ShopCard, Variant, Zone } from "@/lib/api";
@@ -53,12 +54,7 @@ export function ZonesCard({ zones, onFocus }: { zones?: Zone[]; onFocus?: (z: Zo
         {onFocus && <button className="btn ghost" style={{ minHeight: 36 }} onClick={() => onFocus(top)}>فقط همین‌ها</button>}</div>
       <div className="xs muted">{top.why}</div>
       {rest.length > 0 && <div className="xs faint">گزینه‌های بعدی: {rest.map((z) => `${fa(z.name)} (${fa(z.shop_count)} فروشگاه${z.price_min ? `، از ${mil(z.price_min)}` : ""})`).join(" · ")}</div>}
-      {top.lat != null && (
-        <div className="row" style={{ gap: 8 }}>
-          <a className="btn sec grow" style={{ minHeight: 38 }} href={`https://nshn.ir/?lat=${top.lat}&lng=${top.lon}`} target="_blank" rel="noopener">مسیر با نشان</a>
-          <a className="btn sec grow" style={{ minHeight: 38 }} href={`https://balad.ir/location?latitude=${top.lat}&longitude=${top.lon}`} target="_blank" rel="noopener">بلد</a>
-        </div>
-      )}
+      {top.lat != null && top.lon != null && <div className="row" style={{ gap: 8 }}><RouteButton to={{ lat: top.lat, lon: top.lon }} label={fa(top.name)} style={{ minHeight: 38 }} /></div>}
     </div>
   );
 }
@@ -88,7 +84,7 @@ export function FairPriceNote({ fp }: { fp?: FairPrice | null }) {
   if (!fp) return null;
   return (
     <div className="xs row" style={{ gap: 6, alignItems: "flex-start", color: "var(--ink-2)" }}>
-      <Icon n="shield" s /><span><b>قیمت منصفانه: </b>{fp.offers >= 3 ? `${mil(fp.low)} تا ${mil(fp.high)} تومان` : "دادهٔ کافی نیست"}
+      <Icon n="shield" s /><span><b>قیمت منصفانه: </b>{fp.offers >= 3 ? `${mil(fp.low)} تا ${mil(fp.high)} تومان` : "اطلاعات کافی نیست"}
         <span className="faint"> · از {fa(fp.offers)} قیمت ثبت‌شده{fp.fresh_offers ? `، ${fa(fp.fresh_offers)} تا از این هفته` : ""}{fp.outliers ? ` · ${fa(fp.outliers)} قیمت پرت کنار گذاشته شد` : ""}</span></span>
     </div>
   );

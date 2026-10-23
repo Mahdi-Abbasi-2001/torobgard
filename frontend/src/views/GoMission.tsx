@@ -8,6 +8,7 @@ import { useMissions, blankMission, type View } from "@/lib/mission";
 import { useSession } from "@/lib/session";
 import { asMissionProduct } from "@/lib/useStartMission";
 import { Empty } from "@/components/ui";
+import { MissionBar } from "@/components/mission/chrome";
 
 export default function GoMission({ productId, view, ids }: { productId?: string | null; view: View; ids?: string[] }) {
   const router = useRouter();
@@ -31,5 +32,5 @@ export default function GoMission({ productId, view, ids }: { productId?: string
       router.replace(`/m/${m.id}?s=${view}`);
     })();
   }, [ready, sessionReady, sid]); // eslint-disable-line react-hooks/exhaustive-deps
-  return <div className="mc"><div style={{ padding: 40 }}><Empty icon="route" title="در حال باز کردن خرید…">{" "}</Empty></div></div>;
+  return <div className="mc"><MissionBar /><div style={{ padding: 40 }}><Empty icon="route" title="در حال باز کردن خرید…">{" "}</Empty></div></div>;
 }

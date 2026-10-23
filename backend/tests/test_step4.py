@@ -187,7 +187,7 @@ def test_reliability_and_confirmation_fading():
     con.commit()
     r = verify.reliability(con, [shop])[shop]
     assert r["asked"] == 4 and r["replied"] == 3 and r["median_reply_s"] == 240 and r["known"]
-    assert "۴ دقیقه" in r["label"] and "۳ از ۴" in r["label"]
+    assert "۴ دقیقه" in r["label"] and "۳ پیام از ۴ پیام" in r["label"]
     con.execute("DELETE FROM inquiries WHERE shop_id=?", (shop,)); con.commit()
     assert verify.state_for(30) == "fresh" and verify.state_for(200) == "aging" and verify.state_for(500) == "expired"
 

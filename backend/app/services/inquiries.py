@@ -15,6 +15,7 @@ import hmac
 import json
 import os
 import random
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -161,6 +162,19 @@ def _is_simulated(con, shop_id: str) -> bool:
     return SIMULATE and shop_id not in LIVE_SHOPS
 
 
+# ---- seller presence: a shop whose inbox page is open right now can take an in-app voice call
+SELLER_SEEN: dict[str, float] = {}
+ONLINE_S = 20
+
+
+def touch_seller(shop_id: str) -> None:
+    SELLER_SEEN[shop_id] = time.time()
+
+
+def seller_online(shop_id: str) -> bool:
+    return time.time() - SELLER_SEEN.get(shop_id, 0) < ONLINE_S
+
+
 # ---- core
 def create(con, session_id: str, shop_ids: list[str], product_id: str | None, question_keys: list[str],
            timeout_s: int | None = None, note: str | None = None, *, kind: str = "ask", parent_id: str | None = None,
@@ -175,7 +189,7 @@ def create(con, session_id: str, shop_ids: list[str], product_id: str | None, qu
     for sid in dict.fromkeys(shop_ids):
         iid = "inq_" + uuid.uuid4().hex[:12]
         t = now()
-        sim = _is_simulated(con, sid)
+        sim = _is_simulated(con, sid) and not (extra or {}).get("live_call")
         meta = {"keys": qs, "note": note, "kind": kind, "parent": parent_id, "custom": {k: custom[k] for k in qs if k in custom},
                 "campaign": campaign_id, "sim": sim, "turns": 0, **(extra or {})}
         con.execute("INSERT INTO inquiries(id,session_id,shop_id,product_id,questions,status,token,created_at,deadline_at)"
@@ -200,8 +214,17 @@ def request_hold(con, parent_id: str, until: str, timeout_s: int = 180) -> dict 
     p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
     if not p:
         return None
+    # a price the seller already agreed to in a bargain is the price being held: the hold request says so, so nobody argues about it at the counter
+    deal = None
+    for k in con.execute("SELECT questions, answer FROM inquiries WHERE session_id=? AND shop_id=? AND product_id=?", (p["session_id"], p["shop_id"], p["product_id"])).fetchall():
+        try:
+            meta, ans = json.loads(k["questions"] or "{}"), json.loads(k["answer"] or "{}")
+        except ValueError:
+            continue
+        if meta.get("kind") == "bargain" and meta.get("parent") == parent_id and ans.get("bargain_accepted") and ans.get("price"):
+            deal = ans["price"] if deal is None else min(deal, ans["price"])
     made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], [], timeout_s, kind="hold", parent_id=parent_id,
-                  extra={"hold_until": until})
+                  extra={"hold_until": until, **({"deal_price": deal} if deal else {})})
     return view(con, made[0]["id"])
 
 
@@ -228,6 +251,32 @@ def request_bargain(con, parent_id: str, target: int, timeout_s: int = 180) -> d
     price = (json.loads(p["answer"]) or {}).get("price")
     made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], [], timeout_s, kind="bargain", parent_id=parent_id,
                   extra={"target": int(target), "price": price})
+    return view(con, made[0]["id"])
+
+
+CALL_NOTE = "این سؤال را قبلاً در پیام‌رسان فرستادیم و جوابی نیامد؛ همین حالا با تماس خودکار می‌پرسیم."
+
+
+CALL_NOTE_LIVE = "این سؤال را قبلاً در پیام‌رسان فرستادیم و جوابی نیامد؛ الان در برنامه با شما تماس می‌گیریم."
+
+
+def request_escalation(con, parent_id: str, timeout_s: int = 240) -> dict | None:
+    """The first message went unanswered: ask the same question again on a second channel (an automated phone call; in this version a
+    simulated one, labelled as such). Only once per question, and only after the first one really timed out."""
+    p = con.execute("SELECT * FROM inquiries WHERE id=?", (parent_id,)).fetchone()
+    if not p:
+        return None
+    meta = _meta(p)
+    if meta.get("kind", "ask") != "ask" or p["status"] != "no_reply":
+        return None
+    for k in con.execute("SELECT questions FROM inquiries WHERE session_id=? AND shop_id=? AND product_id IS ?", (p["session_id"], p["shop_id"], p["product_id"])):
+        if _meta(k).get("escalated_from") == parent_id:
+            return None
+    custom = {k: v for k, v in (meta.get("custom") or {}).items()}
+    live = seller_online(p["shop_id"])  # someone has the inbox open: the call rings there, in the app, and a person answers it
+    made = create(con, p["session_id"], [p["shop_id"]], p["product_id"], meta.get("keys") or ["stock", "price"], 60 if live else timeout_s,
+                  CALL_NOTE_LIVE if live else CALL_NOTE, custom=custom,
+                  extra={"escalated_from": parent_id, "channel": "call", **({"live_call": True} if live else {})})
     return view(con, made[0]["id"])
 
 
@@ -349,6 +398,7 @@ def view(con, inquiry_id: str, with_alternatives: bool = False) -> dict | None:
          "created_at": r["created_at"], "delivered_at": r["delivered_at"], "answered_at": r["answered_at"],
          "deadline_at": r["deadline_at"], "questions": question_texts(q), "note": q.get("note"),
          "hold_until": q.get("hold_until"), "hold_code": q.get("hold_code"), "eta_min": q.get("eta_min"), "target": q.get("target"),
+         "escalated_from": q.get("escalated_from"), "via_call": q.get("channel") == "call", "live_call": bool(q.get("live_call")),
          "answer": json.loads(r["answer"]) if r["answer"] else None, "partial": q.get("partial"),
          "thread": th, "awaiting_seller": awaiting, "simulated_seller": bool(q.get("sim")),
          "listed_price": _listed(con, r["shop_id"], r["product_id"]),
@@ -563,7 +613,7 @@ def _sim_text(con, r, meta: dict, rnd: random.Random, first: bool) -> str | None
             return "همین الان آخریش فروخته شد، شرمنده."
         return "آره هنوز هست، تشریف بیارید." if rnd.random() < 0.85 else "همین الان آخریش فروخته شد، شرمنده."
     weights = {"full": 30, "changed": 15, "vague": 15, "variant": 10 if (meta.get("note") or "color" in keys) else 0,
-               "alt": 10, "restock": 5, "silent": 15}
+               "alt": 10, "restock": 5, "silent": 3 if meta.get("channel") == "call" else 15}
     outcome = rnd.choices(list(weights), list(weights.values()))[0]
     if first and outcome in ("alt", "restock", "silent"):
         outcome = rnd.choice(["full", "changed", "vague"])  # the first shop asked always has it, so a demo never dead-ends

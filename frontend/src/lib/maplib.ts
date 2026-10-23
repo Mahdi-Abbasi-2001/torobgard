@@ -10,7 +10,19 @@ export type LL = { lat: number; lon: number };
 export const STYLE = "https://tiles.openfreemap.org/styles/positron";
 
 /** Extruded buildings under the labels, tinted warm so the pins and the route stay the loudest things on the map. */
+/** Quieter labels: the road-number shields (1346, 285… clutter every street) are hidden, and place and street names show only their Persian
+ *  form instead of «Latin + Persian». Every map in the app goes through addBuildings, so this applies to all of them. */
+function calmLabels(m: maplibregl.Map) {
+  for (const l of m.getStyle().layers ?? []) {
+    if (l.type !== "symbol") continue;
+    if (/shield/.test(l.id)) { m.setLayoutProperty(l.id, "visibility", "none"); continue; }
+    const tf = m.getLayoutProperty(l.id, "text-field");
+    if (tf && JSON.stringify(tf).includes("name:nonlatin")) m.setLayoutProperty(l.id, "text-field", ["coalesce", ["get", "name:nonlatin"], ["get", "name"]]);
+  }
+}
+
 export function addBuildings(m: maplibregl.Map) {
+  try { calmLabels(m); } catch { /* the stock labels are fine too */ }
   if (m.getLayer("b3d")) return;
   m.addLayer({
     id: "b3d", type: "fill-extrusion", source: "openmaptiles", "source-layer": "building", minzoom: 13.5,

@@ -52,7 +52,7 @@ export default function MissionsView() {
             {list.map(({ head: m, items }) => (
               <div key={m.id} className="mission-item">
                 <MissionCard m={m} count={items.length} />
-                <button type="button" className="mission-rm" aria-label="حذف خرید" title="حذف از این دستگاه" onClick={() => { if (confirm(items.length > 1 ? "این سفر و همهٔ کالاهایش از این دستگاه حذف شود؟" : "این خرید از این دستگاه حذف شود؟")) items.forEach((x) => remove(x.id)); }}><Icon n="x" s /></button>
+                <button type="button" className="mission-rm" aria-label="حذف خرید" title="حذف از این دستگاه" onClick={() => { if (confirm(items.length > 1 ? "این خرید و همهٔ کالاهایش از این دستگاه حذف شود؟" : "این خرید از این دستگاه حذف شود؟")) items.forEach((x) => remove(x.id)); }}><Icon n="x" s /></button>
               </div>
             ))}
           </div>

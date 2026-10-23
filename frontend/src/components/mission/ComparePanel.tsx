@@ -9,7 +9,7 @@ import { fa, mil } from "@/lib/fa";
 import type { Mission } from "@/lib/mission";
 import { Icon } from "@/components/Icon";
 import { ScoreBars } from "@/components/discover";
-import { FlagChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, confirmedPrice } from "@/components/honesty";
+import { FlagChips, LocLine, OpenChip, PriceBadge, ReliabilityLine, StockChip, confirmedPrice } from "@/components/honesty";
 import { Note, Sheet } from "@/components/ui";
 
 const PRIOS: [Priority, string][] = [["balanced", "پیشنهاد ترب‌گرد"], ["price", "قیمت"], ["near", "نزدیکی"], ["trust", "قابل‌اعتماد"], ["now", "الان باز باشد"]];
@@ -68,6 +68,8 @@ export function ComparePanel({ m, set, listed, onShop, max = 5 }: { m: Mission; 
               <span className="wrapr">
                 {later && <span className="xs faint">وقتی می‌رسید:</span>}<OpenChip open={s.open} />
               </span>
+              <StockChip stock={s.stock} />
+              {s.trip_risk && s.stock?.level !== "unknown" && <span className="xs muted">احتمال دست‌خالی برگشتن: <b style={{ color: s.trip_risk.level === "low" ? "var(--ok)" : s.trip_risk.level === "medium" ? "var(--warn)" : "var(--bad)" }}>{s.trip_risk.label}</b></span>}
               <ReliabilityLine r={s.reliability} />
               <FlagChips flags={s.offer?.flags} />
               {table && (

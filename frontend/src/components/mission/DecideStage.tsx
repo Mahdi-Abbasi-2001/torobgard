@@ -36,6 +36,12 @@ export default function DecideStage(sp: StageProps) {
   const [sheet, setSheet] = useState<string | null>(null);
   const [focus, setFocus] = useState<string | null>(null);
   const [help, setHelp] = useState(false);
+  const [refine, setRefine] = useState(m.query); // the search box above the list: change the item without starting over
+  useEffect(() => { Promise.resolve().then(() => setRefine(m.query)); }, [m.query]); // the assistant or the sheet may change the item
+  const [brand, setBrand] = useState<string | null>(null); // the shopper narrows a broad list by brand
+  const [sort, setSort] = useState<"fit" | "cheap" | "pricey">("fit");
+  const [singles, setSingles] = useState(false); // also list models only one shop has
+  const [duel, setDuel] = useState(false); // the head-to-head view, opt-in
   const [showAll, setShowAll] = useState(false); // «none is made for that need»: the shopper may still look at everything
 
   const presets = useQuery({ queryKey: ["presets", m.category], queryFn: () => api.presets(m.category!), enabled: !!m.category, staleTime: Infinity });
@@ -44,8 +50,8 @@ export default function DecideStage(sp: StageProps) {
   const waitPresets = !!m.category && presets.isLoading;
 
   const res = useQuery({
-    queryKey: ["dsearch", m.query, m.category, m.budgetMin, m.budgetMax, preset?.id ?? null, m.cond, m.when, m.place.lat, m.place.lon],
-    queryFn: () => api.search({ q: m.query, category: m.category ?? undefined, price_min: m.budgetMin, price_max: m.budgetMax, limit: 30 }, m.place,
+    queryKey: ["dsearch", m.query, m.category, brand, m.budgetMin, m.budgetMax, preset?.id ?? null, m.cond, m.when, m.place.lat, m.place.lon],
+    queryFn: () => api.search({ q: m.query, category: m.category ?? undefined, brand: brand ?? undefined, price_min: m.budgetMin, price_max: m.budgetMax, limit: 30 }, m.place,
       { prefs: preset?.constraints, near_only: m.cond.near, installment_only: m.cond.installment, open_only: m.cond.open, sort: preset?.sort ?? null, when: m.when }),
     placeholderData: keepPreviousData, enabled: !waitPresets && !!m.query,
   });
@@ -55,12 +61,22 @@ export default function DecideStage(sp: StageProps) {
   const found = useMemo(() => res.data?.items ?? [], [res.data]);
   const forNeed = useMemo(() => found.filter((p) => fitsNeed(p.title, m.need)), [found, m.need]);
   const hidden = forNeed.length ? found.length - forNeed.length : 0, noneForNeed = found.length > 0 && forNeed.length === 0;
-  const pool = useMemo(() => (forNeed.length ? forNeed : showAll ? found : []), [forNeed, showAll, found]);
-  const items = useMemo(() => (res.data?.applied.relaxed ? [...pool] : [...pool].sort((a, b) =>
-    (b.fit_score ?? 0) - (a.fit_score ?? 0) || (b.near?.near ?? 0) - (a.near?.near ?? 0) || b.shop_count - a.shop_count)), [res.data, pool]);
+  const base = useMemo(() => (forNeed.length ? forNeed : showAll ? found : []), [forNeed, showAll, found]);
+  // in-person shopping wants a choice of shops: models that two or more shops list come first; one-shop models wait behind a button
+  const multi = useMemo(() => base.filter((p) => p.shop_count >= 2), [base]);
+  const hideSingles = !singles && multi.length >= 3 && multi.length < base.length;
+  const pool = hideSingles ? multi : base;
+  const singlesHidden = hideSingles ? base.length - multi.length : 0;
+  const items = useMemo(() => {
+    if (res.data?.applied.relaxed) return [...pool];
+    const price = (p: Product) => p.price_median ?? p.price_min ?? Infinity;
+    return [...pool].sort(sort === "cheap" ? (a, b) => price(a) - price(b) : sort === "pricey" ? (a, b) => (price(b) === Infinity ? -1 : price(b)) - (price(a) === Infinity ? -1 : price(a)) : (a, b) =>
+      (b.fit_score ?? 0) - (a.fit_score ?? 0) || (b.near?.near ?? 0) - (a.near?.near ?? 0) || b.shop_count - a.shop_count);
+  }, [res.data, pool, sort]);
+  const brands = (res.data?.facets.brands ?? []).slice(0, 6);
   const relaxed = !!res.data?.applied.relaxed;
   // only an exact match says which category the shopper means; a partial one is a guess
-  useEffect(() => { if (!m.category && !relaxed && items[0]?.category) set({ category: items[0].category }); }, [m.category, relaxed, items, set]);
+  useEffect(() => { if (!m.category && !relaxed && !res.isPlaceholderData && items[0]?.category) set({ category: items[0].category }); }, [m.category, relaxed, res.isPlaceholderData, items, set]);
 
   // models the assistant suggested join the duel first
   const missing = m.extras.filter((id) => !items.some((x) => x.product_id === id)).slice(0, 3);
@@ -70,7 +86,9 @@ export default function DecideStage(sp: StageProps) {
   const challenger = lead ? nextChallenger(all, lead.product_id, m.beaten, m.extras) : null;
   const total = Math.max(1, Math.min(all.length - 1, 5));
   // a duel needs models that several shops list; one-off listings (clothes, decor...) are browsed and picked directly
-  const browse = !!res.data && items.length > 0 && (relaxed || items.slice(0, 12).filter((p) => p.shop_count >= 3).length < 3);
+  // the shopper sees the products first, all of them, and picks; the duel is something they ask for, never the opening screen
+  const duelOk = !!res.data && items.length > 1 && !relaxed && items.slice(0, 12).filter((p) => p.shop_count >= 3).length >= 3;
+  const browse = !!res.data && items.length > 0 && !(duelOk && duel);
   const needText = preset?.label ?? m.need;
 
   const cmp = useQuery({ queryKey: ["dcmp", lead?.product_id, challenger?.product_id], queryFn: () => api.compare([lead!.product_id, challenger!.product_id], m.place), enabled: !!lead && !!challenger, staleTime: 5 * 60_000 });
@@ -80,7 +98,7 @@ export default function DecideStage(sp: StageProps) {
   });
   const rows: DuelRow[] = lead && challenger ? duelRows(lead, challenger, cmp.data) : [];
 
-  const choose = (p: Product) => { set({ productId: p.product_id, product: asMissionProduct(p), champion: p.product_id, picks: [], extras: [] }); go("find"); };
+  const choose = (p: Product) => { set({ productId: p.product_id, product: asMissionProduct(p), champion: p.product_id, picks: [], extras: [] }); go(m.auto ? null : "find"); };
   const next = () => challenger && set((x) => ({ champion: lead!.product_id, beaten: [...x.beaten, challenger.product_id], extras: x.extras.filter((e) => e !== challenger.product_id) }));
   const swap = () => challenger && set((x) => ({ champion: challenger.product_id, beaten: [...x.beaten, lead!.product_id], extras: x.extras.filter((e) => e !== challenger.product_id) }));
   const showDetails = (id: string) => (desk ? setFocus(id) : setSheet(id));
@@ -94,7 +112,7 @@ export default function DecideStage(sp: StageProps) {
         <Thumb src={p.image} alt="" size={desk ? 96 : "100%"} h={desk ? 96 : 92} brand={p.brand} />
         <span className="duel-name"><Bidi text={shortName(p)} /></span>
         <span className="duel-price">{p.price_min != null ? <>{p.price_max && p.price_max !== p.price_min ? `${mil(p.price_min)} تا ${mil(p.price_max)}` : mil(p.price_min)}</> : "قیمت نامشخص"}</span>
-        <span className="xs faint">{fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} تایش نزدیک شماست` : ""}</span>
+        <span className="xs faint">{fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} نزدیک شما` : ""}</span>
       </button>
       {!leader && <button type="button" className="duel-pref" onClick={swap}>این را می‌پسندم</button>}
     </div>
@@ -102,24 +120,41 @@ export default function DecideStage(sp: StageProps) {
 
   const body = (
     <div className="mc-main">
+      <form className="mc-pad st-refine" role="search" onSubmit={(e) => { e.preventDefault(); const q = refine.trim(); if (q && q !== m.query) { setBrand(null); setDuel(false); setSingles(false); set({ query: q, text: q, category: null, presetId: null, beaten: [], champion: null, extras: [] }); } }}>
+        <div className="field" style={{ minHeight: 44 }}><Icon n="search" s /><input value={refine} onChange={(e) => setRefine(e.target.value)} placeholder="کالای دیگری بنویسید یا جستجو را دقیق‌تر کنید" aria-label="جستجوی کالا" enterKeyHint="search" /></div>
+      </form>
       <div className="mc-pad row between" style={{ alignItems: "flex-end", marginTop: desk ? 0 : 4 }}>
-        {browse ? <div><div className="xs faint">{fa(items.length)} نتیجه</div><h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>یکی را انتخاب کنید</h2></div> :
+        {browse || !lead ? <div><div className="xs faint">{items.length > 0 ? `${fa(items.length)} نتیجه برای «${m.query}»` : res.isFetching ? "در حال جستجو…" : `«${m.query}»`}</div><h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>کدام کالا را می‌خواهید؟</h2></div> :
         <div><div className="xs faint">{challenger ? `مقایسهٔ ${fa(Math.min(m.beaten.length + 1, total))} از ${fa(total)}` : "پیشنهاد ما"}</div>
           <h2 style={{ margin: 0, fontSize: desk ? 26 : 19, fontWeight: 800 }}>{challenger ? (needText ? `برای ${needText}، کدام بهتر است؟` : "کدام بهتر است؟") : "گزینهٔ برتر شما"}</h2>{challenger && m.beaten.length > 0 && <div className="xs muted" style={{ marginTop: 2 }}>الان در صدر: <Bidi text={shortName(lead!)} /></div>}</div>}
       </div>
 
       {presets.data && presets.data.presets.length > 0 && (
-        <div className="mc-pad wrapr" role="group" aria-label="نیاز شما">
+        <div className="mc-pad wrapr chips-scroll" role="group" aria-label="نیاز شما"><span className="xs faint chip-label">برای چه؟</span>
           {presets.data.presets.slice(0, 6).map((x) => <button key={x.id} type="button" className={`chip ${preset?.id === x.id ? "on" : ""}`} aria-pressed={preset?.id === x.id} title={x.why} onClick={() => pickPreset(x.id)}>{x.label}</button>)}
+        </div>
+      )}
+
+      {(brands.length > 1 || brand) && (
+        <div className="mc-pad wrapr chips-scroll" role="group" aria-label="برند"><span className="xs faint chip-label">برند</span>
+          <button type="button" className={`chip ${brand === null ? "on" : ""}`} aria-pressed={brand === null} onClick={() => { setBrand(null); setDuel(false); }}>همهٔ برندها</button>
+          {(brand && !brands.some((b) => b.name === brand) ? [{ name: brand, count: 0 }, ...brands] : brands).map((b) => (
+            <button key={b.name} type="button" className={`chip ${brand === b.name ? "on" : ""}`} aria-pressed={brand === b.name} onClick={() => { setBrand(brand === b.name ? null : b.name); setDuel(false); }}>{b.name}</button>
+          ))}
+        </div>
+      )}
+      {items.length > 1 && (
+        <div className="mc-pad wrapr chips-scroll" role="group" aria-label="مرتب‌سازی"><span className="xs faint chip-label">مرتب‌سازی</span>
+          {([["fit", "مناسب‌ترین"], ["cheap", "ارزان‌ترین"], ["pricey", "گران‌ترین"]] as const).map(([k, l]) => <button key={k} type="button" className={`chip ${sort === k ? "on" : ""}`} aria-pressed={sort === k} onClick={() => setSort(k)}>{l}</button>)}
         </div>
       )}
 
       {hidden > 0 && <div className="mc-pad"><Note tone="unk" icon="alert">{fa(hidden)} کالای مخصوص جنس دیگر کنار گذاشته شد تا فقط مناسب «{m.need}» ببینید.</Note></div>}
       {noneForNeed && !showAll && (
         <div className="mc-pad stack" style={{ gap: 10 }}>
-          <Empty icon="store" title={`کالایی مخصوص «${m.need}» پیدا نشد`}>در داده‌ها برای «{m.query}» فقط کالاهای مخصوص جنس دیگر یا نامشخص ثبت شده است. از ترب‌گرد بخواهید دقیق‌ترش کند، یا همه را ببینید و در فروشگاه چک کنید.</Empty>
+          <Empty icon="store" title={`کالایی مخصوص «${m.need}» پیدا نشد`}>در فروشگاه‌ها برای «{m.query}» فقط کالاهای مخصوص جنس دیگر یا نامشخص ثبت شده است. از ترب‌گرد بخواهید دقیق‌ترش کند، یا همه را ببینید و در فروشگاه چک کنید.</Empty>
           <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className="btn pri" onClick={() => setHelp(true)}><Icon n="spark" s />از ترب‌گرد کمک بگیر</button>
+            <button type="button" className="btn pri" onClick={() => setHelp(true)}><Icon n="spark" s />کمک گرفتن از ترب‌گرد</button>
             <button type="button" className="btn sec" onClick={() => setShowAll(true)}>همه را نشان بده</button>
           </div>
         </div>
@@ -128,7 +163,7 @@ export default function DecideStage(sp: StageProps) {
       {relaxed && items.length > 0 && (
         <div className="mc-pad stack" style={{ gap: 8 }}>
           <Note tone="warn" icon="alert">عبارت «{m.query}» را دقیقاً پیدا نکردیم؛ این‌ها نزدیک‌ترین نتیجه‌ها هستند و شاید همان چیزی نباشند که می‌خواهید. دقیق‌ترش کنید:</Note>
-          <button type="button" className="btn sec" style={{ alignSelf: "flex-start", minHeight: 42 }} onClick={() => setHelp(true)}><Icon n="spark" s />از ترب‌گرد کمک بگیر</button>
+          <button type="button" className="btn sec" style={{ alignSelf: "flex-start", minHeight: 42 }} onClick={() => setHelp(true)}><Icon n="spark" s />کمک گرفتن از ترب‌گرد</button>
           <div className="wrapr">
             {m.query.split(/\s+/).filter(Boolean).length > 1 && m.query.split(/\s+/).filter(Boolean).map((w) => (
               <button key={w} type="button" className="chip" onClick={() => set({ query: m.query.split(/\s+/).filter((x) => x && x !== w).join(" "), beaten: [], champion: null })}>بدون «{w}»</button>
@@ -172,7 +207,7 @@ export default function DecideStage(sp: StageProps) {
           )}
           {!challenger && (
             <div className="mc-pad"><div className="mc-note">{all.length > 1 ? "همهٔ گزینه‌ها را دیدید." : "برای این جست‌وجو فقط یک مدل پیدا شد."}{" "}
-              {m.beaten.length > 0 && <button type="button" className="mc-links" style={{ display: "inline", background: "none", border: 0, color: "var(--accent-ink)", fontWeight: 700 }} onClick={() => set({ beaten: [], champion: null })}>از اول مقایسه کن</button>}</div></div>
+              {m.beaten.length > 0 && <button type="button" className="mc-links" style={{ display: "inline", background: "none", border: 0, color: "var(--accent-ink)", fontWeight: 700 }} onClick={() => set({ beaten: [], champion: null })}>مقایسه از اول</button>}</div></div>
           )}
           {challenger && all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id && !m.beaten.includes(x.product_id))[0] && (
             <div className="mc-pad mc-note">گزینهٔ بعدی: <Bidi text={shortName(all.filter((x) => x.product_id !== lead.product_id && x.product_id !== challenger.product_id && !m.beaten.includes(x.product_id))[0])} />{" "}
@@ -181,15 +216,19 @@ export default function DecideStage(sp: StageProps) {
           {res.data && res.data.capped && <div className="mc-pad mc-note">فقط بهترین گزینه‌های این جست‌وجو بررسی شد.</div>}
         </>
       )}
+      {duelOk && (
+        <div className="mc-pad"><button type="button" className="btn sec" style={{ minHeight: 42 }} onClick={() => setDuel(!duel)}>{duel ? "همهٔ کالاها را ببینم" : "دو کالا را کنار هم مقایسه کن"}</button></div>
+      )}
+      {browse && singlesHidden > 0 && <div className="mc-pad"><span className="xs muted">اول کالاهایی را می‌بینید که چند فروشگاه دارند، تا انتخاب فروشگاه داشته باشید.</span></div>}
       {browse && (
         <div className="mc-pad browse-list">
-          {items.slice(0, 12).map((p) => (
+          {items.slice(0, 20).map((p) => (
             <div key={p.product_id} className="card browse-card">
               <button type="button" className="browse-hit" onClick={() => showDetails(p.product_id)} aria-label={`جزئیات ${p.title}`}>
                 <Thumb src={p.image} alt="" size={64} brand={p.brand} />
                 <span className="stack" style={{ gap: 2, minWidth: 0, textAlign: "start" }}>
                   <span className="b sm" style={{ lineHeight: 1.6 }}><Bidi text={p.title} /></span>
-                  <span className="xs muted">{p.price_min != null ? `${mil(p.price_min)}` : "قیمت نامشخص"}، {fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} تایش نزدیک شماست` : ""}</span>
+                  <span className="xs muted">{p.price_min != null ? `${mil(p.price_min)}` : "قیمت نامشخص"}، {fa(p.shop_count)} فروشگاه{p.near?.near ? `، ${fa(p.near.near)} نزدیک شما` : ""}</span>
                 </span>
               </button>
               <button type="button" className="btn sec" style={{ minHeight: 42, fontSize: 14 }} onClick={() => choose(p)}>همین را می‌خواهم</button>
@@ -197,6 +236,7 @@ export default function DecideStage(sp: StageProps) {
           ))}
         </div>
       )}
+      {browse && singlesHidden > 0 && <div className="mc-pad"><button type="button" className="btn sec block" onClick={() => setSingles(true)}>{fa(singlesHidden)} کالای دیگر که فقط یک فروشگاه دارند را هم نشان بده</button></div>}
       {desk && lead && !browse && <Actions />}
     </div>
   );
@@ -214,7 +254,7 @@ export default function DecideStage(sp: StageProps) {
     <>
       <Shell {...sp} patch={patchSlots} mapStage={false}
         center={body}
-        panel={desk && detailId ? <ProductDetails id={detailId} onChallenge={(id) => set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] }))} /> : undefined}
+        panel={desk && detailId ? <div className="stack" style={{ gap: 6 }}><span className="st-cap">پیش‌نمایش کالا؛ روی هر کالا بزنید تا جزئیاتش اینجا بیاید</span><ProductDetails id={detailId} onChallenge={(id) => set((x) => ({ extras: [id, ...x.extras.filter((e) => e !== id)] }))} /></div> : undefined}
         cta={!desk && lead && !browse ? (
           <div className="mc-cta-row">
             <button className="btn pri" onClick={() => choose(lead)}>{shortName(lead)} را انتخاب می‌کنم</button>

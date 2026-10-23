@@ -97,7 +97,7 @@ def test_intake_options_come_from_the_data_not_the_model():
         {"slot": "budget", "text": "بودجه؟", "options": ["۱ تومان", "۲ تومان"]},
         {"slot": "place", "text": "از کجا؟", "options": ["ماه"]}]}
     by = {q["slot"]: q for q in intake._result(con, fake, [], "llm", "هندزفری")["questions"]}
-    assert "ماه" not in by["place"]["options"] and "موقعیت فعلی من" in by["place"]["options"]
+    assert "place" not in by, "the start point is the location chip's job: the intake never asks it"
     assert "۱ تومان" not in by["budget"]["options"] and "فرقی نمی‌کند" in by["budget"]["options"]
     need = {"query": "هندزفری", "questions": [{"slot": "need", "text": "برای چه؟", "options": ["اقتصادی"]}]}
     assert intake._result(con, need, [], "llm", "هندزفری")["questions"] == []  # nothing real to tap: dropped, not the model's guess
@@ -204,9 +204,9 @@ def test_visit_rating_reaches_the_shops_reliability():
 # ---- in-app routing: turns in Persian, minutes from the shared walking model, honest fallback
 def test_route_instructions_and_shape():
     from app.services import routing
-    assert routing.instruction({"type": "turn", "modifier": "right"}, "پارس") == "راست بپیچ توی پارس"
-    assert routing.instruction({"type": "arrive", "modifier": "left"}, "") == "رسیدی؛ مقصد سمت چپ توست"
-    assert routing.instruction({"type": "depart"}, "") == "راه بیفت"
+    assert routing.instruction({"type": "turn", "modifier": "right"}, "پارس") == "به راست بپیچید و وارد خیابان پارس شوید"
+    assert routing.instruction({"type": "arrive", "modifier": "left"}, "") == "به مقصد رسیدید؛ فروشگاه سمت چپ شماست"
+    assert routing.instruction({"type": "depart"}, "") == "از همین‌جا شروع کنید و جلو بروید"
     osrm = {"routes": [{"distance": 855.0, "duration": 700.0, "geometry": {"coordinates": [[51.413, 35.6955], [51.419, 35.699]]}, "legs": [{"steps": [
         {"name": "کیخسرو", "distance": 400, "maneuver": {"type": "depart", "location": [51.413, 35.6955]}},
         {"name": "صادق", "distance": 455, "maneuver": {"type": "turn", "modifier": "left", "location": [51.416, 35.697]}},
@@ -227,7 +227,7 @@ def test_route_falls_back_to_a_straight_line_when_the_server_is_down(monkeypatch
     monkeypatch.setattr(routing.httpx, "AsyncClient", Down)
     routing._cache.clear()
     r = asyncio.run(routing.route((35.6955, 51.413), (35.699, 51.419)))
-    assert r["source"] == "straight" and len(r["points"]) == 2 and r["steps"][-1]["text"] == "رسیدی"
+    assert r["source"] == "straight" and len(r["points"]) == 2 and r["steps"][-1]["text"] == "به مقصد رسیدید"
 
 
 def test_route_endpoint_rejects_places_outside_iran():
@@ -343,3 +343,184 @@ def test_chat_can_add_an_item_to_the_trip_but_only_a_real_one():
     assert [x["query"] for x in block["patch"]["add_items"]] == ["قاب گوشی"]
     res, block = _update_mission(ctx, {"add_items": ["zzzzqq کالای ناموجود"]})
     assert block is None and "error" in res
+
+
+def test_pulse_match_lights_the_shops_that_carry_what_was_typed():
+    base = {"lat": 35.6955, "lon": 51.413, "radius_km": 1.4}
+    d = c.get("/api/pulse/match", params={**base, "q": "هندزفری"}).json()
+    assert d["listed"], "shops with a listing for a matching product"
+    assert not {s["shop_id"] for s in d["listed"]} & {s["shop_id"] for s in d["maybe"]}
+    assert d["hotspot"] and d["hotspot"]["count"] >= 1
+    assert any(x.get("price") for x in d["listed"]), "a lit shop carries its lowest listed price, for the map label"
+    assert c.get("/api/pulse/match", params={**base, "q": "zzzzqqq"}).json()["hotspot"] is None
+
+
+def test_pulse_categories_menu_and_category_match():
+    base = {"lat": 35.6955, "lon": 51.413}
+    items = c.get("/api/pulse/categories", params=base).json()["items"]
+    assert len(items) >= 3 and items[0]["shops"] >= items[-1]["shops"] and not any(i["name"].startswith("سایر") for i in items)
+    d = c.get("/api/pulse/match", params={**base, "category": items[0]["name"]}).json()
+    assert d["listed"] or d["maybe"]
+
+
+def test_pulse_shops_and_chips_carry_a_group_for_the_map_icons():
+    base = {"lat": 35.6955, "lon": 51.413, "radius_km": 1.2}
+    shops = c.get("/api/pulse", params=base).json()["shops"]
+    assert shops and all("g" in s for s in shops) and len({s["g"] for s in shops}) >= 3
+    chips = c.get("/api/pulse/categories", params={"lat": base["lat"], "lon": base["lon"]}).json()["items"]
+    assert all(i["g"] for i in chips)
+    d = c.get("/api/pulse/match", params={"lat": base["lat"], "lon": base["lon"], "q": "هندزفری"}).json()
+    assert all("g" in x for x in d["listed"])
+
+
+def test_pulse_match_names_the_nearest_shop_when_nothing_is_in_reach():
+    d = c.get("/api/pulse/match", params={"lat": 35.9, "lon": 51.9, "q": "هندزفری", "radius_km": 0.3}).json()
+    assert not d["listed"] and d["nearest"] and d["nearest"]["km"] > 5
+
+
+def test_groups_read_the_kind_of_shop_from_category_names_by_whole_words():
+    from app.services import groups
+    assert groups.group_of("کنتاکتور") == "electrical", "«کت» is a jacket only at the start of a word"
+    assert groups.group_of("ماشین لباسشویی") == "home" and groups.group_of("لباس زیر مردانه") == "fashion"
+    assert groups.group_of("عطر و ادکلن") == "beauty" and groups.group_of("موبایل") == "mobile"
+    assert groups.group_of("چیزی که نمی‌شناسیم") == "other"
+
+
+def test_hold_request_after_a_bargain_names_the_agreed_price():
+    from app.services import converse
+    msg = converse.compose("hold", "هندزفری", [], meta={"hold_until": "18:00", "deal_price": 560_000})
+    assert "۵۶۰٬۰۰۰" in msg and "توافق" in msg
+    assert "توافق" not in converse.compose("hold", "هندزفری", [], meta={"hold_until": "18:00"})
+
+
+def test_stock_likelihood_uses_age_activity_and_what_shoppers_said():
+    from app.services import stock
+    base = {"shop_id": "s1", "tier": "listed", "open": {"state": "open"}, "reliability": None, "confirmation": None,
+            "offer": {"age_days": 2, "suspicious": False, "flags": []}}
+    act = {"s1": {"share": 0.9, "last_days": 1, "n": 40}}
+    fresh = stock.likelihood(base, act)
+    stale = stock.likelihood({**base, "offer": {**base["offer"], "age_days": 200}}, {"s1": {"share": 0.0, "last_days": 400, "n": 3}})
+    assert fresh["level"] == "high" and stale["level"] == "low" and fresh["score"] > stale["score"]
+    no = stock.likelihood({**base, "confirmation": {"state": "fresh", "available": False}}, act)
+    yes = stock.likelihood({**base, "offer": {**base["offer"], "age_days": 200}, "confirmation": {"state": "fresh", "available": True}}, {})
+    assert no["score"] <= 5 and yes["score"] >= 90, "a fresh answer outweighs the listing's age"
+    assert stock.likelihood({**base, "tier": "category_only", "offer": None}, act)["level"] == "unknown"
+    assert stock.risk_of_wasted_trip({"open": {"state": "closed"}}, fresh)["percent"] == 100
+
+
+def test_find_shops_cards_carry_stock_and_trip_risk():
+    items = c.get("/api/search/products", params={"q": "هندزفری", "limit": 10}).json()["items"]
+    pid = next(p for p in items if p["shop_count"] >= 2)["product_id"]
+    s = c.get(f"/api/products/{pid}/shops").json()
+    assert s["listed"] and all(x["stock"]["level"] in ("high", "medium", "low") and 3 <= x["stock"]["score"] <= 97 for x in s["listed"])
+    assert all(x["trip_risk"]["level"] in ("low", "medium", "high") for x in s["listed"])
+    assert all(x["stock"]["level"] == "unknown" for x in s["category_only"])
+
+
+def test_daily_stock_check_turns_one_tap_answers_into_confirmations_everyone_sees():
+    from app.services import inquiries as inq
+    shops = c.get("/api/pulse", params={"lat": 35.6955, "lon": 51.413, "radius_km": 1.2}).json()["shops"]
+    r = c.post("/api/stockcheck/run", json={"shops": 3, "items": 2}).json()
+    assert r["shops"] == 3 and r["items"] >= 3
+    from app.db import connect
+    sid = connect().execute("SELECT shop_id FROM stock_checks WHERE status='pending' ORDER BY created_at DESC LIMIT 1").fetchone()[0]
+    tok = inq.shop_token(sid)
+    items = c.get(f"/api/seller/{sid}/{tok}/stockcheck").json()["items"]
+    assert items and c.get(f"/api/seller/{sid}/wrongtoken/stockcheck").status_code == 403
+    first = items[0]
+    done = c.post(f"/api/seller/{sid}/{tok}/stockcheck/{first['id']}", json={"available": True, "price": first["price"]}).json()
+    assert done["left"] == len(items) - 1
+    assert c.post(f"/api/seller/{sid}/{tok}/stockcheck/{first['id']}", json={"available": True}).status_code == 404, "answered once"
+    cards = c.get(f"/api/products/{first['product_id']}/shops").json()["listed"]
+    mine = next(x for x in cards if x["shop_id"] == sid)
+    assert mine["confirmation"]["source"] == "daily" and mine["confirmation"]["state"] == "fresh" and mine["stock"]["level"] == "high"
+    sim = c.post("/api/stockcheck/run", json={"shops": 2, "items": 2, "simulate": True}).json()
+    assert sim.get("answered", 0) >= 0
+
+
+def test_a_silent_shop_is_asked_again_once_by_automated_call():
+    from app.db import connect
+    shop, pid = tuple(connect().execute("SELECT shop_id, product_id FROM offers LIMIT 1").fetchone())
+    sess = "esc-test-1"
+    c.put(f"/api/sessions/{sess}", json={"state": {}})
+    made = c.post("/api/inquiries", json={"session_id": sess, "shop_ids": [shop], "product_id": pid, "questions": ["stock", "price"]})
+    assert made.status_code == 200, made.text
+    body = made.json()
+    iid = (body["items"] if isinstance(body, dict) and "items" in body else body)[0]["id"]
+    con = connect(); con.execute("UPDATE inquiries SET status='no_reply' WHERE id=?", (iid,)); con.commit()
+    r = c.post(f"/api/inquiries/{iid}/escalate", json={"session_id": sess})
+    assert r.status_code == 200 and r.json()["via_call"] and r.json()["escalated_from"] == iid
+    assert c.post(f"/api/inquiries/{iid}/escalate", json={"session_id": sess}).status_code == 409, "only once"
+
+
+def test_an_open_seller_page_gets_the_call_in_the_app_and_answers_it_by_voice_text():
+    from app.db import connect
+    shop, pid = tuple(connect().execute("SELECT shop_id, product_id FROM offers LIMIT 1").fetchone())
+    sess = "esc-live-1"
+    c.put(f"/api/sessions/{sess}", json={"state": {}})
+    made = c.post("/api/inquiries", json={"session_id": sess, "shop_ids": [shop], "product_id": pid, "questions": ["stock", "price"]}).json()
+    iid = (made["items"] if isinstance(made, dict) and "items" in made else made)[0]["id"]
+    con = connect(); con.execute("UPDATE inquiries SET status='no_reply' WHERE id=?", (iid,)); con.commit()
+    from app.services import inquiries as inq
+    tok = inq.shop_token(shop)
+    assert c.get(f"/api/seller/{shop}/{tok}/inquiries").status_code == 200  # the inbox page is open: the shop is online
+    call = c.post(f"/api/inquiries/{iid}/escalate", json={"session_id": sess}).json()
+    assert call["live_call"] and call["via_call"] and not call["simulated_seller"]
+    r = c.post(f"/api/seller/{shop}/{tok}/inquiries/{call['id']}/reply", json={"text": "نه، تمام شده"})
+    assert r.status_code == 200
+
+
+def test_a_seller_account_sees_only_its_own_shop_and_can_set_stock():
+    from app.db import connect
+    from app.services import inquiries as inq
+    shop = connect().execute("SELECT shop_id FROM offers GROUP BY shop_id HAVING COUNT(*)>3 LIMIT 1 OFFSET 7").fetchone()[0]
+    code = f"{shop}.{inq.shop_token(shop)}"
+    _wipe_test_accounts(shop)
+    assert c.post("/api/seller/auth/signup", json={"username": "seller-x1", "password": "longenough1", "code": f"{shop}.bad"}).status_code == 403
+    r = c.post("/api/seller/auth/signup", json={"username": "seller-x1", "password": "longenough1", "code": code})
+    assert r.status_code == 200, r.text
+    u, tok = r.json()["user"], r.json()["token"]
+    assert u["role"] == "seller" and u["shop_id"] == shop
+    assert c.post("/api/seller/auth/signup", json={"username": "seller-x2", "password": "longenough1", "code": code}).status_code == 409, "one account per shop"
+    h = {"Authorization": f"Bearer {tok}"}
+    assert c.get("/api/seller/me/inquiries").status_code == 401
+    assert c.get("/api/seller/me/inquiries", headers=h).json()["shop"]["shop_id"] == shop
+    items = c.get("/api/seller/me/listings", headers=h).json()["items"]
+    assert items
+    pid = items[0]["product_id"]
+    out = c.post(f"/api/seller/me/listings/{pid}", headers=h, json={"available": False}).json()
+    assert out["last"]["available"] is False
+    shopper = c.post("/api/auth/signup", json={"username": "shopper-x1", "password": "longenough1"}).json()
+    assert shopper["user"]["role"] == "shopper"
+    assert c.get("/api/seller/me/listings", headers={"Authorization": f"Bearer {shopper['token']}"}).status_code == 403
+    me = c.post("/api/auth/login", json={"username": "seller-x1", "password": "longenough1"}).json()["user"]
+    assert me["role"] == "seller" and me["shop_id"] == shop
+    _wipe_test_accounts(shop)
+
+
+def _wipe_test_accounts(shop):
+    from app.db import connect
+    con = connect()
+    con.execute("DELETE FROM seller_shops WHERE shop_id=?", (shop,))
+    con.execute("DELETE FROM auth_tokens WHERE user_id IN (SELECT id FROM users WHERE username IN ('seller-x1','seller-x2','shopper-x1'))")
+    con.execute("DELETE FROM users WHERE username IN ('seller-x1','seller-x2','shopper-x1')")
+    con.commit()
+
+
+def test_today_and_shop_tabs_and_a_closed_sign_reaches_shoppers():
+    from app.db import connect
+    from app.services import inquiries as inq, shopsettings
+    shop = connect().execute("SELECT shop_id FROM offers GROUP BY shop_id HAVING COUNT(*)>3 LIMIT 1 OFFSET 9").fetchone()[0]
+    tok = inq.shop_token(shop)
+    t = c.get(f"/api/seller/{shop}/{tok}/today").json()
+    assert {"asked", "answered", "missed", "avg_response_s", "top", "tip"} <= set(t)
+    r = c.post(f"/api/seller/{shop}/{tok}/shop/closed", json={"mode": "hours", "hours": 2}).json()
+    assert r["closed_until"] and r["open"]["state"] == "closed"
+    assert c.get(f"/api/shops/{shop}").json()["open"]["state"] == "closed"
+    r = c.post(f"/api/seller/{shop}/{tok}/shop/closed", json={"mode": "reopen"}).json()
+    assert r["closed_until"] is None
+    assert c.post(f"/api/demo/call-seller/{shop}").status_code == 409, "the seller page is not open"
+    c.get(f"/api/seller/{shop}/{tok}/inquiries")
+    call = c.post(f"/api/demo/call-seller/{shop}").json()
+    assert call["live_call"] and call["status"] in ("sent", "delivered")
+    assert shopsettings.closed_until(shop) is None

@@ -52,7 +52,7 @@ export function LocationSheet({ open, onClose, denied }: { open: boolean; onClos
             {pick.label === a.label && <Icon n="check" s />}{a.label}{a.n ? <span className="xs faint">{fa(a.n)}</span> : null}
           </button>
         ))}
-        {!shown.length && <span className="xs faint">محله‌ای با این نام در داده‌ها نیست؛ روی نقشه بزنید.</span>}
+        {!shown.length && <span className="xs faint">محله‌ای با این نام پیدا نشد؛ روی نقشه بزنید.</span>}
       </div>
       <button type="button" className="btn ghost" style={{ alignSelf: "flex-start", paddingInline: 0 }} onClick={() => setMap(!map)}><Icon n="map" s />{map ? "بستن نقشه" : "انتخاب نقطه روی نقشه"}</button>
       {map && <PinMap lat={pick.lat} lon={pick.lon} onPick={(lat, lon) => setPick({ lat, lon, label: "نقطهٔ انتخابی روی نقشه", source: "pin" })} />}

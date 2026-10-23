@@ -57,7 +57,7 @@ SYSTEM = """تو «ترب‌گرد» هستی، دستیار خرید حضوری
 - query: اسم کالا، کوتاه و به شکلی که فروشگاه‌ها ثبتش کرده‌اند. بودجه، ساعت، محل و «برای چه» را داخلش نگذار. اول search_catalog بزن؛ اگر exact=false بود کلمه‌ها را کوتاه‌تر یا ساده‌تر کن و دوباره امتحان کن. اگر بعد از دو بار هنوز مبهم بود، از کاربر بپرس و گزینه‌ها را از top_categories بردار.
 - need: برای چه کاری یا برای چه کسی (ورزش، بچه، هدیه...). فقط اگر کاربر گفته یا از جمله روشن است.
 - بودجه (به تومان): از جمله بیرون بکش. اگر نگفته و قیمت‌ها پراکنده‌اند (price_spread)، یک سؤال با گزینه‌های بازهٔ واقعی بپرس.
-- محل: اگر پاساژ یا محله‌ای گفت با lookup_place پیدا کن. اگر نگفته، بپرس «از کجا شروع می‌کنید؟» با چند محلهٔ پرفروشگاه و گزینهٔ «موقعیت فعلی من»؛ این سؤال کم‌اولویت‌تر از کالا و بودجه است.
+- محل: اگر پاساژ یا محله‌ای گفت با lookup_place پیدا کن. اگر نگفته، دربارهٔ محل هرگز سؤال نپرس: کاربر نقطهٔ شروعش را بالای صفحه انتخاب کرده و همان استفاده می‌شود.
 - when (now | 1h | evening | tomorrow | HH:MM) و mode (walk | taxi | car): اگر نگفت نپرس؛ فرض کن «الان» و «پیاده» و در assumed بنویس.
 - installment و open_only فقط اگر کاربر خواسته.
 
@@ -69,7 +69,8 @@ SYSTEM = """تو «ترب‌گرد» هستی، دستیار خرید حضوری
 ۴) current_slots چیزهایی است که تا اینجا روشن شده؛ همه را بدون تغییر دوباره در submit_mission بگذار مگر آنکه جواب تازهٔ کاربر عوضشان کند. هرگز بودجه یا محلی که قبلاً روشن شده را پاک نکن.
 ۵) اگر «برای چه/چه کسی» معنای کالا را مشخص می‌کند (مثلاً لباس فرم برای بچه یعنی مدرسه، کفش برای کوه، کیف برای لپ‌تاپ)، با search_catalog یک بار query را با همان کلمه دقیق‌تر امتحان کن و اگر examples به نیاز کاربر نزدیک‌تر شد همان را به‌عنوان query بگذار؛ وگرنه query اصلی بماند. نتیجهٔ دیگری که به نیاز مربوط نیست (لباس فرم نگهبانی برای بچه) نباید در فهرست بالا بیاید.
 ۶) اگر کاربر چند کالای مختلف خواست («گوشی و قاب و شارژر»)، اولی را در query بگذار و بقیه را در more_items (هر کدام کوتاه، به شکلی که فروشگاه‌ها ثبت کرده‌اند)؛ هر کدام را هم با search_catalog چک کن. برای یک کالای واحد more_items را خالی بگذار.
-۷) فارسی بنویس. summary یک جملهٔ کوتاه است: «چه چیزی فهمیدی».
+۷) سؤال دربارهٔ «کدام مدل / کدام محصول» هرگز نپرس و سؤال بدون گزینهٔ قابل‌لمس هم نپرس: بعد از همین مرحله خود کالاها را به کاربر نشان می‌دهیم و او انتخاب می‌کند. سؤال‌های خوب فقط آن‌هایی‌اند که فهرست را واقعاً عوض می‌کنند و با چند گزینهٔ واقعی جواب داده می‌شوند: «برای چه کسی / چه کاری» (مثلاً آقایان یا بانوان، ورزشی یا روزمره، بچه یا بزرگسال)، بودجه، یا انتخاب بین چند دستهٔ مختلف برای یک کلمه. برای «برای چه کسی / چه کاری» حتماً category_needs را صدا بزن و همان گزینه‌های واقعی‌اش را بپرس (slot=need)؛ اگر category_needs گزینهٔ معنی‌داری نداشت نپرس.
+۸) فارسی بنویس. summary یک جملهٔ کوتاه است: «چه چیزی فهمیدی».
 ۸) در پایان submit_mission را دقیقاً یک بار صدا بزن. بدون آن کار تمام نمی‌شود."""
 
 _STATUS = {"search_catalog": "در کاتالوگ فروشگاه‌ها دنبال «{query}» می‌گردم…", "price_spread": "بازهٔ قیمت‌ها را می‌سنجم…",
@@ -158,7 +159,7 @@ def _more_items(con, main: str, raw) -> list[dict]:
 
 def _result(con, a: dict, trace: list[str], engine: str, text: str, need_opts: list[str] | None = None, budget_known: bool = False) -> dict:
     q = re.sub(r"\s+", " ", str(a.get("query") or "")).strip()[:80]
-    questions = _clean_questions(a.get("questions"))
+    questions = [x for x in _clean_questions(a.get("questions")) if x["slot"] != "place"]  # the start point is the location chip's job, never a question
     for qu in questions:  # options for budget and place come from the data, never from the model's memory
         if qu["slot"] == "budget":
             qu["options"] = _budget_options(con, q, a.get("category"))
@@ -171,10 +172,8 @@ def _result(con, a: dict, trace: list[str], engine: str, text: str, need_opts: l
             cats = [c["name"] for c in _search(con, q, a.get("category")).get("top_categories", []) if qt and qt <= set(normalize_fa(c["name"]).split())]
             qu["options"] = cats[:4] if len(cats) >= 2 else []  # one match is no choice, none is a free-text question
     # a "what for?" question with nothing real to tap is noise; the shopper can still type in the box
-    for qu in questions:  # whatever else the model asks is answered by typing: its own «options» would be filler, not choices
-        if qu["slot"] == "other":
-            qu["options"] = []
-    questions = [qu for qu in questions if qu["slot"] in ("budget", "place", "when", "mode", "other", "query") or qu["options"]]  # a need with nothing real to tap: no question
+    # only questions with real things to tap survive: «which model?» in a text box is the next screen's job (the shopper sees the products and picks)
+    questions = [qu for qu in questions if qu["options"] or qu["slot"] == "budget"]
     ex = _search(con, q, a.get("category")) if q else {"exact": False, "top_categories": []}
     if a.get("category") and q and not ex["exact"]:  # a category the model picked that hides every result is worse than none
         a = {**a, "category": None}
@@ -202,6 +201,18 @@ def _result(con, a: dict, trace: list[str], engine: str, text: str, need_opts: l
     }
 
 
+def _broad_question(con, res: dict) -> None:
+    """A word that fits several different kinds of product («کفش»: sneakers, formal, women's, work boots…) must not jump straight to a list that mixes them:
+    ask which kind, with the catalogue's own categories as the buttons. Not asked when one category clearly dominates or the shopper already chose one."""
+    q, cat = res["slots"].get("query"), res["slots"].get("category")
+    if not q or cat or any(x["slot"] in ("query", "need") for x in res["questions"]) or len(res["questions"]) >= 2:
+        return
+    cats = _search(con, q).get("top_categories", [])
+    total = sum(c["count"] for c in cats)
+    if len(cats) >= 2 and total and cats[0]["count"] / total < 0.55:
+        res["questions"].append({"slot": "query", "text": "کدام نوعش را می‌خواهید؟", "options": [c["name"] for c in cats[:4]]})
+
+
 # ------------------------------------------------------------------ rules fallback (no LLM): same shape
 def rules_intake(con, text: str, pinned: dict | None = None) -> dict:
     p = mission.parse(con, text)
@@ -217,7 +228,10 @@ def rules_intake(con, text: str, pinned: dict | None = None) -> dict:
         if _spread(con, q).get("p25"):
             qs.append({"slot": "budget", "text": "بودجه‌تان تقریباً چقدر است؟", "options": []})
     a["questions"] = qs[:2]
-    return _result(con, a, [], "rules", text)
+    res = _result(con, a, [], "rules", text)
+    if not (pinned or {}).get("query"):  # first round only: an answered round already carries the query
+        _broad_question(con, res)
+    return res
 
 
 # ------------------------------------------------------------------ the loop
@@ -262,9 +276,8 @@ async def run_intake(con, messages: list[dict], slots: dict, pinned: list[str], 
                     rounds = sum(1 for m in messages if m.get("role") == "agent")
                     if rounds >= 2:
                         res["questions"] = []  # two rounds of questions is the limit: from here the shopper edits on the next screen
-                    elif rounds == 0 and "place" not in pinned and not res["slots"]["place"] and len(res["questions"]) < 2 and not any(q["slot"] == "place" for q in res["questions"]):
-                        # an empty start point is the one slot every errand needs: always offer it, with real areas and «my location»
-                        res["questions"].append({"slot": "place", "text": "از کجا شروع می‌کنید؟", "options": _place_options(con)})
+                    elif rounds == 0:
+                        _broad_question(con, res)
                     yield {"type": "result", **res}
                     return
                 label = _STATUS.get(c["name"], "در حال بررسی…").format(query=str(args.get("query", ""))[:30])

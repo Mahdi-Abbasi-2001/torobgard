@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from .address import floor_display
 from .geo import haversine_km
-from .hours import open_state, parse_hours_json, now_tehran
+from .hours import OpenState, open_state, parse_hours_json, now_tehran
 from .text import normalize_fa
 from .discover import offer_flags, travel, zones as _zones
 
@@ -60,11 +60,12 @@ def _tokens(q: str) -> list[str]:
     return content or toks
 
 
-def _fts_query(q: str, mode: str = "and") -> str | None:
+def _fts_query(q: str, mode: str = "and", prefix: bool = True) -> str | None:
     toks = _tokens(q)
     if not toks:
         return None
-    return (" AND " if mode == "and" else " OR ").join(f'"{t}"*' for t in toks)
+    star = "*" if prefix else ""   # prefix matching is for typing a search; the map lights shops only for the whole word («کفش» is not «کفشور»)
+    return (" AND " if mode == "and" else " OR ").join(f'"{t}"{star}' for t in toks)
 
 
 # ---------------------------------------------------------------- products
@@ -244,6 +245,10 @@ def _instagram(raw: str | None) -> dict | None:
 def shop_card(r: sqlite3.Row, pay: list[dict], origin: tuple[float, float], at: datetime | None = None) -> dict:
     hrs = parse_hours_json(r["hours"])
     st = open_state(hrs, at)
+    from . import shopsettings
+    cu = shopsettings.closed_until(r["shop_id"], at)
+    if cu:  # the owner said so from the seller app: a shut door beats the declared hours
+        st = OpenState("closed", "امروز بسته است (طبق اعلام فروشنده)" if cu.hour == 23 else f"موقتاً بسته؛ برمی‌گردد {cu:%H:%M}", None, f"{cu:%H:%M}", "ok")
     dist = haversine_km(origin[0], origin[1], r["lat"], r["lon"]) if r["lat"] is not None else None
     phone = None
     try:
@@ -398,7 +403,7 @@ def _rank(items: list[dict], sort: str, weights: tuple | None = None):
     items.sort(key=keys.get(sort, keys["best"]))
 
 
-def get_shop(con, shop_id: str, origin=None) -> dict | None:
+def get_shop(con, shop_id: str, origin=None, q: str | None = None, category: str | None = None) -> dict | None:
     r = con.execute("SELECT * FROM shops WHERE shop_id=?", (shop_id,)).fetchone()
     if not r:
         return None
@@ -408,10 +413,17 @@ def get_shop(con, shop_id: str, origin=None) -> dict | None:
     c["offer_count"] = r["offer_count"]
     now = datetime.now(timezone.utc)
     c["offers"] = [{"offer_id": o["offer_id"], "product_id": o["product_id"], "seller_title": o["seller_title"],
-                    "title": o["title"], **price_info(o["price"], o["changed_at"], o["outlier"], now),
+                    "title": o["title"], "category": o["category"], **price_info(o["price"], o["changed_at"], o["outlier"], now),
                     "flags": offer_flags(o["seller_title"], o["description"])}
-                   for o in con.execute("SELECT o.*, p.title FROM offers o JOIN products p USING(product_id) "
+                   for o in con.execute("SELECT o.*, p.title, p.category FROM offers o JOIN products p USING(product_id) "
                                         "WHERE o.shop_id=? ORDER BY o.changed_at DESC LIMIT 30", (shop_id,))]
+    if q or category:   # what this shop lists of what the shopper is looking for (the recent list above may not reach it)
+        fts = _fts_query(q, "and", prefix=False) if q else None
+        sql = ("SELECT o.*, p.title, p.category FROM offers o JOIN products p USING(product_id) " +
+               ("JOIN products_fts f ON f.rowid=p.rowid " if fts else "") + "WHERE o.shop_id=? " +
+               ("AND products_fts MATCH ? " if fts else "") + ("AND p.category=? " if category else "") + "ORDER BY o.changed_at DESC LIMIT 5")
+        args = [shop_id, *([fts] if fts else []), *([category] if category else [])]
+        c["matching"] = [{"offer_id": o["offer_id"], "product_id": o["product_id"], "title": o["title"], "category": o["category"], "price": o["price"]} for o in con.execute(sql, args)]
     from . import verify
     verify.apply_listing_updates(con, shop_id, c["offers"], now)
     c["reliability"] = verify.reliability(con, [shop_id]).get(shop_id)

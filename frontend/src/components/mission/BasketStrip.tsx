@@ -37,7 +37,7 @@ export function AddItemSheet({ open, onClose, from }: { open: boolean; onClose: 
   const sug = useQuery({ queryKey: ["add-sug", dq, from.place.lat, from.place.lon], enabled: open && dq.length >= 2, staleTime: 60_000, queryFn: () => api.search({ q: dq, limit: 6 }, from.place) });
   return (
     <Sheet open={open} onClose={onClose} label="کالای دیگر" className="tall">
-      <div className="row between"><div><div className="mc-label">به همین سفر</div><div className="b" style={{ fontSize: 17 }}>یک کالای دیگر هم بخرید</div></div>
+      <div className="row between"><div><div className="mc-label">به همین خرید</div><div className="b" style={{ fontSize: 17 }}>یک کالای دیگر هم بخرید</div></div>
         <button className="iconbtn soft" onClick={onClose} aria-label="بستن"><Icon n="x" /></button></div>
       <div className="field" style={{ minHeight: 50 }}><label htmlFor="add-q" className="sr">کالا</label>
         <input id="add-q" value={q} autoFocus onChange={(e) => setQ(e.target.value)} placeholder="مثلاً: قاب گوشی، شارژر…"
@@ -68,9 +68,9 @@ export function BasketStrip({ m }: { m: Mission }) {
   const chosen = items.filter((i) => i.productId && i.product);
   if (!ready) return null;
   return (
-    <div className="bs" aria-label="سبد این سفر" data-spree={spreeOf(m)}>
+    <div className="bs" aria-label="سبد این خرید" data-spree={spreeOf(m)}>
       {items.length > 1 && items.map((it, i) => <ItemChip key={it.id} it={it} n={i + 1} on={it.id === m.id} />)}
-      <button type="button" className="bs-add" onClick={() => setAddOpen(true)}><Icon n="plus" s />{items.length > 1 ? "کالا" : "کالای دیگر هم می‌خواهم"}</button>
+      <button type="button" className="bs-add" onClick={() => setAddOpen(true)}><Icon n="plus" s />{items.length > 1 ? "کالا" : "کالای دیگر"}</button>
       {chosen.length >= 2 && <button type="button" className="bs-trip" onClick={() => setTripOpen(true)}><Icon n="route" s />مسیر کل سبد</button>}
       <AddItemSheet open={addOpen} onClose={() => setAddOpen(false)} from={m} />
       <Sheet open={tripOpen} onClose={() => setTripOpen(false)} label="مسیر کل سبد" className="tall">

@@ -1,4 +1,5 @@
 "use client";
+import { RouteButton } from "@/components/RoutePreview";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,6 @@ export default function ShopView({ id, product }: { id: string; product?: string
   const s = q.data;
   const wrong = s.weekly_hours && Object.values(s.weekly_hours).some(looksWrong);
   const picked = product ? (state.picks[product] ?? []).includes(id) : false;
-  const mapsUrl = `https://maps.google.com/?q=${s.lat},${s.lon}`;
 
   return (
     <main className={`main ${product ? "has-cta" : ""}`}>
@@ -31,17 +31,13 @@ export default function ShopView({ id, product }: { id: string; product?: string
         <div className="lay shop-main">
         <div className="stack" style={{ gap: 6 }}>
           <ShopName shop={s} />
-          {!s.name_is_verified && <span className="xs faint">نام از داده‌ها نمایش داده می‌شود؛ ممکن است با تابلوی فروشگاه فرق کند.</span>}
+          {!s.name_is_verified && <span className="xs faint">نامی که می‌بینید از اطلاعات ثبت‌شده آمده و ممکن است با تابلوی فروشگاه فرق کند.</span>}
           <div className="wrapr"><OpenChip open={s.open} />{s.open.state === "closed" && s.open.opens_at && <span className="xs faint">باز می‌شود: {fa(s.open.opens_at)}</span>}</div>
           <div className="wrapr"><InstallmentChips shop={s} full /><FastChip v={s.fast_delivery} /></div>
           <ReliabilityLine r={s.reliability} />
         </div>
         <MallLocator s={s} />
-        <div className="row" style={{ gap: 8 }}>
-          <a className="btn sec grow" href={`https://nshn.ir/?lat=${s.lat}&lng=${s.lon}`} target="_blank" rel="noopener">نشان</a>
-          <a className="btn sec grow" href={`https://balad.ir/location?latitude=${s.lat}&longitude=${s.lon}`} target="_blank" rel="noopener">بلد</a>
-          <a className="btn sec grow" href={mapsUrl} target="_blank" rel="noopener">گوگل</a>
-        </div>
+        <div className="row" style={{ gap: 8 }}><RouteButton to={{ lat: s.lat, lon: s.lon }} label={s.name} /></div>
         {s.website && <a href={s.website} target="_blank" rel="noopener" className="card row" style={{ padding: "12px 14px", gap: 10, color: "var(--accent-ink)" }}><Icon n="link" s /><bdi>{s.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}</bdi></a>}
         {s.instagram && <a href={s.instagram.profile_url} target="_blank" rel="noopener" className="card row" style={{ padding: "12px 14px", gap: 10, color: "var(--accent-ink)" }}><Icon n="link" s />اینستاگرام{s.instagram.handle && <> · <bdi dir="ltr">@{s.instagram.handle}</bdi></>}</a>}
 

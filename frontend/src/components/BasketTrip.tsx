@@ -63,7 +63,7 @@ export function BasketTrip({ items }: { items: { productId: string; title: strin
             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{fa(stops.length)} توقف{stops.length === 1 ? "، همه‌چیز یک‌جا" : ""}، حدود {fa(plan.data!.total_walk_min)} دقیقه راه</h3>
             <span className="xs faint">جمع قیمت‌های ثبت‌شده: {money(plan.data!.total_price)} تومان</span>
           </div>
-          {leg == null ? (flat ? <div className="ap-flat" style={{ height: 120 }}>نقشهٔ سه‌بعدی بارگذاری نشد؛ توقف‌ها را در فهرست ببین.</div> : <BasketMap origin={place} pins={pins} legs={legs} height={360} onUnavailable={() => setFlat(true)} />)
+          {leg == null ? (flat ? <div className="ap-flat" style={{ height: 120 }}>نقشهٔ سه‌بعدی بارگذاری نشد؛ توقف‌ها را در فهرست ببینید.</div> : <BasketMap origin={place} pins={pins} legs={legs} height={360} onUnavailable={() => setFlat(true)} />)
             : from && stop && <RouteMap key={leg} from={from} to={stop} label={stop.name} mode="walk" height={400} />}
           <div className="stack" style={{ gap: 10 }}>
             {stops.map((s, i) => (

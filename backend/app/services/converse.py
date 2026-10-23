@@ -30,7 +30,7 @@ def compose(kind: str, title: str | None, questions: list[str], note: str | None
     t = f"«{title}»" if title else "کالای موردنظر"
     if kind == "hold":
         return (f"سلام، وقت بخیر. همان مشتری {t} است. لطفاً تا ساعت {fa(meta.get('hold_until') or '')} یکی برایش کنار بگذارید؛ "
-                "خودش می‌آید و حضوری می‌خرد. امکانش هست؟")
+                "خودش می‌آید و حضوری می‌خرد" + (f"، به همان قیمتی که توافق شد: {money(meta['deal_price'])} تومان" if meta.get("deal_price") else "") + ". امکانش هست؟")
     if kind == "arrive":
         code = f" کد نگه‌داری: {fa(meta['hold_code'])}." if meta.get("hold_code") else ""
         return f"سلام. مشتری {t} الان رسیده و دم فروشگاه است.{code} لطفاً آمادهٔ تحویل باشید."

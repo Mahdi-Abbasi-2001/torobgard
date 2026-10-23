@@ -48,7 +48,9 @@ export function HoldSheet({ item, onClose, onGo }: { item: ShopProgress | null; 
   return (
     <Sheet open={!!item} onClose={onClose} label="نگه‌داشتن">
       <div className="row between"><div><div className="mc-label">برایم نگه دارید</div><div className="b" style={{ fontSize: 17 }}>{item?.q.shop?.name}</div>
-        {item?.q.answer?.price ? <div className="xs faint">به قیمت {money(item.q.answer.price)} تومان</div> : null}</div>
+        {item?.q.answer?.price ? (item.deal && item.deal < item.q.answer.price
+          ? <div className="xs faint">به قیمتی که توافق شد: {money(item.deal)} تومان <s>{money(item.q.answer.price)}</s></div>
+          : <div className="xs faint">به قیمت {money(item.q.answer.price)} تومان</div>) : null}</div>
         <button className="iconbtn soft" onClick={onClose} aria-label="بستن"><Icon n="x" /></button></div>
       {accepted && item?.hold ? (
         <div className="stack" style={{ gap: 12 }}>

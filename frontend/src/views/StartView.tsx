@@ -7,19 +7,20 @@ import { useRouter } from "next/navigation";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, type ParsedMission } from "@/lib/api";
-import { fa } from "@/lib/fa";
+import { api, type ParsedMission, type PulseMatch } from "@/lib/api";
+import { fa, mil } from "@/lib/fa";
+import { km, walkMin } from "@/lib/geo";
 import { useIsDesktop } from "@/lib/media";
 import { blankMission, groupMissions, useMissions, type Mission } from "@/lib/mission";
 import { useSession } from "@/lib/session";
-import { useInquiries } from "@/lib/useInquiries";
+import { ShopPeek } from "@/components/ShopPeek";
 import { Icon } from "@/components/Icon";
+import { asGroup, GroupIcon, GROUPS } from "@/lib/groups";
 import { VoiceButton } from "@/components/VoiceButton";
 import { SnapButton } from "@/components/SnapButton";
-import { Bidi, OfflineBanner } from "@/components/ui";
+import { Bidi, OfflineBanner, Sheet } from "@/components/ui";
 import { ThemeToggle } from "@/components/TopBar";
 import { UserMenu } from "@/components/UserMenu";
-import type { StartStats } from "@/components/StartMap";
 import { missionHref } from "@/components/mission/chrome";
 import { MissionCard } from "@/components/mission/MissionCard";
 import { IntakeAgent, intakeToMission, type IntakeSeed } from "@/components/mission/IntakeAgent";
@@ -28,33 +29,32 @@ import { type SlotKey } from "@/components/mission/slots";
 import type { Place } from "@/lib/geo";
 
 const StartMap = dynamic(() => import("@/components/StartMap"), { ssr: false });
-const EXAMPLES = [
-  "هندزفری گردنی برای ورزش، تا ۳٫۵ میلیون، نزدیک علاالدین، عصر",
-  "گوشی سامسونگ ۱۰ تا ۱۵ میلیون، قسطی، فردا ساعت ۱۱",
-  "دوربین مداربسته ۴ کانال، اطراف فردوسی",
-];
 
 export default function StartView() {
   const router = useRouter();
   const desk = useIsDesktop();
-  const { state, update, sid } = useSession();
+  const { state, update } = useSession();
   const { missions, create, ready, remove } = useMissions();
   const [text, setText] = useState("");
   const [debounced, setDebounced] = useState("");
   const [over, setOver] = useState<SlotsPatch>({});
   const [agent, setAgent] = useState<IntakeSeed | null>(null); // set when the shopper presses start: the intake agent takes it from here
   const [slots, setSlots] = useState<{ open: boolean; focus: SlotKey | null; only?: "place" }>({ open: false, focus: null });
-  const [stats, setStats] = useState<StartStats | null>(null);
+  
   const [flat, setFlat] = useState(false); // the 3D backdrop could not start: a soft gradient takes over
-  const [ph, setPh] = useState("");     // the placeholder types example sentences while the box is empty
-  const [tick, setTick] = useState(0);  // which fact the ticker shows
   const field = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { const t = setTimeout(() => setDebounced(text.trim()), 350); return () => clearTimeout(t); }, [text]);
 
   const parsed = useQuery({ queryKey: ["mparse", debounced], queryFn: () => api.missionParse(debounced), enabled: debounced.length > 1, staleTime: Infinity, placeholderData: keepPreviousData });
   const p: ParsedMission | undefined = text.trim() ? parsed.data : undefined;
-  const malls = useQuery({ queryKey: ["malls"], queryFn: () => api.malls(5) });
-  const inq = useInquiries(sid, { live: false });
+  // what the map looks for while the shopper types: the product words the sentence boils down to
+  const [chip, setChip] = useState<string | null>(null); // a category chip the shopper tapped; typing anything else drops it
+  const cats = useQuery({ queryKey: ["pulse-cats", state.place.lat.toFixed(4), state.place.lon.toFixed(4)], staleTime: 10 * 60_000, queryFn: () => api.pulseCategories({ lat: state.place.lat, lon: state.place.lon, limit: 8 }) });
+  const look = chip && text === chip ? { query: "", category: chip } : p?.query ? { query: p.query, category: p.category ?? null } : null;
+  const pickChip = (name: string) => { if (chip === name) { setChip(null); setText(""); } else { setChip(name); setText(name); } setOver({}); };
+  const [hit, setHit] = useState<PulseMatch | null>(null);
+  const [menu, setMenu] = useState(false); // phone: the places the desktop bar links to
+  const [peek, setPeek] = useState<string | null>(null); // the shop whose card is open
 
   // the draft mission: what was read from the sentence, then the shopper's own edits, then this device's usual place / time / way
   const draft: Mission = useMemo(() => {
@@ -81,67 +81,63 @@ export default function StartView() {
     ...(over.place && { place: draft.place.label }), ...(over.when && { when: draft.when }), ...(over.mode && { mode: draft.mode }),
     ...(over.cond && { conditions: { installment: draft.cond.installment, open: draft.cond.open } }),
   };
-  const start = () => { if (text.trim()) setAgent({ text: text.trim(), slots: agentSlots, pinned: pinnedNow }); };
+  const [needPlace, setNeedPlace] = useState(false); // the shopper pressed start before choosing where they are: ask once, then carry on
+  const start = () => {
+    if (!text.trim()) return;
+    if (state.place.source === "default") { setNeedPlace(true); setSlots({ open: true, focus: "place", only: "place" }); return; }
+    setPeek(null); setAgent({ text: text.trim(), slots: agentSlots, pinned: pinnedNow });
+  };
+  useEffect(() => { if (needPlace && !slots.open && state.place.source !== "default") { Promise.resolve().then(() => { setNeedPlace(false); start(); }); } }, [needPlace, slots.open, state.place.source]); // eslint-disable-line react-hooks/exhaustive-deps -- continues once the place is set
 
   const list = ready ? groupMissions(missions.filter((m) => !m.done)).slice(0, 4) : []; // only trips still in progress
-  const mine = new Set(missions.map((m) => m.productId).filter(Boolean)); // the ticker only speaks about trips that are still on this device
-  const recent = inq.items.filter((i) => i.kind === "ask" && (i.status === "answered" || i.status === "unavailable") && i.shop && i.product && mine.has(i.product.product_id)).slice(0, 3);
-
-  // typewriter placeholder
-  useEffect(() => {
-    if (text) return;
-    let i = 0, k = 0, hold = 0;
-    const id = setInterval(() => {
-      const full = EXAMPLES[i % EXAMPLES.length];
-      if (hold > 0) { hold--; return; }
-      k++; setPh(full.slice(0, k));
-      if (k >= full.length) { hold = 30; k = 0; i++; }
-    }, 70);
-    return () => clearInterval(id);
-  }, [text]);
-
-  // the ticker only says things we actually know
-  const facts = useMemo(() => [
-    stats && stats.open > 0 ? { text: `همین حالا ${fa(stats.open)} فروشگاه باز است؛ ${fa(stats.known)} فروشگاه اطراف ساعتش را اعلام کرده` } : null,
-    ...(malls.data?.items.slice(0, 3).map((mm) => ({ text: `${mm.mall}: ${fa(mm.shop_count)} فروشگاه`, href: `/mall/${encodeURIComponent(mm.mall_key)}` })) ?? []),
-    ...recent.map((i) => ({ text: `${i.shop!.name} ${i.status === "answered" ? "تأیید کرد" : "ندارد"}: ${i.product!.title.slice(0, 26)}` })),
-  ].filter((x): x is { text: string; href?: string } => !!x), [stats, malls.data, recent.length]); // eslint-disable-line react-hooks/exhaustive-deps -- recent's contents change with its length here
-  useEffect(() => { if (facts.length < 2) return; const id = setInterval(() => setTick((x) => x + 1), 4500); return () => clearInterval(id); }, [facts.length]);
-  const fact = facts.length ? facts[tick % facts.length] : null;
 
   const sendText = (t: string) => { setText(t); setOver({}); setAgent({ text: t.trim(), slots: {}, pinned: [] }); };
-  const padBottom = desk ? 120 : agent ? 380 : 300;
+  // the map keeps its shops clear of the panel: measure the real panel instead of guessing
+  const panelEl = useRef<HTMLDivElement>(null);
+  const [panelH, setPanelH] = useState(0);
+  useEffect(() => {
+    const el = panelEl.current; if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setPanelH(Math.round(el.getBoundingClientRect().height)));
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
+  const padBottom = panelH > 0 ? panelH + 16 : desk ? 120 : agent ? 380 : 300;
+  const [listOpen, setListOpen] = useState(false); // «show as list»: the same shops without the map
 
   return (
     <div className="bz">
-      {!flat ? <StartMap origin={state.place} going={!!agent} padBottom={padBottom} onStats={setStats} onUnavailable={() => setFlat(true)} /> : <div className="stm-load" />}
+      {!flat ? <StartMap origin={state.place} going={!!agent} padBottom={padBottom} match={look} onMatch={setHit} selected={peek} onPick={setPeek} onUnavailable={() => setFlat(true)} /> : <div className="stm-load" />}
 
       <div className="st-top">
         <Link href="/" className="st-glass st-brand" aria-label="ترب‌گرد"><Icon n="home" s />ترب‌گرد</Link>
-        <button type="button" className="st-glass" onClick={() => setSlots({ open: true, focus: "place", only: "place" })} aria-label={`محدوده: ${state.place.label}. تغییر`}><Icon n="loc" s /><bdi>{fa(state.place.label)}</bdi></button>
-        {stats && stats.open > 0 && <span className="st-glass st-live"><i />{fa(stats.open)} فروشگاه باز</span>}
+        {(() => { const unset = state.place.source === "default"; return (
+          <button type="button" className={`st-glass st-loc ${unset ? "ask" : ""}`} onClick={() => setSlots({ open: true, focus: "place", only: "place" })} aria-label={unset ? "انتخاب موقعیت شما" : `موقعیت شما: ${state.place.label}. تغییر`}><Icon n="loc" s /><bdi>{unset ? "موقعیت خود را انتخاب کنید" : fa(state.place.label)}</bdi>{!unset && <span className="st-loc-edit">تغییر</span>}</button>
+        ); })()}
+        {look && hit && <span className="st-glass st-found" aria-live="polite">{hit.listed.length ? `${fa(hit.listed.length)} فروشگاه نزدیک «${look.query || look.category}» را ثبت کرده‌اند` : hit.maybe.length ? `${fa(hit.maybe.length)} فروشگاه این دسته را دارند؛ ثبت دقیق نشده` : hit.nearest ? `نزدیک شما نیست؛ نزدیک‌ترین «${hit.nearest.name}» حدود ${fa(String(hit.nearest.km).replace(".", "٫"))} کیلومتر دورتر است` : "نزدیک شما فروشگاهی پیدا نشد"}</span>}
+        {look && hit && hit.listed.length + hit.maybe.length > 0 && <button type="button" className="st-glass st-listbtn" onClick={() => setListOpen(true)}><Icon n="list" s />فهرست</button>}
+        {look && hit && hit.listed.length + hit.maybe.length > 0 && <span className="st-legend" aria-hidden="true"><i className="a" />دارند <i className="b" />فقط این دسته را دارند</span>}
         <span className="grow" />
         {desk && <Link href="/missions" className="st-glass">خریدهای من{missions.length > 0 && <span className="tb-cnt">{fa(missions.length)}</span>}</Link>}
         {desk && <UserMenu className="st-glass" />}
         {desk && <span className="st-glass" style={{ padding: 0, minWidth: 38, justifyContent: "center" }}><ThemeToggle /></span>}
+        {!desk && <button type="button" className="st-glass st-menu" onClick={() => setMenu(true)} aria-label="منو: خریدهای من، حساب، حالت نمایش">{missions.length > 0 && <span className="tb-cnt">{fa(missions.length)}</span>}<Icon n="list" s /></button>}
       </div>
-      {fact && !agent && <div className="st-tick" aria-live="polite">{fact.href ? <Link href={fact.href} key={tick} className="st-tick-a">{fact.text}</Link> : <span key={tick}>{fact.text}</span>}</div>}
 
-      <div className="st-panel">
+      <div className="st-panel" ref={panelEl}>
         <OfflineBanner />
         {!agent && list.length > 0 && (
+          <div className="st-missions-wrap"><span className="st-cap">خریدهای در جریان شما</span>
           <div className="st-missions" aria-label="خریدهای در جریان">
             {list.map((g) => (
               <div key={g.head.id} className="st-mc">
                 <MissionCard m={g.head} compact count={g.items.length} />
-                <button type="button" className="st-x" aria-label="حذف از این دستگاه" title="حذف از این دستگاه" onClick={() => { if (confirm(g.items.length > 1 ? "این سفر و همهٔ کالاهایش از این دستگاه حذف شود؟" : "این خرید از این دستگاه حذف شود؟")) g.items.forEach((x) => remove(x.id)); }}><Icon n="x" s /></button>
+                <button type="button" className="st-x" aria-label="حذف از این دستگاه" title="حذف از این دستگاه" onClick={() => { if (confirm(g.items.length > 1 ? "این خرید و همهٔ کالاهایش از این دستگاه حذف شود؟" : "این خرید از این دستگاه حذف شود؟")) g.items.forEach((x) => remove(x.id)); }}><Icon n="x" s /></button>
               </div>
             ))}
-          </div>
+          </div></div>
         )}
+        {!agent && list.length === 0 && !peek && <p className="st-intro">هر چه می‌خواهید بنویسید یا بگویید. فروشگاه‌های نزدیکِ دارای آن را پیدا می‌کنیم، موجودی و قیمت را از آن‌ها می‌پرسیم و مسیر را نشان می‌دهیم.</p>}
         {agent ? (
           <>
-            <div className="st-said"><span className="xs faint">گفتی:</span><span><Bidi text={agent.text} /></span></div>
             <div className="st-agent">
               <IntakeAgent key={agent.text} seed={agent} onEdit={() => setAgent(null)} autoOption
                 onReady={(r, gps, auto) => begin({ ...draft, ...intakeToMission(r, gps), text: draft.text, query: r.slots.query ?? (draft.query || draft.text), auto }, r.slots.more ?? [])} />
@@ -149,9 +145,16 @@ export default function StartView() {
           </>
         ) : (
           <>
+            {peek && <ShopPeek id={peek} origin={state.place} query={look?.query || null} category={look?.category ?? null} onClose={() => setPeek(null)} onAsk={() => { if (text.trim()) start(); else { setPeek(null); field.current?.focus(); } }} />}
+            {!peek && cats.data && cats.data.items.length > 0 && (
+              <div className="st-cats-wrap"><span className="st-cap">دسته‌های پرفروشگاه اطراف؛ بزنید تا روی نقشه ببینید</span>
+              <div className="st-cats" role="group" aria-label="دسته‌های پرفروشگاه اطراف">
+                {cats.data.items.map((c) => <button key={c.name} type="button" className={`st-cat ${chip === c.name && text === chip ? "on" : ""}`} aria-pressed={chip === c.name && text === chip} onClick={() => pickChip(c.name)}><span style={{ color: chip === c.name && text === chip ? "#fff" : GROUPS[asGroup(c.g)].color, display: "inline-flex" }}><GroupIcon g={c.g} size={15} /></span>{c.name}</button>)}
+              </div></div>
+            )}
             <div className="st-box">
               <label htmlFor="errand" className="sr">چه می‌خواهید؟</label>
-              <textarea id="errand" ref={field} rows={1} value={text} onChange={(e) => { setText(e.target.value); setOver({}); setAgent(null); }} placeholder={ph || "فقط بگو چه می‌خواهی…"}
+              <textarea id="errand" ref={field} rows={1} value={text} onChange={(e) => { setText(e.target.value); setOver({}); setAgent(null); }} placeholder="چه چیزی می‌خواهید؟"
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); start(); } }} />
               <SnapButton className="st-snap" label="جست‌وجو با عکس از کالا، جعبه یا برچسب"><Icon n="cam" /></SnapButton>
               <VoiceButton onText={sendText} />
@@ -160,6 +163,33 @@ export default function StartView() {
           </>
         )}
       </div>
+
+      <Sheet open={listOpen} onClose={() => setListOpen(false)} label="فهرست فروشگاه‌ها" className="tall">
+        {hit && (
+          <div className="stack" style={{ gap: 10 }}>
+            <div><div className="mc-label">فروشگاه‌ها</div><div className="b" style={{ fontSize: 17 }}>«{look?.query || look?.category}» نزدیک {state.place.source === "default" ? "شما" : state.place.label}</div></div>
+            {[{ title: "کالا را ثبت کرده‌اند", items: [...hit.listed].sort((a, b) => (a.price ?? 1e15) - (b.price ?? 1e15)) }, { title: "فقط این دسته را دارند؛ باید بپرسید", items: hit.maybe.map((x) => ({ ...x, price: null as number | null })) }].filter((g) => g.items.length).map((g) => (
+              <section key={g.title} className="stack" style={{ gap: 6 }}>
+                <b className="sm">{g.title} ({fa(g.items.length)})</b>
+                {g.items.slice(0, 40).map((x) => (
+                  <button key={x.shop_id} type="button" className="card row between" style={{ padding: "10px 14px", textAlign: "start" }} onClick={() => { setPeek(x.shop_id); setListOpen(false); }}>
+                    <span className="row" style={{ gap: 8, minWidth: 0 }}><span style={{ color: GROUPS[asGroup(x.g)].color, display: "inline-flex" }}><GroupIcon g={x.g} size={16} /></span><b className="sm"><Bidi text={x.name} /></b></span>
+                    <span className="xs muted" style={{ whiteSpace: "nowrap" }}>{x.price ? `از ${mil(x.price)}` : "قیمت نامشخص"} · {fa(Math.round(walkMin(km(state.place, x))))} دقیقه</span>
+                  </button>
+                ))}
+              </section>
+            ))}
+          </div>
+        )}
+      </Sheet>
+
+      <Sheet open={menu} onClose={() => setMenu(false)} label="منو">
+        <div className="stack" style={{ gap: 10 }}>
+          <Link href="/missions" className="btn sec block" onClick={() => setMenu(false)}>خریدهای من{missions.length > 0 && <span className="tb-cnt">{fa(missions.length)}</span>}</Link>
+          <UserMenu className="btn sec block" />
+          <div className="row between"><span className="sm">حالت تیره یا روشن</span><span className="st-glass" style={{ padding: 0, minWidth: 38, justifyContent: "center" }}><ThemeToggle /></span></div>
+        </div>
+      </Sheet>
 
       <SlotsSheet open={slots.open} onClose={() => setSlots((x) => ({ ...x, open: false }))} value={draft} onChange={(patch) => { if (patch.place) update((x) => ({ ...x, place: patch.place!, locationAsked: true })); setOver((o) => ({ ...o, ...patch, cond: patch.cond ? { ...(o.cond ?? draft.cond), ...patch.cond } : o.cond })); }} focus={slots.focus} only={slots.only} cta="تأیید" />
     </div>

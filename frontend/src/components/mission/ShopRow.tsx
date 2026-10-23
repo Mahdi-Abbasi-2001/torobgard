@@ -11,9 +11,9 @@ import { Bidi } from "@/components/ui";
 export const Ripe = ({ r }: { r: 0 | 1 | 2 | 3 | 4 }) => <div className={`ripe r${r}`} aria-hidden="true"><i /><i /><i /><i /></div>;
 export const RipeLegend = () => <div className="ripe-legend" aria-hidden="true"><span>ثبت‌شده</span><span>پرسیده شد</span><span>تأیید شد</span><span>نگه داشته</span></div>;
 
-export function ShopRow({ p, listed, now, flash, onChat, onHold, onAlt, onCall, onRecheck, simple = false }: {
+export function ShopRow({ p, listed, now, flash, onChat, onHold, onAlt, onCall, onRecheck, onEscalate, simple = false }: {
   p: ShopProgress; listed?: ShopCard; now: number; flash?: boolean; simple?: boolean;
-  onChat?: () => void; onHold?: () => void; onAlt?: () => void; onCall?: () => void; onRecheck?: () => void;
+  onChat?: () => void; onHold?: () => void; onAlt?: () => void; onCall?: () => void; onRecheck?: () => void; onEscalate?: () => void;
 }) {
   const { q, kids, ripeness: r, gone, hold } = p;
   const a = q.answer, s = q.shop;
@@ -60,14 +60,16 @@ export function ShopRow({ p, listed, now, flash, onChat, onHold, onAlt, onCall, 
           <AnswerDetails q={q} />
         </>
       )}
-      {q.status === "no_reply" && <div className="xs muted">مهلت پاسخ تمام شد و پاسخی نیامد.</div>}
+      {q.via_call && q.status !== "no_reply" && <div className="xs muted"><Icon n="phone" s /> {q.live_call ? (q.status === "answered" || q.status === "unavailable" ? "با تماس صوتی در برنامه پرسیده شد و خودِ فروشنده جواب داد." : "در حال تماس صوتی با فروشنده…") : "این بار با تماس خودکار پرسیده شد (در این نسخه نمایشی است)."}</div>}
+      {q.status === "no_reply" && <div className="xs muted">{q.via_call ? "با تماس خودکار هم جوابی نیامد." : "مهلت پاسخ تمام شد و پاسخی نیامد."}</div>}
       {!simple && kids.map((k: Inquiry) => <KidRow key={k.id} k={k} />)}
       {hold && simple && <div className="kid" style={{ background: "var(--accent-soft)", color: "var(--accent-ink)" }}><Icon n="hold" s /><span className="grow">نگه داشته{hold.until ? ` تا ${fa(hold.until)}` : ""}؛ در فروشگاه این کد را بگویید:</span><span className="code num" style={{ color: "var(--accent-ink)" }}>{fa(hold.code)}</span></div>}
       <div className="actions">
         {r >= 3 && onChat && <button className="btn ghost" style={{ minHeight: 40 }} onClick={onChat}><Icon n="chat" s />گفتگو و جزئیات</button>}
         {r === 3 && onHold && !holdWaiting && <button className="btn sec" onClick={onHold}><Icon n="hold" s />برایم نگه دار</button>}
-        {r >= 3 && onRecheck && !lastKid && <button className="btn ghost" style={{ minHeight: 40 }} onClick={onRecheck}><Icon n="walk" s />راه افتادم؛ دوباره بپرس</button>}
+        {r >= 3 && onRecheck && !lastKid && <button className="btn ghost" style={{ minHeight: 40 }} onClick={onRecheck}><Icon n="walk" s />هنوز موجود است؟ دوباره بپرس</button>}
         {failed && onAlt && <button className="btn sec" onClick={onAlt}>جایگزین‌ها<Icon n="fwd" s /></button>}
+        {q.status === "no_reply" && onEscalate && !q.via_call && <button className="btn sec" onClick={onEscalate}><Icon n="phone" s />با تماس خودکار دوباره بپرس</button>}
         {q.status === "no_reply" && onCall && <button className="btn ghost" onClick={onCall}><Icon n="phone" s />خودم زنگ می‌زنم</button>}
       </div>
     </div>

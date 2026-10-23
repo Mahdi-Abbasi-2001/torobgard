@@ -77,7 +77,7 @@ export function SlotsSheet({ open, onClose, value, onChange, focus, count, cta =
           ))}
         </div>
         {map && <PinMap lat={cur.lat} lon={cur.lon} onPick={(lat, lon) => onChange({ place: { lat, lon, label: "نقطهٔ انتخابی روی نقشه", source: "pin" } })} />}
-        <span className="xs faint">الان: <b>{cur.source === "default" ? "مرکز تهران، حافظ × جمهوری (پیش‌فرض)" : cur.label}</b></span>
+        <span className="xs faint">الان: <b>{cur.source === "default" ? "هنوز انتخاب نکرده‌اید" : cur.label}</b></span>
       </section>
 
       {!only && (

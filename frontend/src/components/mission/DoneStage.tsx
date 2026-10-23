@@ -6,9 +6,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { fa, mil, money, parseNum } from "@/lib/fa";
+import { useSpree } from "@/lib/mission";
 import { useSession } from "@/lib/session";
 import { Bidi, Note } from "@/components/ui";
-import { Shell } from "./chrome";
+import { missionHref, missionTitle, Shell } from "./chrome";
+import { shortName } from "./DecideStage";
 import { Progress } from "./MissionCard";
 import type { StageProps } from "./stage";
 
@@ -19,6 +21,10 @@ export default function DoneStage(sp: StageProps) {
   const { sid } = useSession();
   const qc = useQueryClient();
   const live = status.items.filter((x) => x.ripeness >= 3).sort((a, b) => Number(b.ripeness === 4) - Number(a.ripeness === 4) || (a.q.answer?.price ?? 9e12) - (b.q.answer?.price ?? 9e12));
+  // the trip is a basket: when this item is bought, the next one that is still open comes up, in the order they were added
+  const spree = useSpree(m);
+  const next = spree.find((x) => x.id !== m.id && !x.done && x.createdAt > m.createdAt) ?? spree.find((x) => x.id !== m.id && !x.done) ?? null;
+  const nextTitle = next ? (missionTitle(next).length > 28 ? shortName({ title: missionTitle(next), brand: next.product?.brand ?? null }) : missionTitle(next)) : "";
   const [shopId, setShopId] = useState<string | null>(m.done?.shopId ?? null);
   const [pick, setPick] = useState<"same" | "diff" | "none" | null>(null);
   const [price, setPrice] = useState("");
@@ -57,12 +63,19 @@ export default function DoneStage(sp: StageProps) {
         <Progress stage={3} finished />
         {done.found !== false && (
           <div className="facts">
-            <div className="fact ok"><span className="xs">پرداختی</span><b>{paid ? money(paid) : "ثبت نشد"}</b></div>
-            {diff != null && diff !== 0 && <div className={`fact ${diff > 0 ? "ok" : "bad"}`}><span className="xs">{diff > 0 ? "کمتر از میانه" : "بیشتر از میانه"}</span><b>{money(Math.abs(diff))}</b></div>}
+            <div className="fact ok"><span className="xs">پرداختی (تومان)</span><b>{paid ? money(paid) : "ثبت نشد"}</b></div>
+            {diff != null && diff !== 0 && <div className={`fact ${diff > 0 ? "ok" : "bad"}`}><span className="xs">{diff > 0 ? "کمتر از قیمت میانه (تومان)" : "بیشتر از قیمت میانه (تومان)"}</span><b>{money(Math.abs(diff))}</b></div>}
             {median && <div className="fact unk"><span className="xs">قیمت میانه</span><b>{mil(median)}</b></div>}
           </div>
         )}
       </div>
+      {next && (
+        <div className="mc-card" style={{ padding: 16, gap: 10 }}>
+          <div className="mc-label">کالای بعدی خرید شما</div>
+          <div className="b" style={{ fontSize: 17 }}><Bidi text={nextTitle} /></div>
+          <Link className="btn pri block" href={missionHref(next.id)}>رفتن به این کالا</Link>
+        </div>
+      )}
       <Note tone="ok" icon="check">ثبت شد. حالا کارت {shopName} برای همه می‌گوید «خریدار تأیید کرد، همین الان».</Note>
       {done.reportId && (
         <div className="mc-card" style={{ padding: 16, gap: 10 }}>
@@ -76,7 +89,7 @@ export default function DoneStage(sp: StageProps) {
           {rate.isError && <Note tone="bad" icon="alert">{(rate.error as Error).message}</Note>}
         </div>
       )}
-      {done.found === false && <button className="btn sec block" onClick={() => { set({ done: null }); setPick(null); go("go"); }}>سراغ فروشگاه جایگزین برو</button>}
+      {done.found === false && <button className="btn sec block" onClick={() => { set({ done: null }); setPick(null); go("go"); }}>رفتن به فروشگاه جایگزین</button>}
     </div>
   ) : (
     <div className="stack" style={{ gap: 12 }}>
@@ -106,7 +119,7 @@ export default function DoneStage(sp: StageProps) {
     </div>
   );
 
-  const cta = done ? <Link className="btn pri" href="/">خرید تازه</Link> : <button className="btn sec" onClick={() => go("go")}>برگشت به مسیر</button>;
+  const cta = done ? (next ? <Link className="btn pri" href={missionHref(next.id)}>کالای بعدی: {nextTitle}</Link> : <Link className="btn pri" href="/">خرید تازه</Link>) : <button className="btn sec" onClick={() => go("go")}>برگشت به مسیر</button>;
   return <Shell {...sp} patch={patchSlots} center={<div className="mc-main"><div className="mc-pad stack" style={{ gap: 12, paddingTop: 8 }}>{body}</div></div>} cta={cta} />;
   void fa;
 }
