@@ -36,6 +36,8 @@ async def _warm_loop():
 async def lifespan(app: FastAPI):
     db.connect().close()  # creates state tables (local: in the catalog file; prod: in the attached state DB)
     asyncio.get_running_loop().run_in_executor(None, db.warm_cache)  # background: don't delay startup
+    from .services import groups as _groups
+    _groups.shop_groups(None, wait=False)  # the map's shop kinds: built in the background, never inside a request
     inq.LOOP = asyncio.get_running_loop()
     task = asyncio.create_task(inq.timeout_loop())
     warm = asyncio.create_task(_warm_loop())

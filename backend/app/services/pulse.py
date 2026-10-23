@@ -18,7 +18,7 @@ def pulse(con, lat: float, lon: float, radius_km: float = 1.6, product_id: str |
     else:
         rows = con.execute("SELECT shop_id, name, lat, lon, mall, hours FROM shops WHERE lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?", (lat - dlat, lat + dlat, lon - dlon, lon + dlon)).fetchall()
     out = []
-    grp = shop_groups(con)
+    grp = shop_groups(con, wait=False)
     for r in rows:
         d = haversine_km(lat, lon, r["lat"], r["lon"])
         if d > radius_km and not product_id:
@@ -78,7 +78,7 @@ def match(con, lat: float, lon: float, q: str | None = None, category: str | Non
             f"SELECT DISTINCT s.shop_id, s.name, s.lat, s.lon FROM shop_categories c JOIN shops s USING(shop_id) WHERE c.category IN ({ph}) "
             "AND s.lat BETWEEN ? AND ? AND s.lon BETWEEN ? AND ?", [*cats, *box]).fetchall()
         maybe = {r["shop_id"]: dict(r) for r in rows if r["shop_id"] not in listed and haversine_km(lat, lon, r["lat"], r["lon"]) <= radius_km}
-    grp = shop_groups(con)
+    grp = shop_groups(con, wait=False)
     for x in [*listed.values(), *maybe.values()]:
         x["g"] = grp.get(x["shop_id"], "other")
     out["listed"], out["maybe"] = list(listed.values()), list(maybe.values())
@@ -100,7 +100,7 @@ def _nearest(con, lat: float, lon: float, fts: str | None, category: str | None)
     if not best:
         return None
     return {"shop_id": best["shop_id"], "name": best["name"], "lat": best["lat"], "lon": best["lon"], "km": round(haversine_km(lat, lon, best["lat"], best["lon"]), 1),
-            "g": shop_groups(con).get(best["shop_id"], "other")}
+            "g": shop_groups(con, wait=False).get(best["shop_id"], "other")}
 
 
 def top_categories(con, lat: float, lon: float, radius_km: float = 1.4, limit: int = 8) -> list[dict]:

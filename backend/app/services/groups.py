@@ -43,11 +43,37 @@ def group_of(category: str | None) -> str:
 _CACHE: dict[int, dict[str, str]] = {}
 
 
-def shop_groups(con) -> dict[str, str]:
-    """shop_id -> its dominant group. Built once per process (the catalogue does not change while the server runs)."""
-    key = id(con) if False else 0
+_STARTED = False
+
+
+def shop_groups(con, wait: bool = True) -> dict[str, str]:
+    """shop_id -> its dominant group. Built once per process (the catalogue does not change while the server runs).
+    wait=False (request handlers): never block on the build; start it in the background and answer with what is there (no groups yet)."""
+    global _STARTED
+    key = 0
     if key in _CACHE:
         return _CACHE[key]
+    if not wait:
+        if not _STARTED:
+            _STARTED = True
+            import threading
+            def _go():
+                from .. import db
+                c = db.connect()
+                try:
+                    _build(c)
+                except Exception:
+                    global _STARTED
+                    _STARTED = False
+                finally:
+                    c.close()
+            threading.Thread(target=_go, daemon=True).start()
+        return {}
+    return _build(con)
+
+
+def _build(con) -> dict[str, str]:
+    key = 0
     counts: dict[str, dict[str, int]] = {}
     cat_group: dict[str, str] = {}
     for sid, cat in con.execute("SELECT shop_id, category FROM shop_categories"):
@@ -70,12 +96,14 @@ def shop_groups(con) -> dict[str, str]:
         counts[sid] = d
     # shops with no declared categories at all: what they actually list (the categories of their offers' products)
     offer_g: dict[str, dict[str, int]] = {}
-    for sid, cat in con.execute("SELECT o.shop_id, p.category FROM offers o JOIN products p USING(product_id)"):
-        if sid in counts or not cat:
-            continue
-        g = cat_group.get(cat) or cat_group.setdefault(cat, group_of(cat))
-        if g != OTHER[0]:
-            d = offer_g.setdefault(sid, {}); d[g] = d.get(g, 0) + 1
+    missing = [r[0] for r in con.execute("SELECT shop_id FROM shops") if r[0] not in counts]
+    for sid in missing:  # per shop and by its own offers (indexed): one pass over every offer is far too slow on a small, cold server
+        for cat, n in con.execute("SELECT p.category, COUNT(*) FROM offers o JOIN products p USING(product_id) WHERE o.shop_id=? GROUP BY p.category", (sid,)):
+            if not cat:
+                continue
+            g = cat_group.get(cat) or cat_group.setdefault(cat, group_of(cat))
+            if g != OTHER[0]:
+                d = offer_g.setdefault(sid, {}); d[g] = d.get(g, 0) + n
     for sid, d in offer_g.items():
         counts[sid] = d
     order = [k for k, _, _ in GROUPS]
