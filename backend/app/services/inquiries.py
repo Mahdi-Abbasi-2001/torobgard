@@ -22,6 +22,8 @@ from datetime import datetime, timedelta, timezone
 from . import catalog, converse, verify
 
 SECRET = os.environ.get("TOROB_SECRET", "dev-secret-change-me")
+# demo recording: shops listed here never answer the first message (the call still can); every other shop answers fully
+DEMO_SILENT = {x.strip() for x in os.environ.get("TOROB_DEMO_SILENT_SHOPS", "").split(",") if x.strip()}
 TIMEOUT_S = int(os.environ.get("TOROB_INQUIRY_TIMEOUT_S", "300"))
 SIMULATE = os.environ.get("TOROB_SIMULATE_SELLERS", "1") == "1"
 SIM_USE_LLM = os.environ.get("TOROB_SIM_USE_LLM", "1") == "1"
@@ -159,7 +161,8 @@ def _is_simulated(con, shop_id: str) -> bool:
     from . import bale
     if bale.enabled() and bale.is_linked(con, shop_id):
         return False  # a real person answers via Bale: never simulate this shop
-    return SIMULATE and shop_id not in LIVE_SHOPS
+    # a shop whose seller page is open has a person at it: never answer for them (the shopper's request waits for them, then a call)
+    return SIMULATE and shop_id not in LIVE_SHOPS and not seller_online(shop_id)
 
 
 # ---- seller presence: a shop whose inbox page is open right now can take an in-app voice call
@@ -615,7 +618,9 @@ def _sim_text(con, r, meta: dict, rnd: random.Random, first: bool) -> str | None
     weights = {"full": 30, "changed": 15, "vague": 15, "variant": 10 if (meta.get("note") or "color" in keys) else 0,
                "alt": 10, "restock": 5, "silent": 3 if meta.get("channel") == "call" else 15}
     outcome = rnd.choices(list(weights), list(weights.values()))[0]
-    if first and outcome in ("alt", "restock", "silent"):
+    if DEMO_SILENT and meta.get("channel") != "call":
+        outcome = "silent" if r["shop_id"] in DEMO_SILENT else "full"
+    elif first and outcome in ("alt", "restock", "silent"):
         outcome = rnd.choice(["full", "changed", "vague"])  # the first shop asked always has it, so a demo never dead-ends
     closes = rnd.choice([8, 9, 9, 10])
     if outcome == "silent":

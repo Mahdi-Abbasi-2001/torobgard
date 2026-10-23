@@ -64,6 +64,7 @@ export default function SellerView({ shop, token }: { shop: string; token: strin
   const pending = q.data.items.filter((i) => i.status === "sent" || i.status === "delivered");
   const past = q.data.items.filter((i) => !pending.includes(i));
   const st = q.data.stats;
+  const holds = q.data.items.filter((i) => i.kind === "hold" && i.answer?.hold_accepted && i.answer.hold_code);
   const ringing = pending.find((i) => i.kind === "ask" && i.live_call && !declined.includes(i.id) && new Date(i.deadline_at).getTime() > now);
 
   return (
@@ -97,6 +98,18 @@ export default function SellerView({ shop, token }: { shop: string; token: strin
             ) : null}
             {q.data.bale?.enabled && <BaleConnect b={q.data.bale} />}
             <div className="xs muted">{pending.length ? `${fa(pending.length)} استعلام منتظر پاسخ شماست` : "استعلام تازه‌ای ندارید. این صفحه خودکار به‌روز می‌شود."}</div>
+            {holds.length > 0 && (
+              <section className="stack" style={{ gap: 8 }} aria-label="کالاهای نگه‌داشته">
+                <div className="h4">نگه‌داشته‌ها؛ کد را با کد مشتری مطابقت دهید</div>
+                {holds.map((h) => (
+                  <div key={h.id} className="hold-chip hold-big"><Icon n="hold" s /><span>
+                    <Bidi text={h.product?.title} />
+                    <b className="num">{fa(h.answer?.hold_code ?? "")}</b>
+                    <span className="xs">{h.answer?.hold_until ? `تا ${fa(h.answer.hold_until)} برای مشتری نگه دارید · ` : ""}وقتی مشتری آمد و همین کد را نشان داد، کالا را تحویل دهید</span>
+                  </span></div>
+                ))}
+              </section>
+            )}
             {sent && <div className="card"><Empty icon="check" tone="ok" title="پاسخ شما ارسال شد">{sent}</Empty></div>}
             {pending.map((i) => <Answerable key={i.id} i={i} shop={shop} token={token} onSent={setSent} />)}
             {past.length > 0 && <div className="h4" style={{ marginTop: 8 }}>پاسخ‌داده‌ها</div>}
